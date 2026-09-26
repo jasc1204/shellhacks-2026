@@ -76,6 +76,9 @@ def build_window(p):
     isd = date.fromisoformat(p["in_service_date"])
     if p.get("start_date"):
         return date.fromisoformat(p["start_date"]), isd, "published start date"
+    if p.get("budget_start"):
+        start = min(date.fromisoformat(p["budget_start"]), isd - timedelta(days=180))
+        return start, isd, p["budget_start_basis"]
     months = DESC_DURATION_MONTHS[work_type(p)]
     return isd - timedelta(days=round(months * 30.44)), isd, f"assumed {months}-month build before in-service date ({work_type(p)})"
 

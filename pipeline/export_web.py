@@ -6,6 +6,7 @@
   backdrop.geojson   existing OSM transmission lines in the two border areas (map context only)
   meta.json          summary numbers, unmapped projects and data sources
 """
+import csv
 import json
 from pathlib import Path
 
@@ -22,7 +23,10 @@ def r6(c):
 def loc_props(loc, name):
     if not loc:
         return None
-    return {"name": name, "matched": loc.get("osm_name", ""), "method": loc.get("method", ""),
+    matched = loc.get("osm_name", "")
+    if loc.get("method", "").startswith("approximate: Nominatim"):
+        matched = ", ".join(matched.split(", ")[:2]) + " (approx.)"  # "Fenwick Street, Hillside Park (approx.)"
+    return {"name": name, "matched": matched, "method": loc.get("method", ""),
             "confidence": loc.get("confidence", ""), "note": loc.get("note", "")}
 
 
@@ -49,6 +53,7 @@ def main():
             "doc": p["source_doc"], "page": p["source_page"], "conf": p["location_confidence"],
             "loc_a": loc_props(p.get("loc_a"), p["name_a"]), "loc_b": loc_props(p.get("loc_b"), p["name_b"]),
             "fix": p.get("point_fix_note", ""), "n_overlaps": count.get(p["project_id"], 0),
+            "budget": p.get("budget"), "budget_check": p.get("budget_check", ""),
             "best_tier": best.get(p["project_id"]), "length_km": p.get("straight_length_km"),
         }
         if not p.get("geometry"):
@@ -94,6 +99,25 @@ def main():
     dump("overlaps.json", overlaps)
     dump("backdrop.geojson", {"type": "FeatureCollection", "features": backdrop})
     dump("meta.json", meta)
+    # Same table in the column layout of Sperry's Projects_Overlaps.xlsx, with our coordinates filled in
+    # (the 3D viewer, world3d/prep_scene.py --projects, reads this format).
+    cols = ["project_id", "utility", "state", "project_name", "name_a", "lat_a", "lon_a", "name_b", "lat_b", "lon_b",
+            "lat_center", "lon_center", "start_date", "in_service_date", "location_confidence", "source_page"]
+    with open(PROC / "projects_located.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols)
+        w.writeheader()
+        for p in projects:
+            if not p.get("geometry"):
+                continue
+            row = {k: p.get(k, "") for k in ("project_id", "utility", "state", "project_name", "name_a", "name_b",
+                                              "in_service_date", "location_confidence", "source_page")}
+            row["start_date"] = p.get("window_start") if p.get("start_date") else ""
+            for k in ("a", "b"):
+                loc = p.get(f"loc_{k}")
+                row[f"lat_{k}"], row[f"lon_{k}"] = (round(loc["lat"], 6), round(loc["lon"], 6)) if loc else ("", "")
+            row["lon_center"], row["lat_center"] = (round(p["center"][0], 6), round(p["center"][1], 6))
+            w.writerow(row)
+
     sizes = {p.name: f"{p.stat().st_size / 1024:.0f} KB" for p in OUT.iterdir()}
     print(f"mapped {len(feats)} projects, {len(ends)} endpoints, {len(overlaps)} overlaps, {len(backdrop)} backdrop lines; unmapped {len(unmapped)}")
     print(sizes)

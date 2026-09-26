@@ -27,3 +27,7 @@ desktop.ini
 .vscode/
 .idea/
 .claude/settings.local.json
+
+# MapLibre worker files, copied from node_modules by `npm run sync-maplibre` (web/package.json)
+web/public/maplibre/
+web/dist/

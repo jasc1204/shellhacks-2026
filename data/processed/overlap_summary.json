@@ -1,20 +1,19 @@
 {
  "desc_projects": 44,
  "gpc_projects": 208,
- "desc_mapped": 44,
- "gpc_mapped": 191,
- "pairs_flagged": 91,
+ "desc_mapped": 43,
+ "gpc_mapped": 189,
+ "pairs_flagged": 88,
  "by_tier": {
   "1": 2,
   "2": 1,
   "3": 7,
-  "4": 81
+  "4": 78
  },
- "center_method_flags": 85,
+ "center_method_flags": 83,
  "caught_only_by_closest_points": [
   "DESC_23__GPC_19523",
   "DESC_7__GPC_20277",
-  "DESC_33__GPC_20277",
   "DESC_6__GPC_20277",
   "DESC_35__GPC_17993",
   "DESC_10__GPC_20796"

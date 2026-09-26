@@ -16,6 +16,19 @@
   "in_service_date": "2023-12-31",
   "in_service_raw": "12/31/23",
   "estimated_cost_usd": 5404301,
+  "budget": {
+   "Previous": 4604301,
+   "2024": 800000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 5404301
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace the Queensboro \u2013 Ft Johnson 115 kV Line and structures as they have reached the end of life.",
   "need": "This project is required due to address end of life issues.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -45,9 +58,9 @@
    32.722793
   ],
   "location_confidence": "medium",
-  "window_start": "2022-07-01",
+  "window_start": "2023-01-01",
   "window_end": "2023-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_2",
@@ -66,6 +79,19 @@
   "in_service_date": "2027-12-31",
   "in_service_raw": "12/31/27",
   "estimated_cost_usd": 5300000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 100000,
+   "2026": 100000,
+   "2027": 5100000,
+   "2028": 0,
+   "Total": 5300000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2025-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2025",
   "description": "Installing a 115 kV Tap to feed the future Union Pier 115 kV Sub.",
   "need": "This project is needed to for load growth in the Charleston area.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -93,9 +119,9 @@
    32.784336
   ],
   "location_confidence": "low",
-  "window_start": "2026-12-31",
+  "window_start": "2025-01-01",
   "window_end": "2027-12-31",
-  "window_basis": "assumed 12-month build before in-service date (other)"
+  "window_basis": "DESC budget: spending starts in 2025"
  },
  {
   "project_id": "DESC_3",
@@ -115,6 +141,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/2024",
   "estimated_cost_usd": 11116933,
+  "budget": {
+   "2025": 1181000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 11116933,
+   "Previous": 2717933,
+   "2024": 6631000
+  },
+  "budget_parse": "nearest column header",
+  "budget_check": "source inconsistency: years sum to $10,529,933 but the total says $11,116,933",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Expand existing Okatie Transmission sub, add a 230-115 autobank and fold the Jasper \u2013 Yemassee 230 kV #1 line into the 230 kV side. Construct two additional 115 kV bus tie lines.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -143,9 +182,9 @@
    32.333758
   ],
   "location_confidence": "high",
-  "window_start": "2022-12-31",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_4",
@@ -164,6 +203,19 @@
   "in_service_date": "2025-12-01",
   "in_service_raw": "12/01/25",
   "estimated_cost_usd": 19890850,
+  "budget": {
+   "Previous": 1189020,
+   "2024": 6601830,
+   "2025": 11800000,
+   "2026": 300000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 19890850
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Upgrade the 954 ACSR portion of the Cainhoy \u2013 Hamlin 115 kV line to B795 ACSR conductor, construct a new Cainhoy \u2013 Hamlin 115 kV #2 line, add terminals to Cainhoy and Hamlin sub to accommodate upgrades.",
   "need": "This project is required due to load growth in the Mount Pleasant area and to meet NERC TPL and internal DESC Planning criteria.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -207,9 +259,9 @@
    32.9006695
   ],
   "location_confidence": "high",
-  "window_start": "2024-06-01",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_5",
@@ -228,6 +280,19 @@
   "in_service_date": "2024-06-01",
   "in_service_raw": "06/01/24",
   "estimated_cost_usd": 11700000,
+  "budget": {
+   "Previous": 9900000,
+   "2024": 1800000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 11700000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures and restring with 1272 ACSR conductor.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -255,9 +320,9 @@
    34.7393853
   ],
   "location_confidence": "medium",
-  "window_start": "2022-12-01",
+  "window_start": "2023-01-01",
   "window_end": "2024-06-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_6",
@@ -276,6 +341,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/24",
   "estimated_cost_usd": 8580000,
+  "budget": {
+   "Previous": 4330000,
+   "2024": 4250000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 8580000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden structures with Self Supporting Steel Structures and restring with 1272 ACSR conductor for the Burton \u2013 Frogmore Transmission section.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -319,9 +397,9 @@
    32.411674500000004
   ],
   "location_confidence": "low",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_7",
@@ -340,6 +418,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 6925000,
+  "budget": {
+   "Previous": 50000,
+   "2024": 50000,
+   "2025": 6825000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 6925000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden structures with Self Supporting Steel Structures and upgrade to 795 ACSR for the Frogmore Distribution Tap \u2013 St. Helena section.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -383,9 +474,9 @@
    32.411674500000004
   ],
   "location_confidence": "low",
-  "window_start": "2024-07-01",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_8",
@@ -404,6 +495,19 @@
   "in_service_date": "2026-12-31",
   "in_service_raw": "12/31/26",
   "estimated_cost_usd": 4912096,
+  "budget": {
+   "Previous": 332096,
+   "2024": 80000,
+   "2025": 100000,
+   "2026": 4400000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 4912096
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures and restring with standard 1272 ACSR conductor.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -449,9 +553,9 @@
    34.17680455
   ],
   "location_confidence": "high",
-  "window_start": "2025-07-01",
+  "window_start": "2023-01-01",
   "window_end": "2026-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_9",
@@ -470,6 +574,19 @@
   "in_service_date": "2028-12-31",
   "in_service_raw": "12/31/28",
   "estimated_cost_usd": 48224719,
+  "budget": {
+   "Previous": 174719,
+   "2024": 0,
+   "2025": 100000,
+   "2026": 450000,
+   "2027": 25000000,
+   "2028": 22500000,
+   "Total": 48224719
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -485,12 +602,12 @@
    "n_candidates": 4
   },
   "loc_b": {
-   "lat": 34.1549947,
-   "lon": -80.9574923,
-   "osm_id": "way/524141691",
-   "osm_name": "Killian Park, Richland County, South Carolina, United States",
+   "lat": 34.1369394,
+   "lon": -80.9369874,
+   "osm_id": "node/9845635239",
+   "osm_name": "Killian Green, Richland County, South Carolina, 31299, United States",
    "osm_operator": "",
-   "method": "approximate: Nominatim leisure/park (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim place/neighbourhood (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
@@ -502,20 +619,20 @@
      33.8213074
     ],
     [
-     -80.9574923,
-     34.1549947
+     -80.9369874,
+     34.1369394
     ]
    ]
   },
-  "straight_length_km": 47.93,
+  "straight_length_km": 45.18,
   "center": [
-   -80.79295705,
-   33.98815105
+   -80.7827046,
+   33.979123400000006
   ],
   "location_confidence": "low",
-  "window_start": "2027-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2028-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_10",
@@ -534,6 +651,19 @@
   "in_service_date": "2025-06-01",
   "in_service_raw": "06/01/2025",
   "estimated_cost_usd": 40660000,
+  "budget": {
+   "Previous": 6660000,
+   "2024": 26800000,
+   "2025": 7200000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 40660000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures and upgrade conductor to standard 1272 ACSR.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -578,9 +708,9 @@
    32.284392600000004
   ],
   "location_confidence": "high",
-  "window_start": "2023-12-01",
+  "window_start": "2023-01-01",
   "window_end": "2025-06-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_11",
@@ -599,6 +729,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 2600000,
+  "budget": {
+   "Previous": 0,
+   "2024": 1000000,
+   "2025": 1600000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 2600000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -626,9 +769,9 @@
    33.9043212
   ],
   "location_confidence": "low",
-  "window_start": "2024-07-01",
+  "window_start": "2024-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_12",
@@ -647,6 +790,19 @@
   "in_service_date": "2028-12-31",
   "in_service_raw": "12/31/28",
   "estimated_cost_usd": 10200000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 0,
+   "2026": 200000,
+   "2027": 5000000,
+   "2028": 5000000,
+   "Total": 10200000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2026-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2026",
   "description": "Replace wooden structures with Self Supporting Steel Structures and upgrade conductor to standard 1272 ACSR.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -690,9 +846,9 @@
    32.7961009
   ],
   "location_confidence": "low",
-  "window_start": "2027-07-02",
+  "window_start": "2026-01-01",
   "window_end": "2028-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2026"
  },
  {
   "project_id": "DESC_13",
@@ -711,20 +867,24 @@
   "in_service_date": "2024-09-30",
   "in_service_raw": "9/30/2024",
   "estimated_cost_usd": 4300000,
+  "budget": {
+   "Previous": 1300000,
+   "2024": 3000000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 4300000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace wooden H-Frame structures with Self Supporting Steel Structures and restring with 1272 ACSR conductor.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 13,
-  "loc_a": {
-   "lat": 34.0172409,
-   "lon": -81.0850345,
-   "osm_id": "node/5368425586",
-   "osm_name": "U.S. Geological Survey South Carolina Water Science Center, Starlight Drive, Dut",
-   "osm_operator": "",
-   "method": "approximate: Nominatim office/government (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 33.9043212,
    "lon": -80.8770342,
@@ -736,27 +896,20 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -81.0850345,
-     34.0172409
-    ],
-    [
-     -80.8770342,
-     33.9043212
-    ]
+    -80.8770342,
+    33.9043212
    ]
   },
-  "straight_length_km": 22.93,
   "center": [
-   -80.98103435,
-   33.960781049999994
+   -80.8770342,
+   33.9043212
   ],
   "location_confidence": "low",
-  "window_start": "2023-04-01",
+  "window_start": "2023-01-01",
   "window_end": "2024-09-30",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_14",
@@ -776,6 +929,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/24",
   "estimated_cost_usd": 11745543,
+  "budget": {
+   "Previous": 8195543,
+   "2024": 3550000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 11745543
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "9.5 miles. Scope includes rebuilding the 115 and 46 kV lines in this corridor SPDC.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -820,9 +986,9 @@
    33.60970965
   ],
   "location_confidence": "medium",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_15",
@@ -842,6 +1008,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 7800000,
+  "budget": {
+   "Previous": 0,
+   "2024": 50000,
+   "2025": 200000,
+   "2026": 7550000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 7800000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Upgrade 6.5 miles of aging conductor with 1272 ACSR and rebuild with SPDC.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -886,9 +1065,9 @@
    33.60970965
   ],
   "location_confidence": "medium",
-  "window_start": "2024-07-01",
+  "window_start": "2024-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_16",
@@ -908,6 +1087,19 @@
   "in_service_date": "2024-12-25",
   "in_service_raw": "12/25/24",
   "estimated_cost_usd": 10833462,
+  "budget": {
+   "Previous": 3300432,
+   "2024": 7533030,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 10833462
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace Autobank 1 and 2 at Edenwood Substation.",
   "need": "This project is required to address end of life and maintenance issues on these transformers.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -935,9 +1127,9 @@
    33.953765
   ],
   "location_confidence": "low",
-  "window_start": "2023-06-26",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-25",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_17",
@@ -954,6 +1146,19 @@
   "in_service_date": "2028-12-31",
   "in_service_raw": "12/31/28",
   "estimated_cost_usd": 9898924,
+  "budget": {
+   "Previous": 709124,
+   "2024": 1689800,
+   "2025": 1200000,
+   "2026": 2300000,
+   "2027": 1400000,
+   "2028": 2600000,
+   "Total": 9898924
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace switch house, switch house equipment, and relay panels at Williams Street substation. Replace the switch house at AM Williams substation. Add Switching House at McMeekin Substation to move relays from plant relay room.",
   "need": "This project is required to address end of life and maintenance issues on these transformers.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -981,9 +1186,9 @@
    34.0063194
   ],
   "location_confidence": "low",
-  "window_start": "2027-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2028-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_18",
@@ -1002,6 +1207,19 @@
   "in_service_date": "2027-03-31",
   "in_service_raw": "3/31/2027",
   "estimated_cost_usd": 2750000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 250000,
+   "2026": 1500000,
+   "2027": 1000000,
+   "2028": 0,
+   "Total": 2750000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2025-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2025",
   "description": "Extend the 115 kV line from the Blue Circle tap to the Harleyville substation to provide 115 kV service.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1029,9 +1247,9 @@
    33.2099069
   ],
   "location_confidence": "high",
-  "window_start": "2025-03-30",
+  "window_start": "2025-01-01",
   "window_end": "2027-03-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "DESC budget: spending starts in 2025"
  },
  {
   "project_id": "DESC_19",
@@ -1051,6 +1269,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/2024",
   "estimated_cost_usd": 3982052,
+  "budget": {
+   "Previous": 782052,
+   "2024": 3200000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 3982052
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Purchase a spare 230/115kV, 336MVA Autobank for the Southern Region to be stored at Summerville 230kV Sub. Include a pad, AC for heaters, and possibly a pit for oil containment.",
   "need": "Spare equipment needs.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1078,9 +1309,9 @@
    32.9873703
   ],
   "location_confidence": "medium",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_20",
@@ -1100,6 +1331,19 @@
   "in_service_date": "2026-06-01",
   "in_service_raw": "6/1/2026",
   "estimated_cost_usd": 40000000,
+  "budget": {
+   "Previous": 100000,
+   "2024": 400000,
+   "2025": 19500000,
+   "2026": 20000000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 40000000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Rebuild Canadys-Ritter 115 kV line as SPDC with 230 kV on one side and 115 kV on the other side.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1143,9 +1387,9 @@
    32.92685825
   ],
   "location_confidence": "low",
-  "window_start": "2024-11-30",
+  "window_start": "2023-01-01",
   "window_end": "2026-06-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_21",
@@ -1164,6 +1408,19 @@
   "in_service_date": "2026-06-01",
   "in_service_raw": "6/1/2026",
   "estimated_cost_usd": 40611419,
+  "budget": {
+   "Previous": 100000,
+   "2024": 1300000,
+   "2025": 18700000,
+   "2026": 20511419,
+   "2027": 0,
+   "2028": 0,
+   "Total": 40611419
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct Ritter \u2013 Yemassee 230kV #1 and #2 SPDC with B1272 ACSR on both sides. Convert the existing Ritter \u2013 Yemassee 230 kV to 115 kV operation. Convert and add terminals at Ritter and Yemassee. Add 230 kV bus tie at Ritter and upgrade the Yemassee 230 kV bus tie.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1207,9 +1464,9 @@
    32.74352305
   ],
   "location_confidence": "low",
-  "window_start": "2024-05-31",
+  "window_start": "2023-01-01",
   "window_end": "2026-06-01",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_22",
@@ -1226,6 +1483,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 34877427,
+  "budget": {
+   "2025": 11489845,
+   "2026": 50000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 34877427,
+   "Previous": 4337401,
+   "2024": 1900181
+  },
+  "budget_parse": "nearest column header",
+  "budget_check": "source inconsistency: years sum to $17,777,427 but the total says $34,877,427",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct Okatie \u2013 Riverport 230 kV to feed new Distribution substation.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1271,9 +1541,9 @@
    32.2725395
   ],
   "location_confidence": "low",
-  "window_start": "2023-12-31",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_23",
@@ -1292,6 +1562,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 23787423,
+  "budget": {
+   "Previous": 9591713,
+   "2024": 5087710,
+   "2025": 9108000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 23787423
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct a 230 kV line with B1272 ACSR from Jasper to Okatie 230/115kV Substation. The line is estimated to be 6.5 miles long. This makes Jasper a Medium Impact substation and will require a new CIP Hut.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1336,9 +1619,9 @@
    32.3464391
   ],
   "location_confidence": "high",
-  "window_start": "2023-12-31",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_24",
@@ -1357,6 +1640,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/25",
   "estimated_cost_usd": 6005000,
+  "budget": {
+   "Previous": 5000,
+   "2024": 2800000,
+   "2025": 3200000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 6005000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Constructing a 115 kV Tap off the Edmund Switching Station- Owens Corning 115 kV Line to feed new Wagener Distribution substation.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1384,9 +1680,9 @@
    33.6501119
   ],
   "location_confidence": "high",
-  "window_start": "2023-12-31",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_25",
@@ -1405,6 +1701,19 @@
   "in_service_date": "2024-06-01",
   "in_service_raw": "6/1/2024",
   "estimated_cost_usd": 10850000,
+  "budget": {
+   "Previous": 3850000,
+   "2024": 7000000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 10850000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replace 6.5 miles of aging conductor.",
   "need": "Replacing approximately 38 guyed wooden structures due to recent failures in the fiberglass strain insulators along this line. Structures to be changed out are dead ends/large angles.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1448,9 +1757,9 @@
    32.8099699
   ],
   "location_confidence": "low",
-  "window_start": "2022-12-01",
+  "window_start": "2023-01-01",
   "window_end": "2024-06-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_26",
@@ -1469,6 +1778,19 @@
   "in_service_date": "2029-12-31",
   "in_service_raw": "12/31/29",
   "estimated_cost_usd": 30000000,
+  "budget": {
+   "2025": 0,
+   "2026": 500000,
+   "Previous": 0,
+   "2024": 0,
+   "2027": 9500000,
+   "2028": 10000000,
+   "Total": 30000000
+  },
+  "budget_parse": "nearest column header",
+  "budget_check": "source inconsistency: years sum to $20,000,000 but the total says $30,000,000",
+  "budget_start": "2026-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2026",
   "description": "Rebuild 40 miles of 230 kV line.",
   "need": "This project is required to address end of life and maintenance issues.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1513,9 +1835,9 @@
    34.08409
   ],
   "location_confidence": "medium",
-  "window_start": "2028-07-01",
+  "window_start": "2026-01-01",
   "window_end": "2029-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2026"
  },
  {
   "project_id": "DESC_27",
@@ -1532,6 +1854,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/24",
   "estimated_cost_usd": 9655669,
+  "budget": {
+   "Previous": 255669,
+   "2024": 9400000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 9655669
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Rebuilding the Williams Goose Creek 230 and 115 kV lines and the Williams - Faber Place 230 kV line across the Goose Creek Reservoir.",
   "need": "This project is required to address end of life and maintenance issues.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1559,9 +1894,9 @@
    32.95333
   ],
   "location_confidence": "low",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_28",
@@ -1580,6 +1915,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/24",
   "estimated_cost_usd": 12475000,
+  "budget": {
+   "Previous": 2475000,
+   "2024": 6000000,
+   "2025": 4000000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 12475000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Replacing several wood pole sections on the Summerville 115 kV Loop that have reached the end of life.",
   "need": "This project is required to address end of life and maintenance issues.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1607,9 +1955,9 @@
    32.9873703
   ],
   "location_confidence": "medium",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_29",
@@ -1628,6 +1976,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/2025",
   "estimated_cost_usd": 4000000,
+  "budget": {
+   "Previous": 0,
+   "2024": 300000,
+   "2025": 3700000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 4000000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Rebuild Line from Santee Substation - Duke/Progress Energy Tie.",
   "need": "Grid hardening.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1671,9 +2032,9 @@
    33.548524549999996
   ],
   "location_confidence": "high",
-  "window_start": "2024-07-01",
+  "window_start": "2024-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_30",
@@ -1692,20 +2053,24 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/2024",
   "estimated_cost_usd": 2509602,
+  "budget": {
+   "Previous": 330954,
+   "2024": 2178648,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 2509602
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Convert the existing Coit - Gills Creek 33 kV Line to 115 kV. Approximately 1.25 miles. Construct Gills Creek Terminal at Coit Bus #1.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 30,
-  "loc_a": {
-   "lat": 34.1884948,
-   "lon": -79.7698085,
-   "osm_id": "way/12400043",
-   "osm_name": "South Coit Street, Florence, Florence County, South Carolina, 29501, United Stat",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 33.9162837,
    "lon": -80.9901211,
@@ -1717,27 +2082,20 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -79.7698085,
-     34.1884948
-    ],
-    [
-     -80.9901211,
-     33.9162837
-    ]
+    -80.9901211,
+    33.9162837
    ]
   },
-  "straight_length_km": 116.43,
   "center": [
-   -80.3799648,
-   34.052389250000004
+   -80.9901211,
+   33.9162837
   ],
   "location_confidence": "low",
-  "window_start": "2022-12-31",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_31",
@@ -1756,6 +2114,19 @@
   "in_service_date": "2024-12-31",
   "in_service_raw": "12/31/2024",
   "estimated_cost_usd": 2200080,
+  "budget": {
+   "Previous": 50080,
+   "2024": 2150000,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 2200080
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Rebuilding section of line between Hooks and Thurmond. Approximately 2.3 miles. The line will be rebuilt on existing R/W using steel poles, 115 kV insulation, and 1272 ACSR conductor.",
   "need": "This project is required to address end of life and reliability issues on these lines.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1800,9 +2171,9 @@
    33.658473650000005
   ],
   "location_confidence": "medium",
-  "window_start": "2023-07-02",
+  "window_start": "2023-01-01",
   "window_end": "2024-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_32",
@@ -1821,6 +2192,19 @@
   "in_service_date": "2025-12-31",
   "in_service_raw": "12/31/2025",
   "estimated_cost_usd": 8750000,
+  "budget": {
+   "Previous": 50000,
+   "2024": 200000,
+   "2025": 8500000,
+   "2026": 0,
+   "2027": 0,
+   "2028": 0,
+   "Total": 8750000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Rebuild 13.5 miles of conductor.",
   "need": "Grid hardening.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -1864,9 +2248,9 @@
    33.983460449999995
   ],
   "location_confidence": "medium",
-  "window_start": "2024-07-01",
+  "window_start": "2023-01-01",
   "window_end": "2025-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_33",
@@ -1885,36 +2269,28 @@
   "in_service_date": "2026-03-31",
   "in_service_raw": "3/31/2026",
   "estimated_cost_usd": 23685000,
+  "budget": {
+   "Previous": 65000,
+   "2024": 360000,
+   "2025": 22975000,
+   "2026": 285000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 23685000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct 230kV Transmission Line for Scout Customer Substation and modify VCS1 and Killian terminals.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 33,
-  "loc_a": {
-   "lat": 32.3596409,
-   "lon": -80.6976071,
-   "osm_id": "node/357089469",
-   "osm_name": "Scout Island, Port Royal, Beaufort County, South Carolina, 29905, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim place/island (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -80.6976071,
-    32.3596409
-   ]
-  },
-  "center": [
-   -80.6976071,
-   32.3596409
-  ],
-  "location_confidence": "low",
-  "window_start": "2024-03-30",
-  "window_end": "2026-03-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "DESC_34",
@@ -1933,17 +2309,30 @@
   "in_service_date": "2026-10-01",
   "in_service_raw": "10/1/2025 (phase 1) and 10/1/2026 (phase 2)",
   "estimated_cost_usd": 93538207,
+  "budget": {
+   "Previous": 284366,
+   "2024": 8014000,
+   "2025": 45475000,
+   "2026": 39764841,
+   "2027": 0,
+   "2028": 0,
+   "Total": 93538207
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct Dawson 230kV substation. Fold in the existing Canadys \u2013 Church Creek and Canadys \u2013 Faber Place 230kV lines at the Dawson 230kV substation (phase 1). Rebuild Canadys \u2013 Dawson 230kV #1 and #2 with B1272 ACSR (phase 2).",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 34,
   "loc_a": {
-   "lat": 33.49865,
-   "lon": -80.8447234,
-   "osm_id": "way/665438047",
-   "osm_name": "Oliver C. Dawson Stadium, Naylor Street, Orangeburg, Orangeburg County, South Ca",
+   "lat": 33.2268344,
+   "lon": -79.6553488,
+   "osm_id": "node/357093979",
+   "osm_name": "Dawson Ridge, Berkeley County, South Carolina, 29453, United States",
    "osm_operator": "",
-   "method": "approximate: Nominatim leisure/stadium (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim place/island (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
@@ -1951,18 +2340,18 @@
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -80.8447234,
-    33.49865
+    -79.6553488,
+    33.2268344
    ]
   },
   "center": [
-   -80.8447234,
-   33.49865
+   -79.6553488,
+   33.2268344
   ],
   "location_confidence": "low",
-  "window_start": "2025-04-01",
+  "window_start": "2023-01-01",
   "window_end": "2026-10-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_35",
@@ -1981,6 +2370,19 @@
   "in_service_date": "2026-08-12",
   "in_service_raw": "8/12/2026",
   "estimated_cost_usd": 17520000,
+  "budget": {
+   "Previous": 100000,
+   "2024": 100000,
+   "2025": 8660000,
+   "2026": 8660000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 17520000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Upgrade the 477 ACSR portions of the Urquhart \u2013 Toolebeck 115 kV line to 1272 ACSR. Replace existing structures with Single Pole Double Circuit Structures. Approximately 12.5 miles.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2024,9 +2426,9 @@
    33.4840049
   ],
   "location_confidence": "high",
-  "window_start": "2025-02-10",
+  "window_start": "2023-01-01",
   "window_end": "2026-08-12",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_36",
@@ -2045,6 +2447,19 @@
   "in_service_date": "2027-05-01",
   "in_service_raw": "5/1/2027",
   "estimated_cost_usd": 19300000,
+  "budget": {
+   "Previous": 0,
+   "2024": 50000,
+   "2025": 250000,
+   "2026": 9000000,
+   "2027": 10000000,
+   "2028": 0,
+   "Total": 19300000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Rebuild the section of the Williams - Summerville 230 kV line from Ladson Jct to Williams. Line to upgraded to B-1272 and designed for a future second circuit. Approximately 10 miles.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2088,9 +2503,9 @@
    33.0025344
   ],
   "location_confidence": "medium",
-  "window_start": "2025-10-30",
+  "window_start": "2024-01-01",
   "window_end": "2027-05-01",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_37",
@@ -2109,6 +2524,19 @@
   "in_service_date": "2027-12-31",
   "in_service_raw": "12/31/2027",
   "estimated_cost_usd": 21850000,
+  "budget": {
+   "Previous": 0,
+   "2024": 50000,
+   "2025": 900000,
+   "2026": 10250000,
+   "2027": 10650000,
+   "2028": 0,
+   "Total": 21850000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Construct a 115 kV tap from Cainhoy to Clements Ferry. Approximately 2.8 miles. Construct terminal at Cainhoy.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2136,9 +2564,9 @@
    32.941402
   ],
   "location_confidence": "high",
-  "window_start": "2025-12-30",
+  "window_start": "2024-01-01",
   "window_end": "2027-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_38",
@@ -2157,6 +2585,19 @@
   "in_service_date": "2027-12-31",
   "in_service_raw": "12/31/2027",
   "estimated_cost_usd": 18000000,
+  "budget": {
+   "Previous": 0,
+   "2024": 50000,
+   "2025": 550000,
+   "2026": 8500000,
+   "2027": 8900000,
+   "2028": 0,
+   "Total": 18000000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Construct a 115 kV tap from Jack Primus to Clements Ferry. Approximately 2.2 miles. Construct terminals at Jack Primus.",
   "need": "Load growth.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2184,9 +2625,9 @@
    32.9193841
   ],
   "location_confidence": "high",
-  "window_start": "2025-12-30",
+  "window_start": "2024-01-01",
   "window_end": "2027-12-31",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_39",
@@ -2205,6 +2646,19 @@
   "in_service_date": "2027-05-01",
   "in_service_raw": "05/01/2027",
   "estimated_cost_usd": 34174682,
+  "budget": {
+   "Previous": 1772338,
+   "2024": 975000,
+   "2025": 4250000,
+   "2026": 21063338,
+   "2027": 6114006,
+   "2028": 0,
+   "Total": 34174682
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2023-01-01",
+  "budget_start_basis": "spending before 2024 (DESC budget 'Previous' column)",
   "description": "Construct a 230 kV transmission line from Church Creek to Charleston Transmission. The Church Creek \u2013 Faber Place 230kV and 115kV lines will be rebuilt, and a 230kV line will be added between Faber Place and Charleston Transmission. Add 230/115kV transformer at Charleston Transmission. Add/upgrade terminals and bus work at impacted substations.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2248,9 +2702,9 @@
    32.8401997
   ],
   "location_confidence": "high",
-  "window_start": "2025-04-30",
+  "window_start": "2023-01-01",
   "window_end": "2027-05-01",
-  "window_basis": "assumed 24-month build before in-service date (construct)"
+  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
  },
  {
   "project_id": "DESC_40",
@@ -2269,6 +2723,19 @@
   "in_service_date": "2026-05-31",
   "in_service_raw": "05/31/2026",
   "estimated_cost_usd": 1100000,
+  "budget": {
+   "Previous": 0,
+   "2024": 75000,
+   "2025": 175000,
+   "2026": 850000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 1100000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2024-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2024",
   "description": "Upgrade the DESC section (approx. 1 mile) of the tie line from 397.5 ACSR Ibis to 1272 ACSR.",
   "need": "This project is needed to improve system performance and to meet NERC TPL and internal DESC Planning Criteria for reliability.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2313,9 +2780,9 @@
    33.892077900000004
   ],
   "location_confidence": "medium",
-  "window_start": "2024-11-29",
+  "window_start": "2024-01-01",
   "window_end": "2026-05-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2024"
  },
  {
   "project_id": "DESC_41",
@@ -2334,6 +2801,19 @@
   "in_service_date": "2026-12-31",
   "in_service_raw": "12/31/2026",
   "estimated_cost_usd": 4500000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 200000,
+   "2026": 4300000,
+   "2027": 0,
+   "2028": 0,
+   "Total": 4500000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2025-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2025",
   "description": "Rebuilding the Cameron Jct \u2013 Elloree 46 kV Line. 7.3 miles.",
   "need": "System hardening",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2377,9 +2857,9 @@
    33.54802535
   ],
   "location_confidence": "medium",
-  "window_start": "2025-07-01",
+  "window_start": "2025-01-01",
   "window_end": "2026-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2025"
  },
  {
   "project_id": "DESC_42",
@@ -2398,6 +2878,19 @@
   "in_service_date": "2027-12-31",
   "in_service_raw": "12/31/2027",
   "estimated_cost_usd": 4500000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 0,
+   "2026": 0,
+   "2027": 4500000,
+   "2028": 0,
+   "Total": 4500000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2027-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2027",
   "description": "Rebuilding the 46 kV line between Elloree and Santee City. 7 miles.",
   "need": "System hardening",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2441,9 +2934,9 @@
    33.47789915
   ],
   "location_confidence": "high",
-  "window_start": "2026-07-01",
+  "window_start": "2027-01-01",
   "window_end": "2027-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2027"
  },
  {
   "project_id": "DESC_43",
@@ -2462,6 +2955,19 @@
   "in_service_date": "2027-12-31",
   "in_service_raw": "12/31/2027",
   "estimated_cost_usd": 3000000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 0,
+   "2026": 0,
+   "2027": 3000000,
+   "2028": 0,
+   "Total": 3000000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2027-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2027",
   "description": "Rebuilding the section of 46 kV line from Urquhart to the Aiken PSA tap point. TBD if the scope of this project includes rebuilding the actual tap Aiken PSA. 4.5 miles.",
   "need": "System hardening",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2489,9 +2995,9 @@
    33.4333777
   ],
   "location_confidence": "medium",
-  "window_start": "2026-07-01",
+  "window_start": "2027-01-01",
   "window_end": "2027-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2027"
  },
  {
   "project_id": "DESC_44",
@@ -2510,6 +3016,19 @@
   "in_service_date": "2028-12-31",
   "in_service_raw": "12/31/2028",
   "estimated_cost_usd": 5900000,
+  "budget": {
+   "Previous": 0,
+   "2024": 0,
+   "2025": 0,
+   "2026": 0,
+   "2027": 0,
+   "2028": 5900000,
+   "Total": 5900000
+  },
+  "budget_parse": "columns left to right",
+  "budget_check": "years sum to the total",
+  "budget_start": "2028-01-01",
+  "budget_start_basis": "DESC budget: spending starts in 2028",
   "description": "Rebuilding the 46 kV line between Cameron Jct and St Matthews. 9.8 miles.",
   "need": "System hardening.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
@@ -2553,9 +3072,9 @@
    33.5636663
   ],
   "location_confidence": "medium",
-  "window_start": "2027-07-02",
+  "window_start": "2028-01-01",
   "window_end": "2028-12-31",
-  "window_basis": "assumed 18-month build before in-service date (rebuild)"
+  "window_basis": "DESC budget: spending starts in 2028"
  },
  {
   "project_id": "GPC_21046",
@@ -4292,27 +4811,27 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 80,
   "source_page": 250,
-  "loc_a": null,
-  "loc_b": {
-   "lat": 33.7760948,
-   "lon": -84.3988077,
-   "osm_id": "relation/3341535",
-   "osm_name": "Georgia Tech, Techwood Drive Northwest, Atlanta, Fulton County, Georgia, 30332, ",
+  "loc_a": {
+   "lat": 32.0617337,
+   "lon": -81.1020623,
+   "osm_id": "way/9082406",
+   "osm_name": "Jefferson Street, Savannah Historic District, Savannah, Chatham County, Georgia,",
    "osm_operator": "",
-   "method": "approximate: Nominatim amenity/university (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
+  "loc_b": null,
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -84.3988077,
-    33.7760948
+    -81.1020623,
+    32.0617337
    ]
   },
   "center": [
-   -84.3988077,
-   33.7760948
+   -81.1020623,
+   32.0617337
   ],
   "location_confidence": "low",
   "window_start": "2024-01-01",
@@ -4524,31 +5043,10 @@
   "plan_page": 85,
   "source_page": 255,
   "loc_a": null,
-  "loc_b": {
-   "lat": 33.4483646,
-   "lon": -84.5224884,
-   "osm_id": "way/1472128597",
-   "osm_name": "QTS, Highway 54 West, Fayetteville, Fayette County, Georgia, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim building/yes (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.5224884,
-    33.4483646
-   ]
-  },
-  "center": [
-   -84.5224884,
-   33.4483646
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-06-01",
-  "window_end": "2026-04-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_19597",
@@ -4572,16 +5070,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 86,
   "source_page": 256,
-  "loc_a": {
-   "lat": 33.7592737,
-   "lon": -84.505209,
-   "osm_id": "node/154075833",
-   "osm_name": "Adamsville, Atlanta, Fulton County, Georgia, 10331, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim place/quarter (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 34.6703655,
    "lon": -84.2421386,
@@ -4593,22 +5082,15 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.505209,
-     33.7592737
-    ],
-    [
-     -84.2421386,
-     34.6703655
-    ]
+    -84.2421386,
+    34.6703655
    ]
   },
-  "straight_length_km": 104.16,
   "center": [
-   -84.3736738,
-   34.2148196
+   -84.2421386,
+   34.6703655
   ],
   "location_confidence": "low",
   "window_start": "2024-06-01",
@@ -6194,33 +6676,17 @@
    "confidence": "low",
    "n_candidates": 1
   },
-  "loc_b": {
-   "lat": 33.7360535,
-   "lon": -84.4136642,
-   "osm_id": "node/4172450826",
-   "osm_name": "West End, 680, Lee Street Southwest, West End, Atlanta, Fulton County, Georgia, ",
-   "osm_operator": "",
-   "method": "approximate: Nominatim railway/station (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_b": null,
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -83.5635642,
-     32.9953281
-    ],
-    [
-     -84.4136642,
-     33.7360535
-    ]
+    -83.5635642,
+    32.9953281
    ]
   },
-  "straight_length_km": 114.09,
   "center": [
-   -83.9886142,
-   33.365690799999996
+   -83.5635642,
+   32.9953281
   ],
   "location_confidence": "low",
   "window_start": "2022-06-01",
@@ -6340,16 +6806,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 119,
   "source_page": 289,
-  "loc_a": {
-   "lat": 33.71849,
-   "lon": -84.938047,
-   "osm_id": "node/14097665790",
-   "osm_name": "Georgia Power, Hickory Level Road, Villa Rica, Carroll County, Georgia, 30180, U",
-   "osm_operator": "",
-   "method": "approximate: Nominatim amenity/charging_station (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 33.7410224,
    "lon": -84.8548652,
@@ -6361,24 +6818,17 @@
    "n_candidates": 3
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.938047,
-     33.71849
-    ],
-    [
-     -84.8548652,
-     33.7410224
-    ]
+    -84.8548652,
+    33.7410224
    ]
   },
-  "straight_length_km": 8.09,
   "center": [
-   -84.8964561,
-   33.7297562
+   -84.8548652,
+   33.7410224
   ],
-  "location_confidence": "low",
+  "location_confidence": "medium",
   "window_start": "2024-05-01",
   "window_end": "2027-05-01",
   "window_basis": "published start date"
@@ -6732,16 +7182,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 127,
   "source_page": 297,
-  "loc_a": {
-   "lat": 33.7592737,
-   "lon": -84.505209,
-   "osm_id": "node/154075833",
-   "osm_name": "Adamsville, Atlanta, Fulton County, Georgia, 10331, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim place/quarter (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 34.6703655,
    "lon": -84.2421386,
@@ -6753,22 +7194,15 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.505209,
-     33.7592737
-    ],
-    [
-     -84.2421386,
-     34.6703655
-    ]
+    -84.2421386,
+    34.6703655
    ]
   },
-  "straight_length_km": 104.16,
   "center": [
-   -84.3736738,
-   34.2148196
+   -84.2421386,
+   34.6703655
   ],
   "location_confidence": "low",
   "window_start": "2025-06-01",
@@ -7026,16 +7460,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 133,
   "source_page": 303,
-  "loc_a": {
-   "lat": 32.5593178,
-   "lon": -84.8245144,
-   "osm_id": "way/9413851",
-   "osm_name": "Garrett Road, Columbus, Muscogee County, Georgia, 31820, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 33.7410224,
    "lon": -84.8548652,
@@ -7047,24 +7472,17 @@
    "n_candidates": 3
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.8245144,
-     32.5593178
-    ],
-    [
-     -84.8548652,
-     33.7410224
-    ]
+    -84.8548652,
+    33.7410224
    ]
   },
-  "straight_length_km": 131.43,
   "center": [
-   -84.8396898,
-   33.1501701
+   -84.8548652,
+   33.7410224
   ],
-  "location_confidence": "low",
+  "location_confidence": "medium",
   "window_start": "2027-01-01",
   "window_end": "2027-06-01",
   "window_basis": "published start date"
@@ -7752,25 +8170,26 @@
   "source_page": 315,
   "loc_a": null,
   "loc_b": {
-   "lat": 32.0777315,
-   "lon": -81.0921477,
-   "osm_id": "way/1359311176",
-   "osm_name": "Grave of Tomochichi, Savannah Historic District, Savannah, Chatham County, Georg",
+   "lat": 33.2714,
+   "lon": -84.09,
+   "osm_id": "",
+   "osm_name": "approximate: midpoint of the O'Hara - Scherer 500 kV line",
    "osm_operator": "",
-   "method": "approximate: Nominatim landuse/cemetery (town/street level, not the substation itself)",
+   "method": "manual: project description + OSM",
    "confidence": "low",
+   "note": "New switching station 'splitting the Ohara - Schere 500kV line' with new lines to the new Towaliga River substation (central Georgia). Placed at the midpoint of O'Hara (33.4819,-84.3674) and Scherer (33.0609,-83.8127) substations.",
    "n_candidates": 0
   },
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -81.0921477,
-    32.0777315
+    -84.09,
+    33.2714
    ]
   },
   "center": [
-   -81.0921477,
-   32.0777315
+   -84.09,
+   33.2714
   ],
   "location_confidence": "low",
   "window_start": "2024-06-01",
@@ -8491,31 +8910,10 @@
   "plan_page": 159,
   "source_page": 329,
   "loc_a": null,
-  "loc_b": {
-   "lat": 33.7760948,
-   "lon": -84.3988077,
-   "osm_id": "relation/3341535",
-   "osm_name": "Georgia Tech, Techwood Drive Northwest, Atlanta, Fulton County, Georgia, 30332, ",
-   "osm_operator": "",
-   "method": "approximate: Nominatim amenity/university (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.3988077,
-    33.7760948
-   ]
-  },
-  "center": [
-   -84.3988077,
-   33.7760948
-  ],
-  "location_confidence": "low",
-  "window_start": "2025-06-01",
-  "window_end": "2028-06-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_19629",
@@ -8654,16 +9052,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 162,
   "source_page": 332,
-  "loc_a": {
-   "lat": 33.6412254,
-   "lon": -84.5847216,
-   "osm_id": "way/731060337",
-   "osm_name": "Pittman Road, Holly Brook, South Fulton, Fulton County, Georgia, 30349, United S",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 32.9187615,
    "lon": -85.1888215,
@@ -8675,24 +9064,17 @@
    "n_candidates": 5
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.5847216,
-     33.6412254
-    ],
-    [
-     -85.1888215,
-     32.9187615
-    ]
+    -85.1888215,
+    32.9187615
    ]
   },
-  "straight_length_km": 98.02,
   "center": [
-   -84.88677154999999,
-   33.279993450000006
+   -85.1888215,
+   32.9187615
   ],
-  "location_confidence": "low",
+  "location_confidence": "medium",
   "window_start": "2025-06-01",
   "window_end": "2028-06-01",
   "window_basis": "published start date"
@@ -9058,42 +9440,26 @@
   "plan_page": 169,
   "source_page": 339,
   "loc_a": {
-   "lat": 33.7823281,
-   "lon": -84.2626804,
-   "osm_id": "way/40608611",
-   "osm_name": "First Avenue, Ingleside, Scottdale, DeKalb County, Georgia, 30002, United States",
+   "lat": 31.9902512,
+   "lon": -80.8509207,
+   "osm_id": "way/9093148",
+   "osm_name": "First Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
    "osm_operator": "",
    "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
-  "loc_b": {
-   "lat": 32.5753286,
-   "lon": -84.9307453,
-   "osm_id": "relation/14456328",
-   "osm_name": "North Columbus Elementary, 2006, Old Guard Road, Columbus, Muscogee County, Geor",
-   "osm_operator": "",
-   "method": "approximate: Nominatim building/school (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_b": null,
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.2626804,
-     33.7823281
-    ],
-    [
-     -84.9307453,
-     32.5753286
-    ]
+    -80.8509207,
+    31.9902512
    ]
   },
-  "straight_length_km": 147.91,
   "center": [
-   -84.59671284999999,
-   33.17882835
+   -80.8509207,
+   31.9902512
   ],
   "location_confidence": "low",
   "window_start": "2028-01-01",
@@ -9173,12 +9539,12 @@
   "plan_page": 171,
   "source_page": 341,
   "loc_a": {
-   "lat": 33.3908012,
-   "lon": -84.7643828,
-   "osm_id": "way/474075445",
-   "osm_name": "Ashley Park, Newnan, Coweta County, Georgia, United States",
+   "lat": 33.5073355,
+   "lon": -84.4768716,
+   "osm_id": "node/153836202",
+   "osm_name": "Ashley Park, Fayette County, Georgia, 30214, United States",
    "osm_operator": "",
-   "method": "approximate: Nominatim landuse/retail (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim place/neighbourhood (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
@@ -9196,8 +9562,8 @@
    "type": "LineString",
    "coordinates": [
     [
-     -84.7643828,
-     33.3908012
+     -84.4768716,
+     33.5073355
     ],
     [
      -85.030769,
@@ -9205,10 +9571,10 @@
     ]
    ]
   },
-  "straight_length_km": 24.83,
+  "straight_length_km": 52.49,
   "center": [
-   -84.8975759,
-   33.400878399999996
+   -84.7538203,
+   33.45914555
   ],
   "location_confidence": "low",
   "window_start": "2024-12-01",
@@ -9432,43 +9798,27 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 175,
   "source_page": 345,
-  "loc_a": {
-   "lat": 34.6703655,
-   "lon": -84.2421386,
-   "osm_id": "node/358711591",
-   "osm_name": "Buzzard Roost, Fannin County, Georgia, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim natural/peak (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
-   "lat": 33.4467303,
-   "lon": -83.8283004,
-   "osm_id": "node/10281025741",
-   "osm_name": "Factory Shoals Recreation Park, 450, Covington, Newton County, Georgia, 30014, U",
+   "lat": 33.7688036,
+   "lon": -84.5913101,
+   "osm_id": "way/46218456",
+   "osm_name": "Factory Shoals Road Southwest, Mableton, Cobb County, Georgia, 30168, United Sta",
    "osm_operator": "",
-   "method": "approximate: Nominatim leisure/park (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.2421386,
-     34.6703655
-    ],
-    [
-     -83.8283004,
-     33.4467303
-    ]
+    -84.5913101,
+    33.7688036
    ]
   },
-  "straight_length_km": 141.3,
   "center": [
-   -84.03521950000001,
-   34.0585479
+   -84.5913101,
+   33.7688036
   ],
   "location_confidence": "low",
   "window_start": "2026-06-01",
@@ -10118,12 +10468,12 @@
   "plan_page": 186,
   "source_page": 356,
   "loc_a": {
-   "lat": 33.6142204,
-   "lon": -85.2869786,
-   "osm_id": "way/33469212",
-   "osm_name": "Lower Little Tallapoosa River Watershed Structure Number 25 Dam, Carroll County,",
+   "lat": 33.7069872,
+   "lon": -84.6536345,
+   "osm_id": "way/9191035",
+   "osm_name": "Old Lower River Road, Tributary, Douglas County, Georgia, 30135, United States",
    "osm_operator": "",
-   "method": "approximate: Nominatim waterway/dam (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
@@ -10141,8 +10491,8 @@
    "type": "LineString",
    "coordinates": [
     [
-     -85.2869786,
-     33.6142204
+     -84.6536345,
+     33.7069872
     ],
     [
      -84.2593662,
@@ -10150,10 +10500,10 @@
     ]
    ]
   },
-  "straight_length_km": 109.04,
+  "straight_length_km": 56.64,
   "center": [
-   -84.77317239999999,
-   33.85577025
+   -84.45650035,
+   33.90215365
   ],
   "location_confidence": "low",
   "window_start": "2025-06-01",
@@ -10377,16 +10727,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 190,
   "source_page": 360,
-  "loc_a": {
-   "lat": 32.2841281,
-   "lon": -83.4836521,
-   "osm_id": "way/9439099",
-   "osm_name": "Slappey Drive, Hawkinsville, Pulaski County, Georgia, 31036, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 31.58934,
    "lon": -84.2112979,
@@ -10398,22 +10739,15 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -83.4836521,
-     32.2841281
-    ],
-    [
-     -84.2112979,
-     31.58934
-    ]
+    -84.2112979,
+    31.58934
    ]
   },
-  "straight_length_km": 103.36,
   "center": [
-   -83.847475,
-   31.93673405
+   -84.2112979,
+   31.58934
   ],
   "location_confidence": "low",
   "window_start": "2026-06-01",
@@ -10814,16 +11148,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 197,
   "source_page": 367,
-  "loc_a": {
-   "lat": 33.7516721,
-   "lon": -84.3375713,
-   "osm_id": "way/9191363",
-   "osm_name": "Anniston Avenue Southeast, Edgewood, Atlanta, DeKalb County, Georgia, 30317, Uni",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 34.2512064,
    "lon": -85.34558,
@@ -10835,22 +11160,15 @@
    "n_candidates": 1
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.3375713,
-     33.7516721
-    ],
-    [
-     -85.34558,
-     34.2512064
-    ]
+    -85.34558,
+    34.2512064
    ]
   },
-  "straight_length_km": 108.26,
   "center": [
-   -84.84157565,
-   34.001439250000004
+   -85.34558,
+   34.2512064
   ],
   "location_confidence": "low",
   "window_start": "2025-06-01",
@@ -10954,35 +11272,19 @@
    "confidence": "medium",
    "n_candidates": 1
   },
-  "loc_b": {
-   "lat": 33.7760948,
-   "lon": -84.3988077,
-   "osm_id": "relation/3341535",
-   "osm_name": "Georgia Tech, Techwood Drive Northwest, Atlanta, Fulton County, Georgia, 30332, ",
-   "osm_operator": "",
-   "method": "approximate: Nominatim amenity/university (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_b": null,
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.4714212,
-     33.825476
-    ],
-    [
-     -84.3988077,
-     33.7760948
-    ]
+    -84.4714212,
+    33.825476
    ]
   },
-  "straight_length_km": 8.67,
   "center": [
-   -84.43511445,
-   33.8007854
+   -84.4714212,
+   33.825476
   ],
-  "location_confidence": "low",
+  "location_confidence": "medium",
   "window_start": "2027-06-01",
   "window_end": "2030-06-01",
   "window_basis": "published start date"
@@ -11666,25 +11968,26 @@
   "source_page": 383,
   "loc_a": null,
   "loc_b": {
-   "lat": 32.0777315,
-   "lon": -81.0921477,
-   "osm_id": "way/1359311176",
-   "osm_name": "Grave of Tomochichi, Savannah Historic District, Savannah, Chatham County, Georg",
+   "lat": 33.2714,
+   "lon": -84.09,
+   "osm_id": "",
+   "osm_name": "approximate: midpoint of the O'Hara - Scherer 500 kV line",
    "osm_operator": "",
-   "method": "approximate: Nominatim landuse/cemetery (town/street level, not the substation itself)",
+   "method": "manual: project description + OSM",
    "confidence": "low",
+   "note": "New switching station 'splitting the Ohara - Schere 500kV line' with new lines to the new Towaliga River substation (central Georgia). Placed at the midpoint of O'Hara (33.4819,-84.3674) and Scherer (33.0609,-83.8127) substations.",
    "n_candidates": 0
   },
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -81.0921477,
-    32.0777315
+    -84.09,
+    33.2714
    ]
   },
   "center": [
-   -81.0921477,
-   32.0777315
+   -84.09,
+   33.2714
   ],
   "location_confidence": "low",
   "window_start": "2024-12-01",
@@ -12170,16 +12473,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 222,
   "source_page": 392,
-  "loc_a": {
-   "lat": 31.2639468,
-   "lon": -82.3601079,
-   "osm_id": "way/803029182",
-   "osm_name": "Kettle Creek, Jamestown, Ware County, Georgia, 31501, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim waterway/canal (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 30.8816485,
    "lon": -83.2279869,
@@ -12191,24 +12485,17 @@
    "n_candidates": 2
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -82.3601079,
-     31.2639468
-    ],
-    [
-     -83.2279869,
-     30.8816485
-    ]
+    -83.2279869,
+    30.8816485
    ]
   },
-  "straight_length_km": 92.95,
   "center": [
-   -82.79404740000001,
-   31.07279765
+   -83.2279869,
+   30.8816485
   ],
-  "location_confidence": "low",
+  "location_confidence": "medium",
   "window_start": "2026-06-02",
   "window_end": "2030-06-01",
   "window_basis": "published start date"
@@ -13444,16 +13731,7 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 245,
   "source_page": 415,
-  "loc_a": {
-   "lat": 33.0918951,
-   "lon": -83.2256872,
-   "osm_id": "way/9010021",
-   "osm_name": "East Walton Street, Milledgeville, Baldwin County, Georgia, 31061, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": {
    "lat": 34.4225382,
    "lon": -83.3586118,
@@ -13465,22 +13743,15 @@
    "n_candidates": 0
   },
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -83.2256872,
-     33.0918951
-    ],
-    [
-     -83.3586118,
-     34.4225382
-    ]
+    -83.3586118,
+    34.4225382
    ]
   },
-  "straight_length_km": 148.47,
   "center": [
-   -83.2921495,
-   33.757216650000004
+   -83.3586118,
+   34.4225382
   ],
   "location_confidence": "low",
   "window_start": "2024-12-01",
@@ -13650,12 +13921,12 @@
    "n_candidates": 1
   },
   "loc_b": {
-   "lat": 34.4225382,
-   "lon": -83.3586118,
-   "osm_id": "relation/16454061",
-   "osm_name": "Middle Fork Broad River, Franklin County, Georgia, United States",
+   "lat": 34.4584345,
+   "lon": -83.4882248,
+   "osm_id": "node/358724256",
+   "osm_name": "Middle Fork Broad River Structure Six Dam, Banks County, Georgia, 30511, United ",
    "osm_operator": "",
-   "method": "approximate: Nominatim waterway/river (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim waterway/dam (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
@@ -13667,15 +13938,15 @@
      34.3264526
     ],
     [
-     -83.3586118,
-     34.4225382
+     -83.4882248,
+     34.4584345
     ]
    ]
   },
-  "straight_length_km": 90.43,
+  "straight_length_km": 79.25,
   "center": [
-   -83.84780915,
-   34.3744954
+   -83.91261564999999,
+   34.39244355
   ],
   "location_confidence": "low",
   "window_start": "2026-06-01",

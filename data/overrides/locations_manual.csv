@@ -6,3 +6,4 @@ GPC,PURRYSBURG,32.36884,-81.12243,unnamed 230/115 kV substation (SC side of McIn
 GPC,GOSHEN,33.3198,-81.9953,Goshen Substation (Augusta area),,medium,OSM + project description,"Two OSM 'Goshen Substation's exist; non-SAV Goshen projects reference the Goshen - Vogtle corridor, i.e. the Augusta-area one."
 DESC,VCS1,34.2960,-81.3149,Virgil C. Summer Nuclear #1 Substation,,high,OSM name (alias),"VCS1 = V.C. Summer Nuclear Station unit 1 switchyard."
 DESC,VCS2,34.2960,-81.3149,Virgil C. Summer Nuclear #1 Substation,,medium,OSM name (alias),"VCS2 = V.C. Summer unit 2 site; placed at the unit 1 switchyard."
+GPC,TOMOCHICHI,33.2714,-84.0900,approximate: midpoint of the O'Hara - Scherer 500 kV line,,low,project description + OSM,"New switching station 'splitting the Ohara - Schere 500kV line' with new lines to the new Towaliga River substation (central Georgia). Placed at the midpoint of O'Hara (33.4819,-84.3674) and Scherer (33.0609,-83.8127) substations."

@@ -34,7 +34,8 @@ USER_AGENT = "GridLock-ShellHacks2026/0.1 (hackathon project)"
 HOME_STATE = {"GPC": "Georgia", "DESC": "South Carolina"}
 CROSS_BORDER_KM = 15  # tie points sit on the Savannah River, so allow a little slack across the border
 NOT_PLACES = {"CC", "GRID", "JUMPER", "TIE BREAKER", "SWITCH WAY", "SMART VALVE", "SKC", "MICROSOFT", "HALF STATION",
-              "TRIBUTARY", "LG E MONROE", "PROJECT CHRONOS", "NORTH GEORGIA DATA", "EMBLEM RIVERSIDE"}
+              "TRIBUTARY", "LG E MONROE", "PROJECT CHRONOS", "NORTH GEORGIA DATA", "EMBLEM RIVERSIDE",
+              "SCOUT"}  # DESC's new "Scout" 230 kV sub: no public location; Nominatim's Scout Island is a guess
 
 AREA_HINTS = {  # south, west, north, east
     "SAV": (31.6, -81.9, 32.6, -80.8),
@@ -218,13 +219,21 @@ class Nominatim:
             return None
         for q in (f"{name.title()}, {state}", f"{main.title()}, {state}"):
             for r in self.search(q):
+                # Places, streets, water bodies and industrial sites only: a landmark that merely shares the name
+                # (e.g. the Grave of Tomochichi in Savannah) says nothing about where a substation is.
+                cat, typ = r.get("category", r.get("class")), r.get("type", "")
+                ok = (cat in ("place", "boundary", "natural", "water", "waterway")
+                      or (cat == "highway" and typ not in ("track", "path", "footway", "cycleway", "service", "bridleway"))
+                      or (cat == "landuse" and typ in ("industrial", "commercial", "port", "railway")))
+                if not ok:
+                    continue
                 lat, lon = float(r["lat"]), float(r["lon"])
                 if km_outside_state(lat, lon, state) > CROSS_BORDER_KM:
                     continue
                 if area_box and not in_box(lat, lon, area_box):
                     continue
-                if partner and haversine_km(lat, lon, partner[0], partner[1]) > 150:
-                    continue
+                if partner and haversine_km(lat, lon, partner[0], partner[1]) > 80:
+                    continue  # a line's two ends are rarely more than ~80 km apart
                 first = main.split()[0]
                 if first.lower() not in r.get("display_name", "").lower():
                     continue

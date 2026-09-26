@@ -142,6 +142,54 @@ def between(lines, start, stops):
 # ----------------------------------------------------------------------------------------------
 # Dominion Energy South Carolina
 # ----------------------------------------------------------------------------------------------
+BUDGET_COLS = ["Previous", "2024", "2025", "2026", "2027", "2028", "Total*"]
+
+
+def parse_budget(page: str):
+    """DESC's 5-year budget table (Previous, 2024..2028, Total). pdftotext scatters it over 2-3 lines, so try
+    assignments until the years add up to the stated total. Returns (budget dict, how, check note)."""
+    lines = page.splitlines()
+    i0 = next(i for i, ln in enumerate(lines) if "Estimated Project Cost" in ln)
+    i1 = next(i for i, ln in enumerate(lines) if "Total Estimated Amount" in ln)
+    heads, vals = [], []
+    for ln in lines[i0:i1]:
+        heads += [(m.start(), m.group(0)) for m in re.finditer(r"Previous|20\d\d|Total\*", ln)]
+        vals += [(m.start(), int(m.group(0)[1:].replace(",", ""))) for m in re.finditer(r"\$[\d,]+", ln)]
+    sums_ok = lambda d: len(d) == 7 and abs(sum(d[c] for c in BUDGET_COLS[:-1]) - d["Total*"]) <= 2
+    tries = []
+    if len(vals) == 7:
+        tries.append((dict(zip(BUDGET_COLS, [v for _, v in sorted(vals)])), "columns left to right"))
+    nearest = {}
+    for pos, v in vals:
+        nearest.setdefault(min(heads, key=lambda h: abs(h[0] - pos))[1], v)
+    tries.append((nearest, "nearest column header"))
+    if len(vals) == 7:
+        total = max(v for _, v in vals)
+        rest = sorted(vals, key=lambda x: (x[1] == total, x[0]))[:6]
+        d = dict(zip(BUDGET_COLS[:-1], [v for _, v in sorted(rest)]))
+        d["Total*"] = total
+        tries.append((d, "largest value is the total"))
+    for d, how in tries:
+        if sums_ok(d):
+            return {k.rstrip("*"): v for k, v in d.items()}, how, "years sum to the total"
+    d = {k.rstrip("*"): v for k, v in nearest.items()}
+    parts = sum(v for k, v in d.items() if k != "Total")
+    return d, "nearest column header", f"source inconsistency: years sum to ${parts:,} but the total says ${d.get('Total', 0):,}"
+
+
+def budget_start(budget, isd):
+    """First year DESC budgets money for the project ('Previous' = spending before 2024)."""
+    if not budget:
+        return None, ""
+    if budget.get("Previous", 0) > 0:
+        return "2023-01-01", "spending before 2024 (DESC budget 'Previous' column)"
+    years = [int(y) for y in ("2024", "2025", "2026", "2027", "2028") if budget.get(y, 0) > 0]
+    if not years:
+        return None, ""
+    first = min(years[0], int(isd[:4]))
+    return f"{first}-01-01", f"DESC budget: spending starts in {first}"
+
+
 def extract_desc():
     text = pdf_to_text(DESC_PDF, TEXT / "desc_projects.txt")
     pages = [p for p in text.split("\f") if p.strip()]
@@ -160,6 +208,9 @@ def extract_desc():
         isd_raw = between(lines, "Planned In-Service Date", ("Estimated Project Cost",))
         dates = [parse_date(m.group(0)) for m in re.finditer(r"\d{1,2}/\d{1,2}/\d{2,4}", isd_raw)]
         amounts = [int(a.replace(",", "")) for a in re.findall(r"\$([\d,]+)", page)]
+        budget, budget_how, budget_check = parse_budget(page)
+        isd = dates[-1] if dates else None
+        b_start, b_basis = budget_start(budget, isd) if isd else (None, "")
         points = split_endpoints(title)
         projects.append({
             "project_id": f"DESC_{page_no}",
@@ -175,7 +226,9 @@ def extract_desc():
             "start_date": None,
             "in_service_date": dates[-1] if dates else None,
             "in_service_raw": isd_raw,
-            "estimated_cost_usd": max(amounts) if amounts else None,
+            "estimated_cost_usd": budget.get("Total") or (max(amounts) if amounts else None),
+            "budget": budget, "budget_parse": budget_how, "budget_check": budget_check,
+            "budget_start": b_start, "budget_start_basis": b_basis,
             "description": description,
             "need": need,
             "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
