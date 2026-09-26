@@ -1,0 +1,29 @@
+# Sperry Tech's GridLock starter package, kept local only: it is theirs to distribute, and every page of the
+# Georgia Power PDF carries a CEII notice. Put the package here to re-run pipeline/extract_projects.py.
+data/sperry/
+
+# Downloaded map tiles (world3d/prep_scene.py re-downloads them); the built scene in world3d/build/ is committed
+world3d/cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.claude/settings.local.json

@@ -1,0 +1,3 @@
+DESC: sub-points located 71/75; projects by confidence {'medium': 14, 'low': 17, 'high': 13}
+GPC: sub-points located 300/362; projects by confidence {'low': 99, 'high': 47, 'medium': 45, 'none': 17}
+exit=0

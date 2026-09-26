@@ -1,0 +1,8 @@
+project_id,name_a,name_b,note
+DESC_1,Queensboro,Ft Johnson,"Title lists two circuits; mapped as Queensboro - Ft Johnson (the section named first)."
+DESC_8,VCS1,Denny Terrace,"Title covers VCS1-Denny Terrace and VCS1-Pineland; OSM's only 'Pineland Substation' is ~190 km away near Estill, so only VCS1-Denny Terrace is mapped."
+DESC_22,Okatie,Riverport,"Description: 'Construct Okatie - Riverport 230 kV to feed new Distribution substation.'"
+DESC_40,Eastover,Sumter,"Eastover - Sumter 115 kV DEP (Duke Energy Progress) tie."
+GPC_19523,HYUNDAI MOTORS,,"'CC - HYUNDAI MOTORS SAVANNAH aka Project EA': customer connection to the Hyundai Metaplant substation; 'CC' is not a place."
+GPC_19966,LITTLE OGEECHEE,,"New 'Big Ogeechee' 500/230 kV substation is described as 'near Little Ogeechee'; placed at Little Ogeechee (approximate)."
+GPC_21116,GOSHEN,,"New switching station on Waynesboro - Wilson 230 kV plus a 12.3 mi line to Goshen (Augusta area, Goshen - Vogtle corridor); placed at Goshen (approximate)."

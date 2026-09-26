@@ -1,0 +1,8 @@
+utility,point_name,lat,lon,matched_feature,osm_id,confidence,source,note
+DESC,Okatie,32.333758,-81.032495,unnamed OSM substation (10 m away),,high,Sperry sample (Projects_Overlaps.xlsx),"Not named in OSM; Sperry's verified coordinate sits on an unnamed substation."
+DESC,Queensboro,32.722793,-79.967332,Queensborough Substation,,high,Sperry sample (Projects_Overlaps.xlsx),"OSM has both 'Queensborough Substation' and a Santee Cooper switching station 570 m away; use Sperry's pick."
+DESC,Hooks,33.65682,-82.15948,GPC <-> SCG&E Compensator Station,way/1074904615,medium,OSM power-line trace,"Unnamed in OSM as 'Hooks'. The GPC-SCE&G tie station is 9.4 mi along the line from Stevens Creek (DESC says Stevens Creek-Hooks corridor is 9.5 mi) and ~2.0 mi from Thurmond (DESC: Hooks-Thurmond section ~2.3 mi)."
+GPC,PURRYSBURG,32.36884,-81.12243,unnamed 230/115 kV substation (SC side of McIntosh tie lines),way/185380609,medium,OSM power-line trace,"The McIntosh-Purrysburg 230 kV tie lines leave McIntosh eastward and end at this unnamed 230/115 kV substation in SC, 0.8 km from DESC's Jasper substation."
+GPC,GOSHEN,33.3198,-81.9953,Goshen Substation (Augusta area),,medium,OSM + project description,"Two OSM 'Goshen Substation's exist; non-SAV Goshen projects reference the Goshen - Vogtle corridor, i.e. the Augusta-area one."
+DESC,VCS1,34.2960,-81.3149,Virgil C. Summer Nuclear #1 Substation,,high,OSM name (alias),"VCS1 = V.C. Summer Nuclear Station unit 1 switchyard."
+DESC,VCS2,34.2960,-81.3149,Virgil C. Summer Nuclear #1 Substation,,medium,OSM name (alias),"VCS2 = V.C. Summer unit 2 site; placed at the unit 1 switchyard."
