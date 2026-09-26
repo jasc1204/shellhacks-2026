@@ -8,7 +8,10 @@ The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
 
 ## Status
 
-Work in progress during the hackathon. Built so far: the data pipeline below, which extracts 252 planned projects (44 DESC, 208 Georgia Power), geocodes their named endpoints and ranks the cross-utility overlaps. Also in progress: `web/` (the interactive map: Vite, TypeScript, MapLibre GL) and `world3d/` (a 3D scene of each border region).
+Built during the hackathon:
+- **The data pipeline** below. It extracts 252 planned projects (44 DESC, 208 Georgia Power), locates their named end points, ranks the 78 cross-utility overlaps, and reproduces all 6 overlaps in Sperry's starter sample.
+- **`web/`:** the interactive map (Vite, TypeScript, MapLibre GL), with the ranked list, satellite and 3D terrain, "add your own project", and a guided tour.
+- **`world3d/`:** a walkable 3D world of the two border regions (Savannah River and Augusta/Thurmond), built with Blender and Three.js from the same data.
 
 ## Data pipeline
 
@@ -20,7 +23,7 @@ Python 3 with `pip install shapely numpy pillow`. Step 1 also needs `pdftotext` 
 | 2. Download substations and plants (GA + SC) and power lines (Savannah and Augusta border areas) from OpenStreetMap | `pipeline/fetch_osm.py` | `data/osm/*.json` |
 | 3. Match each project's named endpoints to OpenStreetMap substations, with a town-level Nominatim fallback flagged as low confidence | `pipeline/geocode.py` | `data/processed/projects_located.json` |
 | 4. Rank overlaps: closest-point distance tiers (touching, < 1.6 km, < 8 km, < 40 km) plus build-window overlap, with Sperry's center-to-center method for comparison | `pipeline/overlaps.py` | `data/processed/overlaps.json`, `overlap_summary.json` |
-| 5. Write the compact files the web map loads, plus the located projects in the column layout of Sperry's `Projects_Overlaps.xlsx` | `pipeline/export_web.py` | `web/public/data/`, `data/processed/projects_located.csv` |
+| 5. Write the compact files the web map loads, plus the project and overlap tables in the column layout of Sperry's `Projects_Overlaps.xlsx` | `pipeline/export_web.py` | `web/public/data/` (incl. `overlaps_sperry_format.csv`), `data/processed/projects_located.csv` |
 
 Every step's output is committed, so you can start from any step:
 
@@ -44,9 +47,13 @@ npm run dev     # http://localhost:5173 (also copies MapLibre's worker into publ
 npm run build   # static site in web/dist/
 ```
 
-- **Map:** both utilities' planned projects, with the overlaps drawn in gold between their closest points. Toggle **CENTERS** to compare with the center-to-center method from Sperry's starter guide.
-- **Opportunities:** the ranked list, filterable by tier and by "same build window". Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline and a rough, editable savings estimate.
-- **Data quality:** the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
+- **Map:** both utilities' planned projects, with the overlaps drawn in gold between their closest points and the selected pair labeled on the map. Toggle **CENTERS** to compare with the center-to-center method from Sperry's starter guide.
+- **Layers:** switch between the night map and **satellite** imagery (USGS, public domain), between **2D** and **3D terrain** (with extruded buildings), and toggle each layer: either utility's projects, your projects, overlaps, the existing grid, line end points, place names.
+- **Opportunities:** the ranked list, filterable by tier and by "same build window". Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate, and **View in 3D** / **Walk the gap** links into the 3D world.
+- **Add your own project:** draw a line or drop a substation, pick the utility and build window, and it's scored in the browser with exactly the same rules as the pipeline (`web/src/geo.ts`, checked against `overlaps.json`: the same 78 overlaps, distances within 1 m). Saved in the browser (`localStorage["gridlock.userProjects.v1"]`) and shown in the 3D world too.
+- **Guided tour** (▶ TOUR): satellite + 3D, then the camera flies to the top opportunities with their numbers on screen. Arrow keys, Space and Esc control it.
+- **Data quality:** downloads of the overlap and project tables in the column layout of Sperry's `Projects_Overlaps.xlsx`, the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
+- **Links:** `#o=<overlap id>` opens an opportunity, e.g. `#o=DESC_23__GPC_20277`. The 3D world is served from the same site under `/world3d/viewer/` (the dev server serves `../world3d`; `npm run build` copies the files the viewer needs into `dist/world3d/`).
 
 ## Data sources
 
@@ -54,6 +61,6 @@ npm run build   # static site in web/dist/
 - **Georgia Power:** 2025 IRP Volume 3 (public disclosure version), which embeds the 2024 GA ITS Ten-Year Plan (2025-2034) with a need date and a start date for each project.
 - Both PDFs came in **Sperry Tech's GridLock starter package**, which is not redistributed here (`data/sperry/` is git-ignored). Put the package there to re-run step 1.
 - Substations, plants and power lines: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL, via the Overpass and Nominatim APIs.
-- Web basemap: [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org) · © OpenStreetMap contributors.
+- Web basemap: [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org) · © OpenStreetMap contributors. Satellite imagery: [USGS The National Map](https://www.usgs.gov/programs/national-geospatial-program/national-map) (public domain). Web 3D terrain: [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/).
 - 3D scene: elevation from [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Terrarium); basemap © OpenStreetMap contributors © [CARTO](https://carto.com/attributions).
 - Manual location overrides for endpoints that OpenStreetMap does not name, each with a source and confidence level: `data/overrides/locations_manual.csv`.
