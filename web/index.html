@@ -18,6 +18,8 @@
           <span class="tag">DESC <b>×</b> GEORGIA POWER · PLANNED TRANSMISSION WORK</span>
         </div>
         <div class="stats" id="stats"></div>
+        <button class="world-link tour-btn" id="tour-btn" title="Guided tour of the top opportunities (arrow keys, Space, Esc)">▶ TOUR</button>
+        <a class="world-link" id="world-link" href="#" hidden title="Fly through the border in 3D">3D WORLD ↗</a>
         <div class="method" role="group" aria-label="Distance method">
           <span class="micro">MEASURE</span>
           <button data-method="closest" class="on" title="GridLock spec: distance between the closest points of the two projects">CLOSEST POINTS</button>
@@ -27,7 +29,10 @@
 
       <main class="stage">
         <div id="map"></div>
+        <div class="loading" id="loading"><span></span>LOADING THE BORDER…</div>
         <div class="hud legend" id="legend"></div>
+        <div class="hud drawbar" id="drawbar" hidden></div>
+        <div class="hud tourbar" id="tourbar" hidden></div>
         <div class="hud detail" id="detail" hidden></div>
         <div class="tooltip" id="tooltip" hidden></div>
       </main>
@@ -39,6 +44,7 @@
           <button data-tab="about">ABOUT</button>
         </nav>
         <section class="panel" id="tab-ranked">
+          <div class="userbox" id="userbox"></div>
           <div class="filters" id="filters"></div>
           <ol class="ranked" id="ranked"></ol>
         </section>
