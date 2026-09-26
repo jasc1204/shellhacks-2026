@@ -118,6 +118,30 @@ def main():
             row["lon_center"], row["lat_center"] = (round(p["center"][0], 6), round(p["center"][1], 6))
             w.writerow(row)
 
+    # Downloads for the judges, in the column layout of Sperry's Projects_Overlaps.xlsx ("overlaps" sheet first,
+    # then our additions). distance_mi and time_gap (day) keep Sperry's definitions (center to center, in-service gap).
+    by_code = {p["project_id"]: p for p in projects}
+    ocols = ["overlap_id", "distance_mi", "time_gap (day)", "utility_a", "project_id_a", "project_name_a", "utility_b",
+             "project_id_b", "project_name_b", "rank", "closest_km", "tier", "tier_label", "can_share",
+             "build_overlap_days", "window_gap_days", "score", "needs_location_check", "source_page_a", "source_page_b"]
+    # utf-8-sig: a byte-order mark so Excel reads the en dashes in project names correctly.
+    with open(OUT / "overlaps_sperry_format.csv", "w", newline="", encoding="utf-8-sig") as fh:
+        w = csv.DictWriter(fh, fieldnames=ocols)
+        w.writeheader()
+        for o in overlaps:
+            a, b = by_code[o["a"]], by_code[o["b"]]
+            w.writerow({
+                "overlap_id": f"OVL_{o['rank']}", "distance_mi": o["center_mi"], "time_gap (day)": o["isd_gap_days"],
+                "utility_a": a["utility"], "project_id_a": o["a"], "project_name_a": o["a_name"],
+                "utility_b": b["utility"], "project_id_b": o["b"], "project_name_b": o["b_name"],
+                "rank": o["rank"], "closest_km": o["closest_km"], "tier": o["tier"], "tier_label": o["tier_label"],
+                "can_share": o["can_share"], "build_overlap_days": o["overlap_days"], "window_gap_days": o["window_gap_days"],
+                "score": o["score"], "needs_location_check": o["needs_location_check"],
+                "source_page_a": a["source_page"], "source_page_b": b["source_page"],
+            })
+    # The pipeline copy stays BOM-free (world3d/prep_scene.py reads it); the download gets one for Excel.
+    (OUT / "projects_located.csv").write_bytes(b"\xef\xbb\xbf" + (PROC / "projects_located.csv").read_bytes())
+
     sizes = {p.name: f"{p.stat().st_size / 1024:.0f} KB" for p in OUT.iterdir()}
     print(f"mapped {len(feats)} projects, {len(ends)} endpoints, {len(overlaps)} overlaps, {len(backdrop)} backdrop lines; unmapped {len(unmapped)}")
     print(sizes)

@@ -100,6 +100,17 @@ def geo_score(tier, d):
     return 0.2 + 0.25 * (1 - (d - 8.0) / 32.0)
 
 
+def timing_phrase(overlap_days, gap_days):
+    """Same wording as web/src/geo.ts."""
+    if overlap_days > 0:
+        return f"build windows overlap by {round(overlap_days / 30.44)} months"
+    if gap_days < 45:
+        return "build windows are back to back"
+    if gap_days < 365:
+        return f"build windows {round(gap_days / 30.44)} months apart"
+    return f"build windows {gap_days / 365.25:.1f} years apart"
+
+
 def time_score(overlap_days, window_days, gap_days):
     if overlap_days > 0:
         return 0.5 + 0.5 * min(1.0, overlap_days / max(1, window_days))
@@ -153,10 +164,7 @@ def main():
             verify = "low" in confs or "none" in confs
             score = 100 * (0.65 * g + 0.35 * t) * (0.85 if verify else 1.0)
 
-            if overlap_days:
-                when = f"build windows overlap by {overlap_days / 30.44:.0f} months"
-            else:
-                when = f"build windows {gap_days / 365.25:.1f} years apart"
+            when = timing_phrase(overlap_days, gap_days)
             dist_txt = "touching" if tier == 1 else f"{closest_km:.1f} km apart at the closest point"
             overlaps.append({
                 "id": f"{a['project_id']}__{b['project_id']}",

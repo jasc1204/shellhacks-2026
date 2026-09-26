@@ -1,4 +1,4 @@
-project_id,utility,state,project_name,name_a,lat_a,lon_a,name_b,lat_b,lon_b,lat_center,lon_center,start_date,in_service_date,location_confidence,source_page
+﻿project_id,utility,state,project_name,name_a,lat_a,lon_a,name_b,lat_b,lon_b,lat_center,lon_center,start_date,in_service_date,location_confidence,source_page
 DESC_1,Dominion Energy South Carolina,SC,Queensboro - Ft Johnson 115 kV & Queensboro-Bayfront 115kV (Queensboro-James Island Sect),Queensboro,32.722793,-79.967332,Ft Johnson,,,32.722793,-79.967332,,2023-12-31,medium,1
 DESC_2,Dominion Energy South Carolina,SC,Union Pier 115-13.8 kV Sub: Tap,Union Pier,32.784336,-79.925588,,,,32.784336,-79.925588,,2027-12-31,low,2
 DESC_3,Dominion Energy South Carolina,SC,"Okatie 230-115kV Substation, Jasper – Yemassee 230kV #1 Fold-in",Okatie,32.333758,-81.032495,,,,32.333758,-81.032495,,2024-12-31,high,3

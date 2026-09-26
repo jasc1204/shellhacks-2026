@@ -212,7 +212,19 @@ class Nominatim:
             NOMINATIM_CACHE.write_text(json.dumps(self.cache), encoding="utf-8")
         return self.cache[q]
 
-    def locate(self, name, utility, area_box, partner):
+    def _street_near(self, other_name, state, lat, lon, km=10):
+        """Does the project's other end also geocode (as a place or street) within `km` of this point?"""
+        if not other_name:
+            return False
+        main = core(other_name, True)
+        for q in (f"{other_name.title()}, {state}", f"{main.title()}, {state}"):
+            for r in self.search(q):
+                if r.get("category", r.get("class")) in ("place", "highway") and \
+                        haversine_km(lat, lon, float(r["lat"]), float(r["lon"])) <= km:
+                    return True
+        return False
+
+    def locate(self, name, utility, area_box, partner, other_name=""):
         state = HOME_STATE[utility]
         main = core(name, True)
         if not main or main in NOT_PLACES or len(main) < 3:
@@ -225,6 +237,12 @@ class Nominatim:
                 ok = (cat in ("place", "boundary", "natural", "water", "waterway")
                       or (cat == "highway" and typ not in ("track", "path", "footway", "cycleway", "service", "bridleway"))
                       or (cat == "landuse" and typ in ("industrial", "commercial", "port", "railway")))
+                # A street name alone is ambiguous ("First Avenue" is in every city; GPC's First Avenue - North
+                # Columbus line is in Columbus, GA). Accept a street only if the other end is located nearby, or
+                # also geocodes within 10 km of it (Fenwick St + Sand Bar Ferry Rd, both in Augusta).
+                if ok and cat == "highway" and partner is None and \
+                        not self._street_near(other_name, state, float(r["lat"]), float(r["lon"])):
+                    ok = False
                 if not ok:
                     continue
                 lat, lon = float(r["lat"]), float(r["lon"])
@@ -245,7 +263,7 @@ class Nominatim:
         return None
 
 
-def locate_point(name, utility, area_box, partner, osm, overrides, nominatim=None):
+def locate_point(name, utility, area_box, partner, osm, overrides, nominatim=None, other_name=""):
     if not name:
         return None
     ov = overrides.get((utility, name.upper()))
@@ -255,7 +273,7 @@ def locate_point(name, utility, area_box, partner, osm, overrides, nominatim=Non
                 "confidence": ov["confidence"], "note": ov.get("note", ""), "n_candidates": 0}
     hit = pick(name, candidates(name, osm), utility, area_box, partner)
     if hit is None and nominatim is not None:
-        hit = nominatim.locate(name, utility, area_box, partner)
+        hit = nominatim.locate(name, utility, area_box, partner, other_name)
     return hit
 
 
@@ -288,9 +306,11 @@ def main():
         a = locate_point(p["name_a"], util, box, None, osm, overrides)
         b = locate_point(p["name_b"], util, box, None, osm, overrides)
         if p["name_b"]:
-            b = locate_point(p["name_b"], util, box, (a["lat"], a["lon"]) if a else None, osm, overrides, nominatim) or b
+            b = locate_point(p["name_b"], util, box, (a["lat"], a["lon"]) if a else None, osm, overrides, nominatim,
+                             other_name=p["name_a"]) or b
         if p["name_a"]:
-            a = locate_point(p["name_a"], util, box, (b["lat"], b["lon"]) if b else None, osm, overrides, nominatim) or a
+            a = locate_point(p["name_a"], util, box, (b["lat"], b["lon"]) if b else None, osm, overrides, nominatim,
+                             other_name=p["name_b"]) or a
         p["loc_a"], p["loc_b"] = a, b
         pts = [x for x in (a, b) if x]
         if len(pts) == 2:

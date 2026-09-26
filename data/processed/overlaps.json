@@ -688,49 +688,6 @@
   "rank": 16
  },
  {
-  "id": "DESC_22__GPC_18889",
-  "a": "DESC_22",
-  "b": "GPC_18889",
-  "a_name": "Riverport Tap: Construct Tap",
-  "b_name": "JEFFERSON STREET#3 - NORTHWEST (WHITE) 115 KV RECONDUCTOR",
-  "closest_km": 16.816,
-  "closest_points": [
-   [
-    -81.075835,
-    32.211321
-   ],
-   [
-    -81.102062,
-    32.061734
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 23.87,
-  "center_mi": 14.83,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-12-31"
-  ],
-  "b_window": [
-   "2024-01-01",
-   "2025-12-01"
-  ],
-  "overlap_days": 700,
-  "window_gap_days": 0,
-  "isd_gap_days": 30,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.381,
-  "time_score": 1.0,
-  "score": 50.8,
-  "needs_location_check": true,
-  "why": "16.8 km apart at the closest point; build windows overlap by 23 months. Can share crews and equipment.",
-  "rank": 17
- },
- {
   "id": "DESC_35__GPC_21116",
   "a": "DESC_35",
   "b": "GPC_21116",
@@ -771,7 +728,7 @@
   "score": 49.0,
   "needs_location_check": false,
   "why": "14.9 km apart at the closest point; build windows overlap by 14 months. Can share crews and equipment.",
-  "rank": 18
+  "rank": 17
  },
  {
   "id": "DESC_10__GPC_20785",
@@ -814,7 +771,7 @@
   "score": 48.3,
   "needs_location_check": false,
   "why": "19.1 km apart at the closest point; build windows overlap by 12 months. Can share crews and equipment.",
-  "rank": 19
+  "rank": 18
  },
  {
   "id": "DESC_43__GPC_16007",
@@ -856,8 +813,8 @@
   "time_score": 0.354,
   "score": 48.3,
   "needs_location_check": true,
-  "why": "2.1 km apart at the closest point; build windows 0.6 years apart. Can share site logistics: laydown yards, deliveries.",
-  "rank": 20
+  "why": "2.1 km apart at the closest point; build windows 7 months apart. Can share site logistics: laydown yards, deliveries.",
+  "rank": 19
  },
  {
   "id": "DESC_31__GPC_16007",
@@ -900,7 +857,7 @@
   "score": 47.3,
   "needs_location_check": true,
   "why": "25.0 km apart at the closest point; build windows overlap by 24 months. Can share crews and equipment.",
-  "rank": 21
+  "rank": 20
  },
  {
   "id": "DESC_22__GPC_20785",
@@ -943,7 +900,7 @@
   "score": 47.1,
   "needs_location_check": true,
   "why": "9.1 km apart at the closest point; build windows overlap by 19 months. Can share crews and equipment.",
-  "rank": 22
+  "rank": 21
  },
  {
   "id": "DESC_3__GPC_20785",
@@ -986,7 +943,7 @@
   "score": 46.2,
   "needs_location_check": false,
   "why": "19.1 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 23
+  "rank": 22
  },
  {
   "id": "DESC_22__GPC_17075",
@@ -1029,7 +986,7 @@
   "score": 45.9,
   "needs_location_check": true,
   "why": "28.2 km apart at the closest point; build windows overlap by 36 months. Can share crews and equipment.",
-  "rank": 24
+  "rank": 23
  },
  {
   "id": "DESC_23__GPC_20066",
@@ -1072,7 +1029,7 @@
   "score": 45.9,
   "needs_location_check": false,
   "why": "29.7 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 25
+  "rank": 24
  },
  {
   "id": "DESC_23__GPC_19523",
@@ -1115,7 +1072,7 @@
   "score": 45.4,
   "needs_location_check": false,
   "why": "38.2 km apart at the closest point; build windows overlap by 28 months. Can share crews and equipment.",
-  "rank": 26
+  "rank": 25
  },
  {
   "id": "DESC_22__GPC_20066",
@@ -1158,50 +1115,7 @@
   "score": 44.8,
   "needs_location_check": true,
   "why": "16.3 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 27
- },
- {
-  "id": "DESC_23__GPC_18889",
-  "a": "DESC_23",
-  "b": "GPC_18889",
-  "a_name": "Jasper \u2013 Okatie 230 kV #2: Construct",
-  "b_name": "JEFFERSON STREET#3 - NORTHWEST (WHITE) 115 KV RECONDUCTOR",
-  "closest_km": 30.948,
-  "closest_points": [
-   [
-    -81.032495,
-    32.333758
-   ],
-   [
-    -81.102062,
-    32.061734
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 31.735,
-  "center_mi": 19.72,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-12-31"
-  ],
-  "b_window": [
-   "2024-01-01",
-   "2025-12-01"
-  ],
-  "overlap_days": 700,
-  "window_gap_days": 0,
-  "isd_gap_days": 30,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.271,
-  "time_score": 1.0,
-  "score": 44.7,
-  "needs_location_check": true,
-  "why": "30.9 km apart at the closest point; build windows overlap by 23 months. Can share crews and equipment.",
-  "rank": 28
+  "rank": 26
  },
  {
   "id": "DESC_10__GPC_20065",
@@ -1243,8 +1157,8 @@
   "time_score": 0.5,
   "score": 43.9,
   "needs_location_check": false,
-  "why": "13.6 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 29
+  "why": "13.6 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 27
  },
  {
   "id": "DESC_22__GPC_19966",
@@ -1287,7 +1201,7 @@
   "score": 43.8,
   "needs_location_check": true,
   "why": "28.2 km apart at the closest point; build windows overlap by 31 months. Can share crews and equipment.",
-  "rank": 30
+  "rank": 28
  },
  {
   "id": "DESC_14__GPC_20793",
@@ -1330,7 +1244,7 @@
   "score": 42.2,
   "needs_location_check": false,
   "why": "3.2 km apart at the closest point; build windows 4.4 years apart. Can share site logistics: laydown yards, deliveries.",
-  "rank": 31
+  "rank": 29
  },
  {
   "id": "DESC_14__GPC_20794",
@@ -1373,7 +1287,7 @@
   "score": 42.2,
   "needs_location_check": false,
   "why": "3.2 km apart at the closest point; build windows 5.4 years apart. Can share site logistics: laydown yards, deliveries.",
-  "rank": 32
+  "rank": 30
  },
  {
   "id": "DESC_15__GPC_20793",
@@ -1416,7 +1330,7 @@
   "score": 42.2,
   "needs_location_check": false,
   "why": "3.2 km apart at the closest point; build windows 3.4 years apart. Can share site logistics: laydown yards, deliveries.",
-  "rank": 33
+  "rank": 31
  },
  {
   "id": "DESC_15__GPC_20794",
@@ -1459,7 +1373,7 @@
   "score": 42.2,
   "needs_location_check": false,
   "why": "3.2 km apart at the closest point; build windows 4.4 years apart. Can share site logistics: laydown yards, deliveries.",
-  "rank": 34
+  "rank": 32
  },
  {
   "id": "DESC_15__GPC_21116",
@@ -1502,7 +1416,7 @@
   "score": 42.0,
   "needs_location_check": false,
   "why": "27.5 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 35
+  "rank": 33
  },
  {
   "id": "DESC_22__GPC_20065",
@@ -1545,93 +1459,7 @@
   "score": 41.8,
   "needs_location_check": true,
   "why": "13.2 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 36
- },
- {
-  "id": "DESC_10__GPC_18889",
-  "a": "DESC_10",
-  "b": "GPC_18889",
-  "a_name": "Okatie-Bluffton 115kV: Rebuild",
-  "b_name": "JEFFERSON STREET#3 - NORTHWEST (WHITE) 115 KV RECONDUCTOR",
-  "closest_km": 28.92,
-  "closest_points": [
-   [
-    -80.934384,
-    32.279677
-   ],
-   [
-    -81.102062,
-    32.061734
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 28.936,
-  "center_mi": 17.98,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-06-01"
-  ],
-  "b_window": [
-   "2024-01-01",
-   "2025-12-01"
-  ],
-  "overlap_days": 517,
-  "window_gap_days": 0,
-  "isd_gap_days": 183,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.287,
-  "time_score": 0.869,
-  "score": 41.7,
-  "needs_location_check": true,
-  "why": "28.9 km apart at the closest point; build windows overlap by 17 months. Can share crews and equipment.",
-  "rank": 37
- },
- {
-  "id": "DESC_22__GPC_20989",
-  "a": "DESC_22",
-  "b": "GPC_20989",
-  "a_name": "Riverport Tap: Construct Tap",
-  "b_name": "SAV: RICE HOPE NEW AUTO TRANSFORMER",
-  "closest_km": 10.654,
-  "closest_points": [
-   [
-    -81.075835,
-    32.211321
-   ],
-   [
-    -81.18708,
-    32.22927
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 13.393,
-  "center_mi": 8.32,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-12-31"
-  ],
-  "b_window": [
-   "2025-06-01",
-   "2029-06-01"
-  ],
-  "overlap_days": 213,
-  "window_gap_days": 0,
-  "isd_gap_days": 1248,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.429,
-  "time_score": 0.597,
-  "score": 41.5,
-  "needs_location_check": true,
-  "why": "10.7 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 38
+  "rank": 34
  },
  {
   "id": "DESC_3__GPC_20065",
@@ -1673,51 +1501,8 @@
   "time_score": 0.396,
   "score": 40.3,
   "needs_location_check": false,
-  "why": "13.6 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 39
- },
- {
-  "id": "DESC_23__GPC_20989",
-  "a": "DESC_23",
-  "b": "GPC_20989",
-  "a_name": "Jasper \u2013 Okatie 230 kV #2: Construct",
-  "b_name": "SAV: RICE HOPE NEW AUTO TRANSFORMER",
-  "closest_km": 15.587,
-  "closest_points": [
-   [
-    -81.1246,
-    32.35912
-   ],
-   [
-    -81.187079,
-    32.22927
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 16.548,
-  "center_mi": 10.28,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-12-31"
-  ],
-  "b_window": [
-   "2025-06-01",
-   "2029-06-01"
-  ],
-  "overlap_days": 213,
-  "window_gap_days": 0,
-  "isd_gap_days": 1248,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.391,
-  "time_score": 0.597,
-  "score": 39.4,
-  "needs_location_check": true,
-  "why": "15.6 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 40
+  "why": "13.6 km apart at the closest point; build windows 5 months apart. Can share crews and equipment.",
+  "rank": 35
  },
  {
   "id": "DESC_22__GPC_19523",
@@ -1760,7 +1545,7 @@
   "score": 39.3,
   "needs_location_check": true,
   "why": "36.6 km apart at the closest point; build windows overlap by 28 months. Can share crews and equipment.",
-  "rank": 41
+  "rank": 36
  },
  {
   "id": "DESC_23__GPC_20783",
@@ -1803,7 +1588,7 @@
   "score": 39.2,
   "needs_location_check": false,
   "why": "29.6 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 42
+  "rank": 37
  },
  {
   "id": "DESC_7__GPC_20277",
@@ -1846,7 +1631,7 @@
   "score": 38.9,
   "needs_location_check": true,
   "why": "38.4 km apart at the closest point; build windows overlap by 24 months. Can share crews and equipment.",
-  "rank": 43
+  "rank": 38
  },
  {
   "id": "DESC_22__GPC_20783",
@@ -1889,7 +1674,7 @@
   "score": 38.4,
   "needs_location_check": true,
   "why": "17.7 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 44
+  "rank": 39
  },
  {
   "id": "DESC_15__GPC_14222",
@@ -1932,7 +1717,7 @@
   "score": 37.9,
   "needs_location_check": false,
   "why": "32.7 km apart at the closest point; build windows overlap by 5 months. Can share crews and equipment.",
-  "rank": 45
+  "rank": 40
  },
  {
   "id": "DESC_22__GPC_20407",
@@ -1975,7 +1760,7 @@
   "score": 37.9,
   "needs_location_check": true,
   "why": "19.0 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 46
+  "rank": 41
  },
  {
   "id": "DESC_10__GPC_20066",
@@ -2017,51 +1802,8 @@
   "time_score": 0.5,
   "score": 37.8,
   "needs_location_check": false,
-  "why": "25.7 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 47
- },
- {
-  "id": "DESC_3__GPC_18889",
-  "a": "DESC_3",
-  "b": "GPC_18889",
-  "a_name": "Okatie 230-115kV Substation, Jasper \u2013 Yemassee 230kV #1 Fold-in",
-  "b_name": "JEFFERSON STREET#3 - NORTHWEST (WHITE) 115 KV RECONDUCTOR",
-  "closest_km": 30.948,
-  "closest_points": [
-   [
-    -81.032495,
-    32.333758
-   ],
-   [
-    -81.102062,
-    32.061734
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 30.948,
-  "center_mi": 19.23,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2024-12-31"
-  ],
-  "b_window": [
-   "2024-01-01",
-   "2025-12-01"
-  ],
-  "overlap_days": 365,
-  "window_gap_days": 0,
-  "isd_gap_days": 335,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.271,
-  "time_score": 0.761,
-  "score": 37.6,
-  "needs_location_check": true,
-  "why": "30.9 km apart at the closest point; build windows overlap by 12 months. Can share crews and equipment.",
-  "rank": 48
+  "why": "25.7 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 42
  },
  {
   "id": "DESC_22__GPC_21023",
@@ -2103,51 +1845,8 @@
   "time_score": 0.499,
   "score": 35.5,
   "needs_location_check": true,
-  "why": "17.7 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 49
- },
- {
-  "id": "DESC_10__GPC_20989",
-  "a": "DESC_10",
-  "b": "GPC_20989",
-  "a_name": "Okatie-Bluffton 115kV: Rebuild",
-  "b_name": "SAV: RICE HOPE NEW AUTO TRANSFORMER",
-  "closest_km": 18.606,
-  "closest_points": [
-   [
-    -81.032495,
-    32.333758
-   ],
-   [
-    -81.187079,
-    32.22927
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 23.762,
-  "center_mi": 14.76,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-06-01"
-  ],
-  "b_window": [
-   "2025-06-01",
-   "2029-06-01"
-  ],
-  "overlap_days": 0,
-  "window_gap_days": 0,
-  "isd_gap_days": 1461,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.367,
-  "time_score": 0.5,
-  "score": 35.2,
-  "needs_location_check": true,
-  "why": "18.6 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 50
+  "why": "17.7 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 43
  },
  {
   "id": "DESC_10__GPC_20783",
@@ -2189,8 +1888,8 @@
   "time_score": 0.5,
   "score": 35.0,
   "needs_location_check": false,
-  "why": "31.1 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 51
+  "why": "31.1 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 44
  },
  {
   "id": "DESC_23__GPC_21023",
@@ -2232,8 +1931,8 @@
   "time_score": 0.499,
   "score": 35.0,
   "needs_location_check": false,
-  "why": "31.0 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 52
+  "why": "31.0 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 45
  },
  {
   "id": "DESC_6__GPC_20277",
@@ -2276,7 +1975,7 @@
   "score": 34.0,
   "needs_location_check": true,
   "why": "38.4 km apart at the closest point; build windows overlap by 12 months. Can share crews and equipment.",
-  "rank": 53
+  "rank": 46
  },
  {
   "id": "DESC_14__GPC_21116",
@@ -2318,8 +2017,8 @@
   "time_score": 0.396,
   "score": 33.2,
   "needs_location_check": false,
-  "why": "27.5 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 54
+  "why": "27.5 km apart at the closest point; build windows 5 months apart. Can share crews and equipment.",
+  "rank": 47
  },
  {
   "id": "DESC_3__GPC_20066",
@@ -2361,51 +2060,8 @@
   "time_score": 0.396,
   "score": 32.1,
   "needs_location_check": false,
-  "why": "29.7 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 55
- },
- {
-  "id": "DESC_3__GPC_20989",
-  "a": "DESC_3",
-  "b": "GPC_20989",
-  "a_name": "Okatie 230-115kV Substation, Jasper \u2013 Yemassee 230kV #1 Fold-in",
-  "b_name": "SAV: RICE HOPE NEW AUTO TRANSFORMER",
-  "closest_km": 18.606,
-  "closest_points": [
-   [
-    -81.032495,
-    32.333758
-   ],
-   [
-    -81.187079,
-    32.22927
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 18.606,
-  "center_mi": 11.56,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2024-12-31"
-  ],
-  "b_window": [
-   "2025-06-01",
-   "2029-06-01"
-  ],
-  "overlap_days": 0,
-  "window_gap_days": 152,
-  "isd_gap_days": 1613,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.367,
-  "time_score": 0.396,
-  "score": 32.1,
-  "needs_location_check": true,
-  "why": "18.6 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 56
+  "why": "29.7 km apart at the closest point; build windows 5 months apart. Can share crews and equipment.",
+  "rank": 48
  },
  {
   "id": "DESC_23__GPC_20407",
@@ -2448,7 +2104,7 @@
   "score": 31.9,
   "needs_location_check": true,
   "why": "32.8 km apart at the closest point; build windows overlap by 7 months. Can share crews and equipment.",
-  "rank": 57
+  "rank": 49
  },
  {
   "id": "DESC_3__GPC_20783",
@@ -2490,8 +2146,8 @@
   "time_score": 0.396,
   "score": 31.4,
   "needs_location_check": false,
-  "why": "31.1 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 58
+  "why": "31.1 km apart at the closest point; build windows 5 months apart. Can share crews and equipment.",
+  "rank": 50
  },
  {
   "id": "DESC_10__GPC_20407",
@@ -2533,8 +2189,8 @@
   "time_score": 0.5,
   "score": 30.5,
   "needs_location_check": true,
-  "why": "29.4 km apart at the closest point; build windows 0.0 years apart. Can share crews and equipment.",
-  "rank": 59
+  "why": "29.4 km apart at the closest point; build windows are back to back. Can share crews and equipment.",
+  "rank": 51
  },
  {
   "id": "DESC_31__GPC_14222",
@@ -2576,8 +2232,8 @@
   "time_score": 0.354,
   "score": 30.2,
   "needs_location_check": false,
-  "why": "30.6 km apart at the closest point; build windows 0.6 years apart. Can share crews and equipment.",
-  "rank": 60
+  "why": "30.6 km apart at the closest point; build windows 7 months apart. Can share crews and equipment.",
+  "rank": 52
  },
  {
   "id": "DESC_10__GPC_21023",
@@ -2619,8 +2275,8 @@
   "time_score": 0.354,
   "score": 29.8,
   "needs_location_check": false,
-  "why": "31.3 km apart at the closest point; build windows 0.6 years apart. Can share crews and equipment.",
-  "rank": 61
+  "why": "31.3 km apart at the closest point; build windows 7 months apart. Can share crews and equipment.",
+  "rank": 53
  },
  {
   "id": "DESC_14__GPC_14222",
@@ -2662,8 +2318,8 @@
   "time_score": 0.354,
   "score": 29.1,
   "needs_location_check": false,
-  "why": "32.7 km apart at the closest point; build windows 0.6 years apart. Can share crews and equipment.",
-  "rank": 62
+  "why": "32.7 km apart at the closest point; build windows 7 months apart. Can share crews and equipment.",
+  "rank": 54
  },
  {
   "id": "DESC_14__GPC_17993",
@@ -2706,7 +2362,7 @@
   "score": 28.6,
   "needs_location_check": false,
   "why": "9.3 km apart at the closest point; build windows 6.0 years apart. Can share crews and equipment.",
-  "rank": 63
+  "rank": 55
  },
  {
   "id": "DESC_15__GPC_17993",
@@ -2749,7 +2405,7 @@
   "score": 28.6,
   "needs_location_check": false,
   "why": "9.3 km apart at the closest point; build windows 5.0 years apart. Can share crews and equipment.",
-  "rank": 64
+  "rank": 56
  },
  {
   "id": "DESC_22__GPC_21006",
@@ -2792,7 +2448,7 @@
   "score": 27.1,
   "needs_location_check": true,
   "why": "20.0 km apart at the closest point; build windows 1.0 years apart. Can share crews and equipment.",
-  "rank": 65
+  "rank": 57
  },
  {
   "id": "DESC_31__GPC_17993",
@@ -2835,7 +2491,7 @@
   "score": 26.9,
   "needs_location_check": false,
   "why": "12.6 km apart at the closest point; build windows 6.0 years apart. Can share crews and equipment.",
-  "rank": 66
+  "rank": 58
  },
  {
   "id": "DESC_3__GPC_21023",
@@ -2878,7 +2534,7 @@
   "score": 26.1,
   "needs_location_check": false,
   "why": "31.5 km apart at the closest point; build windows 1.0 years apart. Can share crews and equipment.",
-  "rank": 67
+  "rank": 59
  },
  {
   "id": "DESC_3__GPC_20407",
@@ -2920,8 +2576,8 @@
   "time_score": 0.396,
   "score": 25.9,
   "needs_location_check": true,
-  "why": "32.8 km apart at the closest point; build windows 0.4 years apart. Can share crews and equipment.",
-  "rank": 68
+  "why": "32.8 km apart at the closest point; build windows 5 months apart. Can share crews and equipment.",
+  "rank": 60
  },
  {
   "id": "DESC_23__GPC_21006",
@@ -2964,7 +2620,7 @@
   "score": 24.7,
   "needs_location_check": false,
   "why": "34.2 km apart at the closest point; build windows 1.0 years apart. Can share crews and equipment.",
-  "rank": 69
+  "rank": 61
  },
  {
   "id": "DESC_43__GPC_20793",
@@ -3007,7 +2663,7 @@
   "score": 24.7,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 1.4 years apart. Can share crews and equipment.",
-  "rank": 70
+  "rank": 62
  },
  {
   "id": "DESC_10__GPC_21006",
@@ -3050,7 +2706,7 @@
   "score": 20.8,
   "needs_location_check": false,
   "why": "31.7 km apart at the closest point; build windows 1.6 years apart. Can share crews and equipment.",
-  "rank": 71
+  "rank": 63
  },
  {
   "id": "DESC_22__GPC_20784",
@@ -3093,7 +2749,7 @@
   "score": 20.4,
   "needs_location_check": true,
   "why": "18.3 km apart at the closest point; build windows 3.4 years apart. Can share crews and equipment.",
-  "rank": 72
+  "rank": 64
  },
  {
   "id": "DESC_35__GPC_20793",
@@ -3136,7 +2792,7 @@
   "score": 19.6,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 2.8 years apart. Can share crews and equipment.",
-  "rank": 73
+  "rank": 65
  },
  {
   "id": "DESC_35__GPC_20794",
@@ -3179,7 +2835,7 @@
   "score": 19.6,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 3.8 years apart. Can share crews and equipment.",
-  "rank": 74
+  "rank": 66
  },
  {
   "id": "DESC_35__GPC_17993",
@@ -3222,7 +2878,7 @@
   "score": 19.6,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 4.4 years apart. Can share crews and equipment.",
-  "rank": 75
+  "rank": 67
  },
  {
   "id": "DESC_43__GPC_20794",
@@ -3265,7 +2921,7 @@
   "score": 19.6,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 2.4 years apart. Can share crews and equipment.",
-  "rank": 76
+  "rank": 68
  },
  {
   "id": "DESC_43__GPC_17993",
@@ -3308,7 +2964,7 @@
   "score": 19.6,
   "needs_location_check": false,
   "why": "27.0 km apart at the closest point; build windows 3.0 years apart. Can share crews and equipment.",
-  "rank": 77
+  "rank": 69
  },
  {
   "id": "DESC_23__GPC_20784",
@@ -3351,7 +3007,7 @@
   "score": 18.3,
   "needs_location_check": false,
   "why": "29.5 km apart at the closest point; build windows 3.4 years apart. Can share crews and equipment.",
-  "rank": 78
+  "rank": 70
  },
  {
   "id": "DESC_3__GPC_20784",
@@ -3394,7 +3050,7 @@
   "score": 17.5,
   "needs_location_check": false,
   "why": "31.1 km apart at the closest point; build windows 4.4 years apart. Can share crews and equipment.",
-  "rank": 79
+  "rank": 71
  },
  {
   "id": "DESC_10__GPC_20784",
@@ -3437,7 +3093,7 @@
   "score": 17.5,
   "needs_location_check": false,
   "why": "31.1 km apart at the closest point; build windows 4.0 years apart. Can share crews and equipment.",
-  "rank": 80
+  "rank": 72
  },
  {
   "id": "DESC_23__GPC_20796",
@@ -3480,50 +3136,7 @@
   "score": 16.9,
   "needs_location_check": false,
   "why": "32.2 km apart at the closest point; build windows 4.4 years apart. Can share crews and equipment.",
-  "rank": 81
- },
- {
-  "id": "DESC_10__GPC_13166",
-  "a": "DESC_10",
-  "b": "GPC_13166",
-  "a_name": "Okatie-Bluffton 115kV: Rebuild",
-  "b_name": "FIRST AVENUE - NORTH COLUMBUS 115KV LINE REBUILD",
-  "closest_km": 27.219,
-  "closest_points": [
-   [
-    -80.853384,
-    32.235027
-   ],
-   [
-    -80.850921,
-    31.990251
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 33.835,
-  "center_mi": 21.02,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-06-01"
-  ],
-  "b_window": [
-   "2028-01-01",
-   "2028-12-01"
-  ],
-  "overlap_days": 0,
-  "window_gap_days": 944,
-  "isd_gap_days": 1279,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.3,
-  "time_score": 0.0,
-  "score": 16.6,
-  "needs_location_check": true,
-  "why": "27.2 km apart at the closest point; build windows 2.6 years apart. Can share crews and equipment.",
-  "rank": 82
+  "rank": 73
  },
  {
   "id": "DESC_22__GPC_20796",
@@ -3566,7 +3179,7 @@
   "score": 16.1,
   "needs_location_check": true,
   "why": "28.2 km apart at the closest point; build windows 4.4 years apart. Can share crews and equipment.",
-  "rank": 83
+  "rank": 74
  },
  {
   "id": "DESC_22__GPC_20787",
@@ -3609,7 +3222,7 @@
   "score": 16.1,
   "needs_location_check": true,
   "why": "28.2 km apart at the closest point; build windows 4.4 years apart. Can share crews and equipment.",
-  "rank": 84
+  "rank": 75
  },
  {
   "id": "DESC_3__GPC_21006",
@@ -3652,7 +3265,7 @@
   "score": 15.9,
   "needs_location_check": false,
   "why": "34.2 km apart at the closest point; build windows 2.0 years apart. Can share crews and equipment.",
-  "rank": 85
+  "rank": 76
  },
  {
   "id": "DESC_3__GPC_20796",
@@ -3695,7 +3308,7 @@
   "score": 14.4,
   "needs_location_check": false,
   "why": "37.3 km apart at the closest point; build windows 5.4 years apart. Can share crews and equipment.",
-  "rank": 86
+  "rank": 77
  },
  {
   "id": "DESC_10__GPC_20796",
@@ -3738,49 +3351,6 @@
   "score": 14.4,
   "needs_location_check": false,
   "why": "37.3 km apart at the closest point; build windows 5.0 years apart. Can share crews and equipment.",
-  "rank": 87
- },
- {
-  "id": "DESC_22__GPC_13166",
-  "a": "DESC_22",
-  "b": "GPC_13166",
-  "a_name": "Riverport Tap: Construct Tap",
-  "b_name": "FIRST AVENUE - NORTH COLUMBUS 115KV LINE REBUILD",
-  "closest_km": 32.452,
-  "closest_points": [
-   [
-    -81.075835,
-    32.211321
-   ],
-   [
-    -80.850921,
-    31.990251
-   ]
-  ],
-  "lines_cross": false,
-  "center_km": 36.763,
-  "center_mi": 22.84,
-  "flagged_by_center_method": true,
-  "tier": 4,
-  "tier_label": "Under 40 km",
-  "can_share": "Can share crews and equipment",
-  "a_window": [
-   "2023-01-01",
-   "2025-12-31"
-  ],
-  "b_window": [
-   "2028-01-01",
-   "2028-12-01"
-  ],
-  "overlap_days": 0,
-  "window_gap_days": 731,
-  "isd_gap_days": 1066,
-  "shared_corridor_km": 0.0,
-  "geo_score": 0.259,
-  "time_score": 0.0,
-  "score": 14.3,
-  "needs_location_check": true,
-  "why": "32.5 km apart at the closest point; build windows 2.0 years apart. Can share crews and equipment.",
-  "rank": 88
+  "rank": 78
  }
 ]

@@ -31,3 +31,6 @@ desktop.ini
 # MapLibre worker files, copied from node_modules by `npm run sync-maplibre` (web/package.json)
 web/public/maplibre/
 web/dist/
+
+# Blender auto-backups
+*.blend1

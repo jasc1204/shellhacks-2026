@@ -1,16 +1,16 @@
 {
  "desc_projects": 44,
  "gpc_projects": 208,
- "desc_mapped": 43,
- "gpc_mapped": 189,
- "pairs_flagged": 88,
+ "desc_mapped": 42,
+ "gpc_mapped": 175,
+ "pairs_flagged": 78,
  "by_tier": {
   "1": 2,
   "2": 1,
   "3": 7,
-  "4": 78
+  "4": 68
  },
- "center_method_flags": 83,
+ "center_method_flags": 73,
  "caught_only_by_closest_points": [
   "DESC_23__GPC_19523",
   "DESC_7__GPC_20277",

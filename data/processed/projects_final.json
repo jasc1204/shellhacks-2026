@@ -1163,32 +1163,11 @@
   "need": "This project is required to address end of life and maintenance issues on these transformers.",
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 17,
-  "loc_a": {
-   "lat": 34.0063194,
-   "lon": -81.0522098,
-   "osm_id": "way/158977654",
-   "osm_name": "Williams Street, Elmwood, Columbia, Richland County, South Carolina, 29202, Unit",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/unclassified (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -81.0522098,
-    34.0063194
-   ]
-  },
-  "center": [
-   -81.0522098,
-   34.0063194
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-01-01",
-  "window_end": "2028-12-31",
-  "window_basis": "spending before 2024 (DESC budget 'Previous' column)"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "DESC_18",
@@ -4370,32 +4349,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 71,
   "source_page": 241,
-  "loc_a": {
-   "lat": 33.6172665,
-   "lon": -83.8425662,
-   "osm_id": "way/543481998",
-   "osm_name": "Alcovy Road, Covington, Newton County, Georgia, 30014, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -83.8425662,
-    33.6172665
-   ]
-  },
-  "center": [
-   -83.8425662,
-   33.6172665
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-06-01",
-  "window_end": "2025-06-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_13787",
@@ -4811,32 +4769,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 80,
   "source_page": 250,
-  "loc_a": {
-   "lat": 32.0617337,
-   "lon": -81.1020623,
-   "osm_id": "way/9082406",
-   "osm_name": "Jefferson Street, Savannah Historic District, Savannah, Chatham County, Georgia,",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -81.1020623,
-    32.0617337
-   ]
-  },
-  "center": [
-   -81.1020623,
-   32.0617337
-  ],
-  "location_confidence": "low",
-  "window_start": "2024-01-01",
-  "window_end": "2025-12-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20152",
@@ -5183,31 +5120,10 @@
   "plan_page": 88,
   "source_page": 258,
   "loc_a": null,
-  "loc_b": {
-   "lat": 32.5593178,
-   "lon": -84.8245144,
-   "osm_id": "way/9413851",
-   "osm_name": "Garrett Road, Columbus, Muscogee County, Georgia, 31820, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.8245144,
-    32.5593178
-   ]
-  },
-  "center": [
-   -84.8245144,
-   32.5593178
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-04-30",
-  "window_end": "2026-06-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20216",
@@ -5230,31 +5146,10 @@
   "plan_page": 89,
   "source_page": 259,
   "loc_a": null,
-  "loc_b": {
-   "lat": 33.6036902,
-   "lon": -84.5516004,
-   "osm_id": "way/1444515092",
-   "osm_name": "Stonewall Tell Road, Stonewall, South Fulton, Fulton County, Georgia, 30349, Uni",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.5516004,
-    33.6036902
-   ]
-  },
-  "center": [
-   -84.5516004,
-   33.6036902
-  ],
-  "location_confidence": "low",
-  "window_start": "2025-01-01",
-  "window_end": "2026-06-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_18679",
@@ -6984,31 +6879,10 @@
   "plan_page": 122,
   "source_page": 292,
   "loc_a": null,
-  "loc_b": {
-   "lat": 33.5141185,
-   "lon": -84.6118181,
-   "osm_id": "way/42004321",
-   "osm_name": "Gullatt Road, Fairburn, Fulton County, Georgia, 30268, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.6118181,
-    33.5141185
-   ]
-  },
-  "center": [
-   -84.6118181,
-   33.5141185
-  ],
-  "location_confidence": "low",
-  "window_start": "2024-06-01",
-  "window_end": "2027-06-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_18736",
@@ -7411,32 +7285,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 131,
   "source_page": 301,
-  "loc_a": {
-   "lat": 33.0918951,
-   "lon": -83.2256872,
-   "osm_id": "way/9010021",
-   "osm_name": "East Walton Street, Milledgeville, Baldwin County, Georgia, 31061, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -83.2256872,
-    33.0918951
-   ]
-  },
-  "center": [
-   -83.2256872,
-   33.0918951
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-06-01",
-  "window_end": "2027-06-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20505",
@@ -8408,31 +8261,10 @@
   "plan_page": 150,
   "source_page": 320,
   "loc_a": null,
-  "loc_b": {
-   "lat": 31.7059341,
-   "lon": -83.2476923,
-   "osm_id": "way/9019352",
-   "osm_name": "East Roanoke Drive, Fitzgerald, Ben Hill County, Georgia, 31750, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/secondary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -83.2476923,
-    31.7059341
-   ]
-  },
-  "center": [
-   -83.2476923,
-   31.7059341
-  ],
-  "location_confidence": "low",
-  "window_start": "2025-06-01",
-  "window_end": "2027-12-31",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_19997",
@@ -9439,32 +9271,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 169,
   "source_page": 339,
-  "loc_a": {
-   "lat": 31.9902512,
-   "lon": -80.8509207,
-   "osm_id": "way/9093148",
-   "osm_name": "First Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -80.8509207,
-    31.9902512
-   ]
-  },
-  "center": [
-   -80.8509207,
-   31.9902512
-  ],
-  "location_confidence": "low",
-  "window_start": "2028-01-01",
-  "window_end": "2028-12-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20586",
@@ -9489,32 +9300,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 170,
   "source_page": 340,
-  "loc_a": {
-   "lat": 32.5455833,
-   "lon": -82.908126,
-   "osm_id": "way/9364040",
-   "osm_name": "North Jefferson Street, Dublin, Laurens County, Georgia, 31921, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/primary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -82.908126,
-    32.5455833
-   ]
-  },
-  "center": [
-   -82.908126,
-   32.5455833
-  ],
-  "location_confidence": "low",
-  "window_start": "2023-11-01",
-  "window_end": "2028-12-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_21062",
@@ -9798,27 +9588,27 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 175,
   "source_page": 345,
-  "loc_a": null,
-  "loc_b": {
-   "lat": 33.7688036,
-   "lon": -84.5913101,
-   "osm_id": "way/46218456",
-   "osm_name": "Factory Shoals Road Southwest, Mableton, Cobb County, Georgia, 30168, United Sta",
+  "loc_a": {
+   "lat": 34.6703655,
+   "lon": -84.2421386,
+   "osm_id": "node/358711591",
+   "osm_name": "Buzzard Roost, Fannin County, Georgia, United States",
    "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
+   "method": "approximate: Nominatim natural/peak (town/street level, not the substation itself)",
    "confidence": "low",
    "n_candidates": 0
   },
+  "loc_b": null,
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -84.5913101,
-    33.7688036
+    -84.2421386,
+    34.6703655
    ]
   },
   "center": [
-   -84.5913101,
-   33.7688036
+   -84.2421386,
+   34.6703655
   ],
   "location_confidence": "low",
   "window_start": "2026-06-01",
@@ -10969,32 +10759,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 194,
   "source_page": 364,
-  "loc_a": {
-   "lat": 32.2292702,
-   "lon": -81.1870795,
-   "osm_id": "way/9085353",
-   "osm_name": "Rice Hope Plantation Road, Port Wentworth, Chatham County, Georgia, 31322, Unite",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -81.1870795,
-    32.2292702
-   ]
-  },
-  "center": [
-   -81.1870795,
-   32.2292702
-  ],
-  "location_confidence": "low",
-  "window_start": "2025-06-01",
-  "window_end": "2029-06-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_13628",
@@ -12026,33 +11795,17 @@
    "confidence": "low",
    "n_candidates": 0
   },
-  "loc_b": {
-   "lat": 34.7294377,
-   "lon": -85.0013674,
-   "osm_id": "way/9540388",
-   "osm_name": "Cavender Drive, Whitfield County, Georgia, 30720, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_b": null,
   "geometry": {
-   "type": "LineString",
+   "type": "Point",
    "coordinates": [
-    [
-     -84.2421386,
-     34.6703655
-    ],
-    [
-     -85.0013674,
-     34.7294377
-    ]
+    -84.2421386,
+    34.6703655
    ]
   },
-  "straight_length_km": 69.72,
   "center": [
-   -84.62175300000001,
-   34.699901600000004
+   -84.2421386,
+   34.6703655
   ],
   "location_confidence": "low",
   "window_start": "2026-06-01",
@@ -12082,32 +11835,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 215,
   "source_page": 385,
-  "loc_a": {
-   "lat": 34.7294377,
-   "lon": -85.0013674,
-   "osm_id": "way/9540388",
-   "osm_name": "Cavender Drive, Whitfield County, Georgia, 30720, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -85.0013674,
-    34.7294377
-   ]
-  },
-  "center": [
-   -85.0013674,
-   34.7294377
-  ],
-  "location_confidence": "low",
-  "window_start": "2026-06-01",
-  "window_end": "2030-06-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20375",
@@ -12693,31 +12425,10 @@
   "plan_page": 227,
   "source_page": 397,
   "loc_a": null,
-  "loc_b": {
-   "lat": 33.741366,
-   "lon": -84.5873303,
-   "osm_id": "way/1315012527",
-   "osm_name": "Thornton Road, Douglas County, Georgia, 30366, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/trunk (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -84.5873303,
-    33.741366
-   ]
-  },
-  "center": [
-   -84.5873303,
-   33.741366
-  ],
-  "location_confidence": "low",
-  "window_start": "2027-06-01",
-  "window_end": "2030-06-01",
-  "window_basis": "published start date"
+  "loc_b": null,
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20160",
@@ -12835,32 +12546,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 230,
   "source_page": 400,
-  "loc_a": {
-   "lat": 33.3017738,
-   "lon": -83.4039621,
-   "osm_id": "way/9442031",
-   "osm_name": "Glenwood Springs Road, Eatonton, Putnam County, Georgia, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/tertiary (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -83.4039621,
-    33.3017738
-   ]
-  },
-  "center": [
-   -83.4039621,
-   33.3017738
-  ],
-  "location_confidence": "low",
-  "window_start": "2028-01-01",
-  "window_end": "2030-12-31",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_20690",
@@ -13130,32 +12820,11 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 235,
   "source_page": 405,
-  "loc_a": {
-   "lat": 32.8308237,
-   "lon": -83.6614181,
-   "osm_id": "way/9029735",
-   "osm_name": "Pio Nono Lane, Unionville, Macon, Bibb County, Georgia, 31204, United States",
-   "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
-   "n_candidates": 0
-  },
+  "loc_a": null,
   "loc_b": null,
-  "geometry": {
-   "type": "Point",
-   "coordinates": [
-    -83.6614181,
-    32.8308237
-   ]
-  },
-  "center": [
-   -83.6614181,
-   32.8308237
-  ],
-  "location_confidence": "low",
-  "window_start": "2025-01-01",
-  "window_end": "2031-06-01",
-  "window_basis": "published start date"
+  "geometry": null,
+  "center": null,
+  "location_confidence": "none"
  },
  {
   "project_id": "GPC_21114",
