@@ -1,0 +1,6 @@
+{
+  "_how": "Copy this file to tokens.local.json (git-ignored). Free Cesium ion account: cesium.com/ion -> Access Tokens -> copy the Default token. Or use a Google Map Tiles API key instead of the ion token.",
+  "cesiumIonToken": "",
+  "googleMapsKey": "",
+  "geoidOffset": -30
+}

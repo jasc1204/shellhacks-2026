@@ -1,0 +1,2 @@
+# local secrets for the photoreal mode (Cesium ion token / Google Map Tiles key)
+viewer/tokens.local.json
