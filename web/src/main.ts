@@ -16,7 +16,41 @@ const COLOR: Record<Utility, string> = { DESC: '#4dd8ff', GPC: '#3b7dff' }
 const HOT = '#ffd166'
 const ICE = '#eef4ff'
 const UTIL_NAME: Record<Utility, string> = { DESC: 'DOMINION ENERGY SC', GPC: 'GEORGIA POWER' }
-const TIER_SHORT: Record<number, string> = { 1: 'T1 TOUCHING', 2: 'T2 < 1.6 KM', 3: 'T3 < 8 KM', 4: 'T4 < 40 KM' }
+const TIER_SHORT: Record<number, string> = { 1: 'T1 TOUCHING', 2: 'T2 UNDER 1.6 KM', 3: 'T3 UNDER 8 KM', 4: 'T4 UNDER 40 KM' }
+
+// The spec's two overlap signals, as three views of the same overlaps (the 3D world uses the same design).
+// GEOGRAPHIC: every pair within 40 km, by tier. TIMELINE: the same pairs by build timing.
+// BOTH: the spec's "used together", close enough to share (tier 1 to 3) AND timed together (same window or under 6 months).
+type Mode = 'geo' | 'time' | 'both'
+type Bucket = 'same' | 'u6' | 'u2y' | 'far'
+const MODES: { key: Mode; label: string; tip: string }[] = [
+  { key: 'geo', label: 'GEOGRAPHIC', tip: 'Primary signal: every pair within 40 km, measured between the closest points' },
+  { key: 'time', label: 'TIMELINE', tip: 'Secondary signal: the same overlaps, grouped by how their build windows line up' },
+  { key: 'both', label: 'BOTH', tip: 'Both signals used together: close enough to share, and building at the same time' },
+]
+const TIER_WORDS: Record<number, string> = { 1: 'TOUCHING', 2: 'UNDER 1.6 KM', 3: 'UNDER 8 KM', 4: 'UNDER 40 KM' }
+const TIER_SHARE: Record<number, string> = {
+  1: 'Must coordinate outage timing and crossing structures',
+  2: 'Can share the land itself: right-of-way, access roads, permits',
+  3: 'Can share site logistics: laydown yards, deliveries',
+  4: 'Can share crews and equipment',
+}
+const BUCKETS: { key: Bucket; label: string; tip: string }[] = [
+  { key: 'same', label: 'SAME WINDOW', tip: 'Build windows overlap: crews and equipment can be shared as planned' },
+  { key: 'u6', label: 'UNDER 6 MONTHS APART', tip: 'Back to back or close: a small schedule shift lines them up' },
+  { key: 'u2y', label: 'UNDER 2 YEARS APART', tip: 'Sharing would take a real schedule change' },
+  { key: 'far', label: '2 YEARS OR MORE', tip: 'Far apart in time: close on the map, but built years apart' },
+]
+const bucketOf = (o: Overlap): Bucket =>
+  o.overlap_days > 0 ? 'same' : o.window_gap_days < 183 ? 'u6' : o.window_gap_days < 730 ? 'u2y' : 'far'
+const isBoth = (o: Overlap) => o.tier <= 3 && (o.overlap_days > 0 || o.window_gap_days < 183)
+// Spec order: closer tiers first (touching leads), then build timing, then distance. The pipeline already ranks its
+// overlaps this way, so those keep their exported rank; your own projects' overlaps are placed with the pipeline's key:
+// (tier, -time_score, window_gap_days, closest_km, needs_location_check, id).
+const pipelineKey = (x: Overlap, y: Overlap) =>
+  x.tier - y.tier || y.time_score - x.time_score || x.window_gap_days - y.window_gap_days || x.closest_km - y.closest_km ||
+  +x.needs_location_check - +y.needs_location_check || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0)
+const specOrder = (x: Overlap, y: Overlap) => (!x.user && !y.user ? x.rank - y.rank : pipelineKey(x, y))
 // Sperry's starter sample (Projects_Overlaps.xlsx): their 6 overlaps, center distance in miles, in-service gap in days.
 const SPERRY_SAMPLE = [
   { id: 'OVL_1', a: 'DESC_31', b: 'GPC_20793', mi: 4.09, gap: 3074 },
@@ -32,7 +66,8 @@ const LAYER_GROUPS: { key: string; label: string; swatch: string; layers: string
   { key: 'desc', label: 'Dominion Energy SC', swatch: `<i style="background:${COLOR.DESC}"></i>`, layers: ['desc-lines', 'desc-points'] },
   { key: 'gpc', label: 'Georgia Power', swatch: '<i class="dash"></i>', layers: ['gpc-lines', 'gpc-points'] },
   { key: 'user', label: 'Your projects', swatch: '<i class="user"></i>', layers: ['user-glow', 'user-lines', 'user-points'] },
-  { key: 'overlaps', label: 'Overlaps', swatch: `<i style="background:${HOT};box-shadow:0 0 8px ${HOT}"></i>`, layers: ['conn-glow', 'connectors', 'conn-ends', 'conn-sel'] },
+  { key: 'overlaps', label: 'Overlaps', swatch: `<i style="background:${HOT};box-shadow:0 0 8px ${HOT}"></i>`,
+    layers: ['conn-glow', 'connectors', 'conn-ends', 'conn-sel', 'touch-halo', 'touch-ring', 'touch-core', 'touch-sel', 'touch-hit'] },
   { key: 'grid', label: 'Existing grid (OSM)', swatch: '<i style="background:#27406f"></i>', layers: ['backdrop'] },
   { key: 'ends', label: 'Line end points', swatch: '<i class="dot"></i>', layers: ['endpoints'] },
   { key: 'labels', label: 'Place names', swatch: '<i style="background:#7286a4;height:2px"></i>', layers: [] },
@@ -41,8 +76,10 @@ const UI_KEY = 'gridlock.ui.v1'
 
 const state = {
   method: 'closest' as Method,
-  tiers: new Set([1, 2, 3, 4]),
-  concurrentOnly: false,
+  mode: 'geo' as Mode,
+  geoTiers: new Set([1, 2, 3, 4]),
+  timeBuckets: new Set<Bucket>(['same', 'u6', 'u2y', 'far']),
+  bothTiers: new Set([1, 2, 3]),
   selected: null as string | null,
   cost: { mobilizationPct: 3, easementPerAcre: 15000, rowWidthM: 0 },
   satellite: false,
@@ -63,8 +100,6 @@ let meta: Meta
 let levels: Level[] = []
 let levelOf: Record<string, { level: string; title: string }> = {}
 const WORLD_VIEWER = `${import.meta.env.BASE_URL}world3d/viewer/`
-type Clip = { id: string; file: string; poster?: string }
-let clips: Record<string, Clip> = {}  // pre-rendered Blender fly-ins by overlap id (public/clips/manifest.json)
 let backdropData: any = null
 let endpointsData: any = null
 let draft: LonLat[] = []
@@ -86,18 +121,13 @@ async function load() {
   backdropData = bd
   endpointsData = ep
   projects = p.features
-  overlaps = o
+  overlaps = [...o].sort((x: Overlap, y: Overlap) => x.rank - y.rank)  // the pipeline's rank is the spec order
   meta = m
   // The 3D world is optional: without it the map works the same, just without "View in 3D".
   try {
     levels = await fetch(`${import.meta.env.BASE_URL}world3d/build/levels.json`).then((r) => (r.ok ? r.json() : []))
     for (const l of levels) for (const id of l.overlap_ids) levelOf[id] = { level: l.level, title: l.title }
   } catch { levels = []; levelOf = {} }
-  // So are the Blender fly-ins: no manifest, no WATCH button. (In dev a missing file comes back as HTML, which json() rejects.)
-  try {
-    const cm = await fetch(`${import.meta.env.BASE_URL}clips/manifest.json`).then((r) => (r.ok ? r.json() : { clips: [] }))
-    for (const c of cm.clips ?? []) clips[c.id] = c
-  } catch { clips = {} }
   try { Object.assign(state, pickUi(JSON.parse(localStorage.getItem(UI_KEY) || '{}'))) } catch { /* defaults */ }
   state.user = loadUserProjects()
   recomputeUserOverlaps(false)
@@ -108,11 +138,20 @@ function pickUi(v: any) {
   if (typeof v.satellite === 'boolean') out.satellite = v.satellite
   if (typeof v.view3d === 'boolean') out.view3d = v.view3d
   if (v.layers && typeof v.layers === 'object') out.layers = { ...state.layers, ...v.layers }
+  if (MODES.some((m) => m.key === v.mode)) out.mode = v.mode
+  const nums = (a: unknown, ok: number[]) => (Array.isArray(a) ? new Set(a.filter((t) => ok.includes(t))) : null)
+  const gt = nums(v.geoTiers, [1, 2, 3, 4]), bt = nums(v.bothTiers, [1, 2, 3])
+  if (gt) out.geoTiers = gt
+  if (bt) out.bothTiers = bt
+  if (Array.isArray(v.timeBuckets)) out.timeBuckets = new Set(v.timeBuckets.filter((b: any) => BUCKETS.some((x) => x.key === b)))
   return out
 }
 
 function saveUi() {
-  try { localStorage.setItem(UI_KEY, JSON.stringify({ satellite: state.satellite, view3d: state.view3d, layers: state.layers })) } catch { /* ignore */ }
+  try {
+    localStorage.setItem(UI_KEY, JSON.stringify({ satellite: state.satellite, view3d: state.view3d, layers: state.layers,
+      mode: state.mode, geoTiers: [...state.geoTiers], timeBuckets: [...state.timeBuckets], bothTiers: [...state.bothTiers] }))
+  } catch { /* ignore */ }
 }
 
 /** Score every user project against the other utility's projects (and other user projects), same rules as the pipeline. */
@@ -127,7 +166,7 @@ function recomputeUserOverlaps(save = true) {
       for (const d of byUtil('DESC', projects)) { const o = scorePair(d, uf); if (o) out.push(o) }
     }
   }
-  out.sort((x, y) => y.score - x.score)
+  out.sort(pipelineKey)
   out.forEach((o, i) => { o.rank = i + 1; o.user = true })
   userOverlaps = out
   for (const uf of userFeatures) {
@@ -139,25 +178,64 @@ function recomputeUserOverlaps(save = true) {
   if (save) saveUserState(state.user, userOverlaps)
 }
 
-function visibleOverlaps(): Overlap[] {
-  return allOverlaps().filter((o) =>
-    state.tiers.has(o.tier) &&
-    (!state.concurrentOnly || o.overlap_days > 0) &&
-    (state.method === 'closest' || o.flagged_by_center_method))
+/** Every overlap the current distance method flags (the base set the three filter views split up). */
+function methodOverlaps(): Overlap[] {
+  return allOverlaps().filter((o) => state.method === 'closest' || o.flagged_by_center_method)
 }
+
+/** The base set of a view, before its sub-buttons: BOTH keeps only the pairs that are close AND timed together. */
+function modeBase(mode: Mode = state.mode): Overlap[] {
+  const all = methodOverlaps()
+  return mode === 'both' ? all.filter(isBoth) : all
+}
+
+function passesSub(o: Overlap): boolean {
+  if (state.mode === 'geo') return state.geoTiers.has(o.tier)
+  if (state.mode === 'time') return state.timeBuckets.has(bucketOf(o))
+  return state.bothTiers.has(o.tier)
+}
+
+function visibleOverlaps(): Overlap[] {
+  return modeBase().filter(passesSub)
+}
+
+const connectorEnds = (o: Overlap): [LonLat, LonLat] =>
+  state.method === 'closest' ? o.closest_points as [LonLat, LonLat] : [centerOf(byId[o.a]), centerOf(byId[o.b])]
+const isTouchingPoint = ([p, q]: [LonLat, LonLat]) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 1e-6
 
 function connectorGeoJSON(list: Overlap[]) {
   return {
     type: 'FeatureCollection',
     features: list.map((o) => ({
       type: 'Feature',
-      geometry: {
-        type: 'LineString',
-        coordinates: state.method === 'closest' ? o.closest_points : [centerOf(byId[o.a]), centerOf(byId[o.b])],
-      },
+      geometry: { type: 'LineString', coordinates: connectorEnds(o) },
       properties: { id: o.id, tier: o.tier, rank: o.rank, concurrent: o.overlap_days > 0, user: !!o.user },
     })),
   }
+}
+
+// Touching pairs (tier 1: within 0.25 km, the footprint of a substation) have a connector of zero or near-zero length.
+// They get a marker of their own at the middle of their closest points: one per spot, even when several pairs touch
+// there (both Thurmond Dam circuits meet the Hooks line in one yard). With the centers method only an exactly
+// zero-length connector needs it. `ids` is ",id1,id2," so an expression can test membership with a substring 'in'.
+function touchGeoJSON(list: Overlap[]) {
+  const spots = new Map<string, { c: LonLat; ids: string[] }>()
+  for (const o of list) {
+    const ends = connectorEnds(o)
+    if (state.method === 'closest' ? o.tier !== 1 : !isTouchingPoint(ends)) continue
+    const mid: LonLat = [(ends[0][0] + ends[1][0]) / 2, (ends[0][1] + ends[1][1]) / 2]
+    const k = mid.map((v) => v.toFixed(5)).join(',')
+    if (!spots.has(k)) spots.set(k, { c: mid, ids: [] })
+    spots.get(k)!.ids.push(o.id)
+  }
+  return fc([...spots.values()].map((s) => ({
+    type: 'Feature', geometry: { type: 'Point', coordinates: s.c }, properties: { id: s.ids[0], ids: `,${s.ids.join(',')},`, tier: 1 },
+  })))
+}
+
+/** Projects in at least one shown overlap stay bright; the rest dim (never removed: the spec wants both plans on screen). */
+function shownProjectIds(list = visibleOverlaps()): string[] {
+  return [...new Set(list.flatMap((o) => [o.a, o.b]))]
 }
 
 const fc = (features: any[]) => ({ type: 'FeatureCollection', features }) as any
@@ -234,10 +312,11 @@ function initMap(style: any) {
     map.addSource('user-projects', { type: 'geojson', data: fc(userFeatures) })
     map.addSource('endpoints', { type: 'geojson', data: endpointsData })
     map.addSource('connectors', { type: 'geojson', data: connectorGeoJSON(visibleOverlaps()) as any })
+    map.addSource('touch', { type: 'geojson', data: touchGeoJSON(visibleOverlaps()) })
     map.addSource('draft', { type: 'geojson', data: fc([]) })
 
     map.addLayer({ id: 'backdrop', type: 'line', source: 'backdrop',
-      paint: { 'line-color': '#27406f', 'line-opacity': 0.55, 'line-width': ['interpolate', ['linear'], ['get', 'kv'], 46, 0.6, 230, 1.2, 500, 1.8] } })
+      paint: { 'line-color': '#27406f', 'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.3, 10, 0.55], 'line-width': ['interpolate', ['linear'], ['get', 'kv'], 46, 0.6, 230, 1.2, 500, 1.8] } })
 
     // selection glow sits under everything it highlights
     map.addLayer({ id: 'sel-glow', type: 'line', source: 'projects', filter: ['in', ['get', 'id'], ['literal', []]],
@@ -281,6 +360,19 @@ function initMap(style: any) {
     map.addLayer({ id: 'conn-sel', type: 'line', source: 'connectors', filter: ['==', ['get', 'id'], ''],
       layout: { 'line-cap': 'round' }, paint: { 'line-color': '#fff5d6', 'line-width': 5 } })
 
+    // Tier 1: where two projects touch. A breathing gold halo (pulse()), a crisp ring and a core, clickable like a connector.
+    map.addLayer({ id: 'touch-halo', type: 'circle', source: 'touch',
+      paint: { 'circle-color': HOT, 'circle-radius': 16, 'circle-blur': 0.9, 'circle-opacity': 0.4 } })
+    map.addLayer({ id: 'touch-ring', type: 'circle', source: 'touch',
+      paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 7, 12, 10], 'circle-color': 'rgba(0,0,0,0)',
+        'circle-stroke-color': HOT, 'circle-stroke-width': 2.5 } })
+    map.addLayer({ id: 'touch-core', type: 'circle', source: 'touch', paint: { 'circle-radius': 3.5, 'circle-color': HOT } })
+    map.addLayer({ id: 'touch-sel', type: 'circle', source: 'touch', filter: ['in', ',none,', ['get', 'ids']],
+      paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 11, 12, 15], 'circle-color': 'rgba(0,0,0,0)',
+        'circle-stroke-color': '#fff5d6', 'circle-stroke-width': 2 } })
+    // an invisible, generous hit area: a 3 px core is too small to click
+    map.addLayer({ id: 'touch-hit', type: 'circle', source: 'touch', paint: { 'circle-radius': 14, 'circle-color': HOT, 'circle-opacity': 0 } })
+
     // labels for the selected opportunity: both project names and the gap, placed at the closest points
     map.addSource('sel-labels', { type: 'geojson', data: fc([]) })
     map.addLayer({ id: 'sel-labels', type: 'symbol', source: 'sel-labels',
@@ -299,6 +391,7 @@ function initMap(style: any) {
     map.once('idle', () => $('#loading').classList.add('done'))
     setTimeout(() => $('#loading').classList.add('done'), 8000)  // never leave it up on a slow tile server
     applyLayerState()
+    applyProjectDim()
     if (state.satellite) setSatellite(map, true)
     if (state.view3d) set3D(map, true)
     wireMapEvents()
@@ -309,9 +402,15 @@ function initMap(style: any) {
 }
 
 // The selected connector breathes: glow is for live things.
+// So do touching points (Tier 1, "must coordinate"): their halo swells and fades on a slower breath.
 function pulse() {
   const t = performance.now() / 1000
   if (map.getLayer('conn-sel')) map.setPaintProperty('conn-sel', 'line-opacity', 0.55 + 0.45 * Math.abs(Math.sin(t * 2.2)))
+  if (map.getLayer('touch-halo')) {
+    const b = 0.5 + 0.5 * Math.sin(t * 2.4)
+    map.setPaintProperty('touch-halo', 'circle-radius', 13 + 11 * b)
+    map.setPaintProperty('touch-halo', 'circle-opacity', 0.55 - 0.35 * b)
+  }
   requestAnimationFrame(pulse)
 }
 
@@ -330,17 +429,42 @@ function wireMapEvents() {
       show(`${head}${esc(p.name)}`, e.point.x, e.point.y)
     })
     map.on('mouseleave', layer, hide)
-    map.on('click', layer, (e) => { if (!state.drawing) showProject(String((e.features![0].properties as any).id)) })
+    map.on('click', layer, (e) => {
+      if (state.drawing) return
+      // an overlap drawn on top of the project wins the click (its own handler selects it)
+      if (map.queryRenderedFeatures(e.point, { layers: ['connectors', 'touch-hit'] }).length) return
+      showProject(String((e.features![0].properties as any).id))
+    })
   }
-  map.on('mousemove', 'connectors', (e) => {
-    if (state.drawing) return
-    const o = findOverlap(String((e.features![0].properties as any).id))
-    if (!o) return
-    map.getCanvas().style.cursor = 'pointer'
-    show(`<div class="u" style="color:${HOT}">${o.user ? 'YOURS ' : ''}${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>${esc(o.why)}`, e.point.x, e.point.y)
-  })
-  map.on('mouseleave', 'connectors', hide)
-  map.on('click', 'connectors', (e) => { if (!state.drawing) { e.preventDefault(); selectOverlap(String((e.features![0].properties as any).id)) } })
+  // Several pairs can meet at one spot (both Thurmond Dam circuits touch the same yard): list them in the tooltip,
+  // and let repeated clicks step through them.
+  // Both overlap layers at once: a touching point can also be the end of a longer connector.
+  const under = (e: { point: { x: number; y: number } }) => {
+    const feats = map.queryRenderedFeatures([e.point.x, e.point.y], { layers: ['touch-hit', 'connectors'] })
+    const ids = [...new Set(feats.flatMap((f) => (f.properties.ids ? String(f.properties.ids).split(',').filter(Boolean) : [String(f.properties.id)])))]
+    return ids.map(findOverlap).filter((o): o is Overlap => !!o).sort(specOrder)
+  }
+  for (const layer of ['connectors', 'touch-hit']) {
+    map.on('mousemove', layer, (e) => {
+      if (state.drawing) return
+      const os = under(e)
+      if (!os.length) return
+      map.getCanvas().style.cursor = 'pointer'
+      const o = os[0]
+      const more = os.length > 1
+        ? `<div class="u" style="margin-top:4px">ALSO HERE: ${os.slice(1).map(rankLabel).join(' AND ')}<br>CLICK AGAIN FOR THE NEXT</div>` : ''
+      show(`<div class="u" style="color:${HOT}">${o.user ? 'YOURS ' : ''}${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>${esc(o.why)}${more}`, e.point.x, e.point.y)
+    })
+    map.on('mouseleave', layer, hide)
+    map.on('click', layer, (e) => {
+      if (state.drawing || e.defaultPrevented) return
+      e.preventDefault()
+      const os = under(e)
+      if (!os.length) return
+      const i = os.findIndex((o) => o.id === state.selected)
+      selectOverlap(os[(i + 1) % os.length].id)
+    })
+  }
   map.on('click', (e) => {
     if (!state.drawing || draft.length >= 2) return
     draft.push([+e.lngLat.lng.toFixed(6), +e.lngLat.lat.toFixed(6)])
@@ -352,8 +476,31 @@ function wireMapEvents() {
 
 function refreshMap() {
   if (!map?.getSource('connectors')) return
-  ;(map.getSource('connectors') as GeoJSONSource).setData(connectorGeoJSON(visibleOverlaps()) as any)
+  const vis = visibleOverlaps()
+  ;(map.getSource('connectors') as GeoJSONSource).setData(connectorGeoJSON(vis) as any)
+  ;(map.getSource('touch') as GeoJSONSource).setData(touchGeoJSON(vis))
   ;(map.getSource('user-projects') as GeoJSONSource).setData(fc(userFeatures))
+  applyProjectDim(vis)
+}
+
+// Projects outside every shown overlap step far back (not removed: both utilities' plans stay on the map).
+const DIM = 0.24
+function applyProjectDim(vis = visibleOverlaps()) {
+  if (!map?.getLayer('desc-lines')) return
+  const ids = shownProjectIds(vis)
+  const shown = (key = 'id'): any => ['in', ['get', key], ['literal', ids]]
+  const dim = (normal: any, low = DIM): any => ['case', shown(), normal, low]
+  const byConf = (hi: number): any => ['case', ['==', ['get', 'conf'], 'low'], 0.55, hi]
+  for (const l of ['desc-lines', 'gpc-lines']) map.setPaintProperty(l, 'line-opacity', dim(byConf(0.95)))
+  for (const l of ['desc-points', 'gpc-points']) {
+    map.setPaintProperty(l, 'circle-opacity', dim(byConf(1)))
+    map.setPaintProperty(l, 'circle-stroke-opacity', dim(1))
+  }
+  map.setPaintProperty('user-glow', 'line-opacity', dim(0.35, 0.05))
+  map.setPaintProperty('user-lines', 'line-opacity', dim(1, 0.3))
+  map.setPaintProperty('user-points', 'circle-opacity', dim(1, 0.3))
+  map.setPaintProperty('endpoints', 'circle-opacity', ['case', shown('project'), 1, DIM])
+  map.setPaintProperty('endpoints', 'circle-stroke-opacity', ['case', shown('project'), 1, DIM])
 }
 
 // T4 (< 40 km) pairs are most of the list; keep them faint when zoomed out so the close pairs read first.
@@ -363,7 +510,8 @@ function connectorOpacity(selectedId: string | null): any {
     ['match', ['get', 'tier'], 4, t4, 1], ['match', ['get', 'tier'], 4, t4 * 0.5, 0.6]]
   const byZoom = ['interpolate', ['linear'], ['zoom'], 7, base(0.14), 10, base(0.5)]
   if (!selectedId) return byZoom
-  return ['interpolate', ['linear'], ['zoom'], 7, ['case', ['==', ['get', 'id'], selectedId], 1, 0.08], 10, ['case', ['==', ['get', 'id'], selectedId], 1, 0.18]]
+  // Selected: the other close pairs stay faintly readable; the fan of < 40 km lines nearly disappears.
+  return ['case', ['==', ['get', 'id'], selectedId], 1, ['match', ['get', 'tier'], 4, 0.06, 0.28]]
 }
 
 function highlight(ids: string[], connectorId = '') {
@@ -371,6 +519,12 @@ function highlight(ids: string[], connectorId = '') {
   map.setFilter('sel-glow', ['in', ['get', 'id'], ['literal', ids]])
   map.setFilter('conn-sel', ['==', ['get', 'id'], connectorId])
   map.setPaintProperty('connectors', 'line-opacity', connectorOpacity(connectorId || null))
+  // Touching points: the selected one gets a ring; with any overlap selected, only it keeps breathing.
+  const isSel: any = ['in', `,${connectorId},`, ['get', 'ids']]
+  map.setFilter('touch-sel', isSel)
+  map.setFilter('touch-halo', connectorId ? isSel : null)
+  for (const [l, p] of [['touch-ring', 'circle-stroke-opacity'], ['touch-core', 'circle-opacity']] as const)
+    map.setPaintProperty(l, p, connectorId ? ['case', isSel, 1, 0.3] : 1)
   setSelectionLabels(connectorId ? findOverlap(connectorId) ?? null : null)
 }
 
@@ -393,10 +547,11 @@ function setSelectionLabels(o: Overlap | null) {
   const dist = state.method === 'closest' ? (o.tier === 1 ? 'TOUCHING' : `${o.closest_km.toFixed(2)} KM`) : `${o.center_mi.toFixed(1)} MI (CENTERS)`
   src.setData(fc([
     pt([(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2], { text: dist, color: HOT, size: 15, anchor: 'bottom', offset: [0, touching ? -1.2 : -0.8] }),
-    pt(pa, { text: shortName(a.name), color: colorOf(a), size: 12, anchor: touching ? 'right' : east ? 'right' : 'left',
-      offset: touching ? [-1.1, 0.2] : [east ? -0.9 : 0.9, 0] }),
+    // touching: both names to the right of the Tier 1 ring, stacked (the detail card covers the left side)
+    pt(pa, { text: shortName(a.name), color: colorOf(a), size: 12, anchor: touching ? 'bottom-left' : east ? 'right' : 'left',
+      offset: touching ? [1.5, -0.1] : [east ? -0.9 : 0.9, 0] }),
     pt(pb, { text: shortName(b.name), color: colorOf(b), size: 12, anchor: touching ? 'top-left' : east ? 'left' : 'right',
-      offset: touching ? [0.7, 1.0] : [east ? 0.9 : -0.9, 0] }),
+      offset: touching ? [1.5, 0.1] : [east ? 0.9 : -0.9, 0] }),
   ]))
 }
 
@@ -430,7 +585,7 @@ function renderLegend() {
     <div class="seg"><button data-base="map" class="${state.satellite ? '' : 'on'}">MAP</button><button data-base="sat" class="${state.satellite ? 'on' : ''}" title="USGS aerial imagery">SATELLITE</button></div>
     <div class="seg"><button data-view="2d" class="${state.view3d ? '' : 'on'}">2D</button><button data-view="3d" class="${state.view3d ? 'on' : ''}" title="Terrain (x4 height) and 3D buildings">3D TERRAIN</button></div>
     <div class="head"><span>LAYERS</span><button data-collapse title="Show or hide the layer list">${state.legendCollapsed ? '+' : '–'}</button></div>
-    <div class="body">${rows}<div class="note">Faded = approximate location<br>Overlaps by ${state.method === 'closest' ? 'closest points' : 'centers'}</div></div>`
+    <div class="body">${rows}<div class="note">Faded: approximate location<br>Dimmed: no overlap in this view</div></div>`
   const L = $('#legend')
   L.querySelectorAll<HTMLButtonElement>('[data-base]').forEach((b) => b.addEventListener('click', () => {
     state.satellite = b.dataset.base === 'sat'
@@ -559,7 +714,7 @@ function renderUserBox() {
       <button data-del="${p.id}" title="Delete this project" aria-label="Delete ${esc(p.name)}">✕</button></li>`
   }).join('')
   box.innerHTML = `<div class="headrow"><span class="micro">YOUR PROJECTS</span><button class="chip add" data-add>+ ADD A PROJECT</button></div>
-    ${items ? `<ul>${items}</ul>` : `<div class="hint">What if a utility builds somewhere new? Draw a line or drop a substation, and GridLock scores it against the other utility's plans.</div>`}`
+    ${items ? `<ul>${items}</ul>` : `<div class="hint">Draw a what-if line or substation and see what it overlaps.</div>`}`
   box.querySelector('[data-add]')!.addEventListener('click', () => (state.drawing ? stopDrawing() : startDrawing()))
   box.querySelectorAll<HTMLLIElement>('li[data-id]').forEach((li) => li.addEventListener('click', (e) => {
     const del = (e.target as HTMLElement).closest<HTMLElement>('[data-del]')
@@ -576,7 +731,15 @@ function startTour() {
   if (!map?.getSource('dem')) return
   if (state.drawing) stopDrawing()
   closeDetail()
-  const steps: (Overlap | null)[] = [null, ...overlaps.slice(0, 3)]
+  // Top 3 in spec order among what the current view shows (like the 3D world's tour), skipping a pair that meets at the
+  // same spot as one already shown (the two Thurmond Dam circuits). An empty view falls back to the full ranking.
+  const shown = visibleOverlaps().filter((o) => !o.user)
+  const top: Overlap[] = []
+  for (const o of shown.length ? shown : overlaps) {
+    if (top.length === 3) break
+    if (!top.some((x) => JSON.stringify(x.closest_points) === JSON.stringify(o.closest_points))) top.push(o)
+  }
+  const steps: (Overlap | null)[] = [null, ...top]
   if (userOverlaps[0]) steps.push(userOverlaps[0])
   tour = { steps, i: 0, timer: 0, paused: false, saved: { satellite: state.satellite, view3d: state.view3d } }
   if (!state.satellite) { state.satellite = true; setSatellite(map, true) }
@@ -680,25 +843,46 @@ function tourAction(act: string) {
 // ------------------------------------------------------------------------------------------------ side panel
 function renderStats() {
   const vis = visibleOverlaps().filter((o) => !o.user)
+  const mine = visibleOverlaps().length - vis.length   // your projects' overlaps: counted by the filter chips too
   const concurrent = vis.filter((o) => o.overlap_days > 0).length
   $('#stats').innerHTML = `
     <span><b>${meta.desc_mapped + meta.gpc_mapped}</b>PROJECTS MAPPED</span>
-    <span class="hot"><b>${vis.length}</b>OVERLAPS</span>
+    <span class="hot"><b>${vis.length}</b>OVERLAPS${mine ? ` + ${mine} YOURS` : ''}</span>
     <span><b>${concurrent}</b>SAME BUILD WINDOW</span>
     <span class="hot"><b>${vis.filter((o) => o.tier <= 2).length}</b>SHARE LAND OR TOUCH</span>`
 }
 
+// Three views of the spec's two signals. The top row picks the view; the row under it toggles its groups, each
+// with its count (counts are the view's base set, so they don't change while you toggle).
 function renderFilters() {
-  const counts = [1, 2, 3, 4].map((t) => overlaps.filter((o) => o.tier === t && (state.method === 'closest' || o.flagged_by_center_method)).length)
-  $('#filters').innerHTML =
-    [1, 2, 3, 4].map((t, i) => `<button class="chip hotchip ${state.tiers.has(t) ? 'on' : ''}" data-tier="${t}">${TIER_SHORT[t]} (${counts[i]})</button>`).join('') +
-    `<button class="chip ${state.concurrentOnly ? 'on' : ''}" data-concurrent="1" title="Only pairs whose build windows overlap">SAME WINDOW ONLY</button>`
-  $('#filters').querySelectorAll<HTMLButtonElement>('button').forEach((btn) => btn.addEventListener('click', () => {
-    if (btn.dataset.tier) {
-      const t = Number(btn.dataset.tier)
-      state.tiers.has(t) ? state.tiers.delete(t) : state.tiers.add(t)
-    } else state.concurrentOnly = !state.concurrentOnly
-    rerender()
+  const base = modeBase()
+  const chip = (key: string, label: string, n: number, on: boolean, tip: string) =>
+    `<button class="chip hotchip ${on && n ? 'on' : ''}" data-sub="${key}" title="${esc(tip)}" ${n ? '' : 'disabled'} aria-pressed="${on}">${label} (${n})</button>`
+  let subs = ''
+  if (state.mode === 'geo') {
+    subs = [1, 2, 3, 4].map((t) => chip(String(t), TIER_WORDS[t], base.filter((o) => o.tier === t).length, state.geoTiers.has(t), TIER_SHARE[t])).join('')
+  } else if (state.mode === 'time') {
+    subs = BUCKETS.map((b) => chip(b.key, b.label, base.filter((o) => bucketOf(o) === b.key).length, state.timeBuckets.has(b.key), b.tip)).join('')
+  } else {
+    subs = [1, 2, 3].map((t) => chip(String(t), TIER_WORDS[t], base.filter((o) => o.tier === t).length, state.bothTiers.has(t), TIER_SHARE[t])).join('')
+  }
+  $('#filters').innerHTML = `
+    <div class="modes" role="group" aria-label="Overlap signal">${MODES.map((m) =>
+      `<button class="${m.key === state.mode ? 'on' : ''}" data-mode="${m.key}" title="${esc(m.tip)}" aria-pressed="${m.key === state.mode}">${m.label}</button>`).join('')}</div>
+    <div class="subs">${subs}</div>
+    ${state.mode === 'both' ? '<div class="modehint">Close enough to share, and building at the same time</div>' : ''}`
+  $('#filters').querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => btn.addEventListener('click', () => {
+    if (state.mode === btn.dataset.mode) return
+    state.mode = btn.dataset.mode as Mode
+    saveUi(); rerender()
+  }))
+  $('#filters').querySelectorAll<HTMLButtonElement>('[data-sub]').forEach((btn) => btn.addEventListener('click', () => {
+    const k = btn.dataset.sub!
+    const toggle = <T,>(s: Set<T>, v: T) => (s.has(v) ? s.delete(v) : s.add(v))
+    if (state.mode === 'geo') toggle(state.geoTiers, Number(k))
+    else if (state.mode === 'time') toggle(state.timeBuckets, k as Bucket)
+    else toggle(state.bothTiers, Number(k))
+    saveUi(); rerender()
   }))
 }
 
@@ -715,7 +899,7 @@ function overlapItem(o: Overlap) {
   const a = byId[o.a].properties, b = byId[o.b].properties
   const dist = state.method === 'closest' ? (o.tier === 1 ? 'touching' : `${o.closest_km.toFixed(1)} km closest`) : `${o.center_mi.toFixed(1)} mi center-to-center`
   return `<li tabindex="0" data-id="${o.id}" class="${o.id === state.selected ? 'sel' : ''}">
-    <div class="top"><span class="rank">${rankLabel(o)}</span>${o.user ? '<span class="yours">YOURS</span>' : ''}<span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span><span class="score">${o.score.toFixed(0)}</span></div>
+    <div class="top"><span class="rank">${rankLabel(o)}</span>${o.user ? '<span class="yours">YOURS</span>' : ''}<span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span>${o.overlap_days > 0 ? '<span class="when">SAME WINDOW</span>' : ''}</div>
     <div class="names"><div><span class="dot ${dotClass(a)}"></span>${esc(a.name)}</div><div><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div></div>
     <div class="meta">${dist}, ${timingText(o)}${o.needs_location_check ? ', <span class="warn">verify location</span>' : ''}</div>
   </li>`
@@ -776,6 +960,7 @@ function projectBlock(p: ProjectProps) {
     <div class="m">${esc(p.status)}, source page ${p.page}</div>
     ${p.budget ? budgetBars(p.budget, p.budget_check) : ''}
     ${locLine(p.loc_a)}${locLine(p.loc_b)}
+    ${p.fix ? `<div class="m">Mapping note: ${esc(p.fix)}</div>` : ''}
     ${p.desc ? `<div class="d">${esc(p.desc.length > 230 ? p.desc.slice(0, 227) + '…' : p.desc)}</div>` : ''}
   </div>`
 }
@@ -864,8 +1049,7 @@ function actions3d(o: Overlap) {
   const world = lv ? `<a class="btn3d" href="${url}" title="Opens the ${esc(lv.title)} level of the 3D world">VIEW IN 3D ↗</a>
     <a class="btn3d hotbtn" href="${url}&walk=1" title="Drop onto the ground at one end, facing the other">WALK THE GAP ↗</a>`
     : levels.length ? '<span class="m">NOT IN A 3D LEVEL YET</span>' : ''
-  const clip = clips[o.id] ? '<button class="btn3d" data-watch title="A short fly-in over this gap, rendered in Blender">▶ WATCH FLY-IN</button>' : ''
-  return `<div class="actions3d">${world}${clip}
+  return `<div class="actions3d">${world}
     <a class="btn3d" href="${earthUrl(o)}" target="_blank" rel="noopener" title="Google Earth's own 3D view of this spot">GOOGLE EARTH ↗</a>
   </div>`
 }
@@ -875,30 +1059,6 @@ function earthUrl(o: Overlap) {
   const [p, q] = o.closest_points
   const d = Math.round(Math.min(60000, Math.max(1800, o.closest_km * 2600)))  // camera distance that frames both ends
   return `https://earth.google.com/web/@${((p[1] + q[1]) / 2).toFixed(5)},${((p[0] + q[0]) / 2).toFixed(5)},0a,${d}d,35y,0h,55t,0r`
-}
-
-// A pre-rendered Blender fly-in (our own world: USGS imagery + OpenStreetMap, no Google data), played over the map.
-function openClip(o: Overlap) {
-  const c = clips[o.id]
-  if (!c) return
-  const base = `${import.meta.env.BASE_URL}clips/`
-  const a = byId[o.a].properties, b = byId[o.b].properties
-  const box = document.createElement('div')
-  box.className = 'clipmodal'
-  box.innerHTML = `<div class="clipbox" role="dialog" aria-label="Fly-in video">
-      <button class="close" aria-label="Close">ESC ✕</button>
-      <div class="kicker">COORDINATION OPPORTUNITY ${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>
-      <video src="${base}${esc(c.file)}"${c.poster ? ` poster="${base}${esc(c.poster)}"` : ''} autoplay muted playsinline controls></video>
-      <div class="cap"><span class="dot ${dotClass(a)}"></span>${esc(a.name)}<b>×</b><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div>
-      <div class="meta">${o.tier === 1 ? 'Touching' : o.closest_km.toFixed(2) + ' km apart'}, ${timingText(o)}</div>
-      <div class="credit">Rendered in Blender from USGS The National Map imagery, AWS Terrain Tiles elevation and OpenStreetMap data (© OpenStreetMap contributors)</div>
-    </div>`
-  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); close() } }
-  const close = () => { box.remove(); removeEventListener('keydown', onKey, true) }
-  box.addEventListener('click', (e) => { if (e.target === box) close() })
-  box.querySelector('.close')!.addEventListener('click', close)
-  addEventListener('keydown', onKey, true)  // capture: Esc closes the video, not the card under it
-  document.body.append(box)
 }
 
 function renderOverlapDetail(o: Overlap) {
@@ -923,17 +1083,32 @@ function renderOverlapDetail(o: Overlap) {
     <div class="section-title">IMPACT ESTIMATE</div>
     ${renderCost(o)}`
   card.querySelector('.close')!.addEventListener('click', closeDetail)
-  card.querySelector('[data-watch]')?.addEventListener('click', () => openClip(o))
   card.querySelectorAll<HTMLInputElement>('input[data-cost]').forEach((inp) => inp.addEventListener('change', () => {
     (state.cost as any)[inp.dataset.cost!] = Number(inp.value)
     renderOverlapDetail(o)
   }))
 }
 
+// Whatever opens an overlap (the list, a tour stop, DETAILS, a project card, a #o= link from the 3D world) must be able
+// to see it: if the saved view hides it, switch to GEOGRAPHIC with its tier on (and to closest points if the centers
+// method doesn't flag it), so the card never opens for a pair that has no ring, connector or list row.
+function revealOverlap(o: Overlap) {
+  if (visibleOverlaps().some((x) => x.id === o.id)) return
+  if (state.method === 'center' && !o.user && !o.flagged_by_center_method) {
+    state.method = 'closest'
+    document.querySelectorAll<HTMLButtonElement>('.method button').forEach((b) => b.classList.toggle('on', b.dataset.method === 'closest'))
+  }
+  state.mode = 'geo'
+  state.geoTiers.add(o.tier)
+  saveUi()
+  rerender()
+}
+
 function selectOverlap(id: string) {
   const o = findOverlap(id)
   if (!o || !byId[o.a] || !byId[o.b]) return
   if (state.drawing) stopDrawing()
+  revealOverlap(o)
   state.selected = id
   history.replaceState(null, '', `#o=${encodeURIComponent(id)}`)  // shareable, and the 3D viewer links back here
   renderRanked()
@@ -947,7 +1122,7 @@ function showProject(pid: string) {
   const f = byId[pid]
   if (!f) return
   const p = f.properties
-  const mine = allOverlaps().filter((o) => o.a === pid || o.b === pid).sort((x, y) => y.score - x.score)
+  const mine = allOverlaps().filter((o) => o.a === pid || o.b === pid).sort(specOrder)
   state.selected = null
   renderRanked()
   const card = $('#detail')
@@ -962,7 +1137,7 @@ function showProject(pid: string) {
     <div class="section-title">${mine.length ? `${mine.length} OVERLAP${mine.length > 1 ? 'S' : ''} WITH ${other}` : `NO ${other} WORK WITHIN 40 KM`}</div>
     <ol class="ranked">${mine.slice(0, 8).map((o) => {
       const q = byId[o.a === pid ? o.b : o.a].properties
-      return `<li data-id="${o.id}"><div class="top"><span class="rank">${rankLabel(o)}</span><span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span><span class="score">${o.score.toFixed(0)}</span></div>
+      return `<li data-id="${o.id}"><div class="top"><span class="rank">${rankLabel(o)}</span><span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span>${o.overlap_days > 0 ? '<span class="when">SAME WINDOW</span>' : ''}</div>
         <div class="names"><div><span class="dot ${dotClass(q)}"></span>${esc(q.name)}</div></div>
         <div class="meta">${o.tier === 1 ? 'touching' : o.closest_km.toFixed(1) + ' km'}, ${timingText(o)}</div></li>`
     }).join('')}</ol>`
@@ -1012,7 +1187,7 @@ function renderQuality() {
       'Google Earth web: Projects, New project, Import KML file from computer. Google Earth Pro: File, Open')}</div>
     <p>The Google Earth file holds every mapped project and all ${overlaps.length} overlaps, with the gap, timing, savings and source pages in each pop-up.</p>
     <h3>Checked against Sperry's answer key</h3>
-    <p>All 6 overlaps in Sperry's starter sample are reproduced. In-service gaps match to the day. Center distances differ slightly because we also located <b>Hooks</b> and <b>Purrysburg</b>, which the sample leaves blank. The closest-point rule shows two of those pairs are much closer than their centers suggest.</p>
+    <p>All 6 overlaps in Sperry's starter sample are reproduced, and the in-service gaps match to the day. Center distances differ where our points differ from the sample's: we located <b>Hooks</b> and <b>Purrysburg</b>, which the sample leaves blank, and the sample's <b>McIntosh</b> point (its GPC_3 row) sits 657 m west of the substation. OVL_4 differs the most (8.01 mi in the sample, 4.45 mi here). The closest-point rule shows two of these pairs are much closer than their centers suggest.</p>
     <table><tr><th>SAMPLE</th><th>THEIRS (CENTER, GAP)</th><th>OURS</th></tr>${sample}</table>
     <h3>Location confidence</h3>
     <table><tr><th></th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>UNMAPPED</th></tr>
@@ -1036,8 +1211,9 @@ function renderAbout() {
     <ul>
       <li><b>Distance:</b> between the <b>closest points</b> of the two projects, as the GridLock spec asks. A line can pass right by a substation even when their centers are miles apart. Toggle <span class="mono">CENTERS</span> to compare with the center-to-center method in Sperry's starter guide.</li>
       <li><b>Tiers:</b> touching (≤ 0.25 km, the footprint of a substation), under 1.6 km (share land), under 8 km (share logistics) or under 40 km (share crews). Anything farther is ignored.</li>
-      <li><b>Timing:</b> Georgia Power publishes start and need dates. DESC publishes an in-service date plus a 5-year budget, so a DESC window starts in the first year its budget spends money on the project. 41 of 44 budgets add up to their stated totals; the other 3 don't in the source PDF and are flagged. If a project has no budget, the window is assumed: 24 months for new construction, 18 for rebuilds, 12 for other work.</li>
-      <li><b>Score:</b> 65% distance, 35% timing, ×0.85 when a location is approximate.</li>
+      <li><b>Timing:</b> Georgia Power publishes start and need dates. DESC publishes an in-service date plus a 5-year budget, so a DESC window starts in the first year its budget spends money on the project. Every DESC window comes from its budget years; money in the budget's "Previous" column is taken to start in January 2023. 41 of 44 budgets add up to their stated totals; the other 3 don't in the source PDF and are flagged.</li>
+      <li><b>Ranking:</b> by distance tier first (touching, then under 1.6, 8 and 40 km), then build timing (the same window first, then the smaller gap), then distance. Each pair also carries a score (65% distance, 35% timing, ×0.85 when a location is approximate), shown for reference only.</li>
+      <li><b>Filters:</b> GEOGRAPHIC splits the overlaps by tier, TIMELINE by build timing, and BOTH keeps the pairs that are close enough to share (touching to under 8 km) and building at the same time (or under 6 months apart). Projects outside the shown overlaps dim, but stay on the map.</li>
       <li><b>Your projects:</b> anything you add is scored in your browser with exactly the same rules (checked against the pipeline: the same 78 overlaps, distances within 1 m). It's saved only in this browser and shows up in the 3D world too.</li>
     </ul>
     <h3>Limits</h3>

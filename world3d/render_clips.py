@@ -1,4 +1,5 @@
-"""GridLock fly-in clips: a ~7 s cinematic Blender render of one ranked overlap, for the web app.
+"""GridLock fly-in clips: a ~7 s cinematic Blender render of one ranked overlap, for local previews only.
+(The site shows no videos since 0b1e176, so clips land in the git-ignored world3d/explore/clips/, not web/public.)
 
 Headless, one clip per run (a few minutes each on an RTX 3070 laptop):
   blender -b --factory-startup -P world3d/render_clips.py -- DESC_23__GPC_20277
@@ -7,7 +8,7 @@ Options:
   --seconds 7  --fps 24  --res 1280x720  --samples 48
   --tmp DIR        where the PNG frames go (deleted after encoding unless --keep)
   --still 1,168    look test: render only these frames as PNGs into --tmp, no video
-  --manifest       only rewrite web/public/clips/manifest.json from the clips already there
+  --manifest       only rewrite world3d/explore/clips/manifest.json from the clips already there
 
 Explore mode (no rendering): the same look for a whole level, saved as a .blend to fly around in:
   blender -b --factory-startup -P world3d/render_clips.py -- --explore savannah      (or augusta)
@@ -17,8 +18,8 @@ Explore mode (no rendering): the same look for a whole level, saved as a .blend 
 The main overlap's fly-in is the active camera (Space plays it, Numpad 0 looks through it). The Layout 3D view opens
 in EEVEE Rendered with the bloom compositor, km-scale clipping, at the fly-in's first frame.
 
-Writes web/public/clips/<id>.mp4 (H.264 yuv420p, no audio), <id>.jpg (poster: the final framing) and
-manifest.json (every clip whose files exist and probe as playable). The web page overlays the facts, so the frames
+Writes world3d/explore/clips/<id>.mp4 (H.264 yuv420p, no audio), <id>.jpg (poster: the final framing) and
+manifest.json (every clip whose files exist and probe as playable). Overlay the facts separately: the frames
 carry no text. Only our own data: USGS imagery (public domain), OpenStreetMap grid, yards and buildings, AWS terrain.
 
 The camera starts ~2.5 km out and ~900 m up, then eases in (orbiting 40 degrees) to a framing solved per overlap so
@@ -47,7 +48,7 @@ sys.path.insert(0, str(HERE))
 import build_world as bw  # noqa: E402  (shared helpers: Terrain, tower_mesh, curve_object, lin, node_mat)
 
 BUILD = HERE / "build"
-OUT = HERE.parent / "web" / "public" / "clips"
+OUT = HERE / "explore" / "clips"   # git-ignored; the site itself shows no videos
 
 SUN_AZ, SUN_EL = 160.0, 35.0   # compass bearing + elevation: from the south-southeast, like the imagery's own shadows
 SUN_E = 6.5                    # sun lamp strength

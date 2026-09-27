@@ -66,19 +66,6 @@ button { font: inherit; color: inherit; }
 .btn3d.hotbtn:hover { box-shadow: 0 0 14px rgba(255, 209, 102, 0.35); }
 .actions3d { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0 2px; }
 .actions3d .m { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
-/* Blender fly-in player (WATCH FLY-IN on an overlap card) */
-.clipmodal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(2, 4, 8, 0.8); backdrop-filter: blur(3px); }
-.clipbox { position: relative; width: min(960px, 100%); max-height: 100%; overflow: auto; padding: 14px 16px 12px; background: var(--panel);
-  border: 1px solid var(--line-2); border-radius: 6px; box-shadow: 0 0 26px rgba(77, 216, 255, 0.12); }
-.clipbox .kicker { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; color: var(--hot); padding-right: 70px; }
-.clipbox video { display: block; width: 100%; aspect-ratio: 16 / 9; margin: 10px 0; background: #000; border-radius: 3px; }
-.clipbox .cap { font-size: 14px; line-height: 1.5; color: var(--ink); }
-.clipbox .cap b { color: var(--hot); margin: 0 6px; }
-.clipbox .meta { margin-top: 3px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); }
-.clipbox .credit { margin-top: 8px; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
-.clipbox .close { position: absolute; right: 12px; top: 10px; background: none; border: 0; color: var(--ink-2); cursor: pointer; font-family: var(--mono); font-size: 12px; }
-.clipbox .close:hover { color: var(--ink); }
-
 /* Loading: a scanning bar, hidden once the map's first frame with our layers is drawn */
 .loading { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; color: var(--ink-2); pointer-events: none; transition: opacity 0.5s; }
@@ -226,8 +213,19 @@ button { font: inherit; color: inherit; }
 .tabs { display: flex; gap: 6px; padding: 12px 12px 10px; border-bottom: 1px solid var(--line); }
 .tabs button { flex: 1; padding: 7px 4px; }
 .panel { overflow: auto; flex: 1; min-height: 0; }
-.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; }
-.chip.hotchip.on { border-color: var(--hot); box-shadow: 0 0 12px rgba(255, 209, 102, 0.22); }
+.filters { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; }
+/* The spec's two signals: GEOGRAPHIC / TIMELINE / BOTH picks the view, the chips under it toggle its groups */
+.modes { display: flex; gap: 4px; }
+.modes button { flex: 1; background: transparent; border: 1px solid var(--line-2); border-radius: 3px; padding: 7px 0; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--ink-2); }
+.modes button:hover { color: var(--ink); }
+.modes button.on { color: var(--hot); border-color: var(--hot); background: rgba(255, 209, 102, 0.07); box-shadow: 0 0 12px rgba(255, 209, 102, 0.2); }
+.modes button:focus-visible { outline: 1px solid var(--hot); outline-offset: 2px; }
+.subs { display: flex; flex-wrap: wrap; gap: 6px; }
+.subs .chip { padding: 5px 8px; letter-spacing: 0.1em; }
+.chip.hotchip.on { color: var(--ink); border-color: var(--hot); box-shadow: 0 0 12px rgba(255, 209, 102, 0.22); }
+.chip:disabled { opacity: 0.35; cursor: default; }
+.modehint { font-size: 12px; color: var(--ink-2); }
 .ranked { list-style: none; margin: 0; padding: 4px 0 20px; }
 .ranked li { padding: 11px 14px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
 .ranked li:hover { background: rgba(59, 125, 255, 0.06); }
@@ -239,7 +237,7 @@ button { font: inherit; color: inherit; }
 .tier.t2 { background: rgba(255, 209, 102, 0.8); }
 .tier.t3 { background: rgba(255, 209, 102, 0.55); }
 .tier.t4 { background: transparent; color: var(--hot); border: 1px solid rgba(255, 209, 102, 0.45); }
-.ranked .score { margin-left: auto; color: var(--ink); }
+.ranked .when { margin-left: auto; color: var(--ink); font-size: 9.5px; letter-spacing: 0.16em; }
 .ranked .names { margin-top: 6px; font-size: 13px; line-height: 1.45; }
 .ranked .names div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
