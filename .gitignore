@@ -40,3 +40,5 @@ web/dist/
 video/node_modules/
 video/takes/
 video/out/
+video/.venv-tts/
+video/voice/
