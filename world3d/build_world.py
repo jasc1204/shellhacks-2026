@@ -233,8 +233,9 @@ def ground_material(build, scene):
 
 
 # ---------------------------------------------------------------- models
-def tower_mesh():
-    """Lattice transmission tower, unit height (scaled per voltage). Arms run along local X."""
+def tower_mesh(thickness=0.0045):
+    """Lattice transmission tower, unit height (scaled per voltage). Arms run along local X.
+    `thickness` is the lattice member width as a fraction of the height (render_clips.py uses a thicker one)."""
     bm = bmesh.new()
     levels = [0.0, 0.2, 0.38, 0.54, 0.68]
     rings = []
@@ -257,7 +258,7 @@ def tower_mesh():
     tmp = bpy.data.objects.new("tower_cage", me)
     bpy.context.scene.collection.objects.link(tmp)
     wf = tmp.modifiers.new("lattice", "WIREFRAME")
-    wf.thickness = 0.0045
+    wf.thickness = thickness
     wf.use_even_offset = True
     wf.use_replace = True
     dg = bpy.context.evaluated_depsgraph_get()

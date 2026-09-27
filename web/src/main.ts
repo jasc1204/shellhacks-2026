@@ -891,7 +891,7 @@ function openClip(o: Overlap) {
       <video src="${base}${esc(c.file)}"${c.poster ? ` poster="${base}${esc(c.poster)}"` : ''} autoplay muted playsinline controls></video>
       <div class="cap"><span class="dot ${dotClass(a)}"></span>${esc(a.name)}<b>×</b><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div>
       <div class="meta">${o.tier === 1 ? 'Touching' : o.closest_km.toFixed(2) + ' km apart'}, ${timingText(o)}</div>
-      <div class="credit">Rendered in Blender from USGS imagery and OpenStreetMap data (© OpenStreetMap contributors)</div>
+      <div class="credit">Rendered in Blender from USGS The National Map imagery, AWS Terrain Tiles elevation and OpenStreetMap data (© OpenStreetMap contributors)</div>
     </div>`
   const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); close() } }
   const close = () => { box.remove(); removeEventListener('keydown', onKey, true) }
