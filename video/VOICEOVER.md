@@ -29,11 +29,11 @@ Distance is measured between the closest points, not the centers, like the spec 
 
 Take number three. Dominion's Jasper to Okatie line and Georgia Power's McIntosh reactors. Less than a kilometer apart, and building in the same twenty-four months. Coordinated, that's about a million dollars saved: one crew mobilization instead of two, and shared right-of-way.
 
-**5. The same spot, in 3D** *(press 3D, the camera takes over, fly in, walk the gap)*
+**5. The same spot, in 3D** *(press 3D, the camera takes over and flies in, the card shows the savings)*
 
-Now the same spot, in 3D. One click, same place. That's the real river, real buildings, the grid that's there today, and both planned lines. The rings show what they could share: the land, the laydown yards, the crews. And you can walk the gap. Stand at one utility's line and look across at the other's.
+Now the same spot, in 3D. One click, same place. That's the real river, real buildings, the grid that's there today, and both planned lines. The rings show what they could share: the land, the laydown yards, the crews. And the numbers come along: twenty-four months together, about a million dollars saved.
 
-**6. The top two** *(the 3D tour reaches Thurmond Dam)*
+**6. The top two** *(pick #1 in the list, the 3D world flies to Thurmond Dam)*
 
 The top two are touching. At Thurmond Dam, both utilities are rebuilding lines that end at the same spot. They have to coordinate outages, but their build windows are four years apart. That's a conversation worth having now.
 

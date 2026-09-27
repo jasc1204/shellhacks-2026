@@ -9,14 +9,14 @@ import type { Level, LonLat } from './types'
 
 export type View = '2d' | '3d'
 export type Cam = { lon: number; lat: number; alt: number; bearing: number; pitch: number; fov: number }
-export type Target = { level: string; center: LonLat; id: string | null; km: number; walk?: boolean }
+export type Target = { level: string; center: LonLat; id: string | null; km: number }
 interface Api3D {
   level: string
-  select(id: string | null, opts?: { fly?: boolean; walk?: boolean }): boolean
+  select(id: string | null, opts?: { fly?: boolean }): boolean
   camera(): Cam
   jump(cam: Cam): void
   setVisible?(ids: string[] | null): void
-  tour?(): void
+  setInfo?(info: Record<string, { savings: string; note: string }>): void
 }
 type Hooks = { levels(): Level[]; onSelect(id: string | null): void; onView(v: View): void; visibleIds(): string[] }
 
@@ -103,7 +103,7 @@ function frameLoaded() {
     try { d = f.contentDocument } catch { d = null }
     // the viewer takes its boot screen away once the level is built
     if (d && d.getElementById('stage') && !d.getElementById('boot')) {
-      adopt(d); ready = true; api()?.setVisible?.(hooks.visibleIds())
+      adopt(d); ready = true; api()?.setVisible?.(hooks.visibleIds()); api()?.setInfo?.(info)
       if (view === '3d' && run === runAtLoad) veil(false)
       return
     }
@@ -216,7 +216,7 @@ export async function show3D(t: Target) {
   await ownFrames(f, 20, 900)
   if (run !== r) return
   f.classList.add('on')
-  if (t.id) a?.select(t.id, { fly: true, walk: !!t.walk })
+  if (t.id) a?.select(t.id, { fly: true })
   await wait(FADE_MS)
   if (run !== r) return
   stage.classList.add('v3d-done')   // the map is covered: hide it so MapLibre stays idle
@@ -226,7 +226,7 @@ export async function show3D(t: Target) {
 /** Already in 3D: fly to another overlap, loading its level first if it lives in the other one. */
 async function retarget(t: Target, r: number) {
   if (t.level === level && ready) {
-    if (t.id) api()?.select(t.id, { fly: true, walk: !!t.walk })
+    if (t.id) api()?.select(t.id, { fly: true })
     return
   }
   const f = frame!
@@ -237,7 +237,7 @@ async function retarget(t: Target, r: number) {
   load(t.level)
   if (!(await whenReady(r))) return
   f.classList.add('on')
-  if (t.id) api()?.select(t.id, { fly: true, walk: !!t.walk })
+  if (t.id) api()?.select(t.id, { fly: true })
   veil(false)
   try { f.contentWindow?.focus() } catch { /* ignore */ }
 }
@@ -284,10 +284,6 @@ function haze(on: boolean) {
 /** Keep the 3D world's arcs in step with the page's filter. */
 export function setVisible3D(ids: string[]) { if (ready) api()?.setVisible?.(ids) }
 
-/** The TOUR button while in 3D: the 3D world's own tour. */
-export function tour3D() {
-  const a = api()
-  if (a?.tour) a.tour()
-  else win()?.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }))
-  try { frame?.contentWindow?.focus() } catch { /* ignore */ }
-}
+/** The 2D card's rough savings, for the 3D card (sent again whenever the world reloads). */
+let info: Record<string, { savings: string; note: string }> = {}
+export function setInfo3D(i: typeof info) { info = i; if (ready) api()?.setInfo?.(info) }

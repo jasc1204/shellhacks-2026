@@ -212,7 +212,7 @@ body.touring #key { display: none; }
 }
 /* embedded in the GridLock page (?embed=1): its side panel does the list and the filter, its header the 2D / 3D switch,
    and its own veil the loading (the boot element stays, hidden, for the page to watch) */
-body.embed #leftcol, body.embed #to-map { display: none !important; }
+body.embed #list, body.embed #to-map, body.embed #levels a[href*="photoreal"] { display: none !important; }
 body.embed #dock { left: 16px; }
 body.embed #boot { visibility: hidden; }
 </style>
@@ -283,10 +283,10 @@ body.embed #boot { visibility: hidden; }
   <div class="proj gpc" id="c-b"></div>
   <div class="facts">
     <div class="fact"><div class="kicker">BUILD WINDOWS</div><div class="v" id="c-time"></div></div>
-    <div class="fact"><div class="kicker">ON FOOT / BY TRUCK</div><div class="v" id="c-reach"></div></div>
+    <div class="fact" id="c-save-box" hidden><div class="kicker" id="c-save-k">ROUGH SAVINGS</div><div class="v" id="c-save"></div></div>
   </div>
   <p id="why"></p>
-  <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button></div>
+  <div class="btns"><button class="act" id="b-fly">FLY OVER</button></div>
 </section>
 
 <div id="dock">
@@ -315,13 +315,13 @@ body.embed #boot { visibility: hidden; }
 <footer id="status" class="panel">
   <div class="st-main">
     <div class="readout">
-      <div class="row"><span id="mode">DRONE</span><span id="speed"></span><span id="alt"></span></div>
+      <div class="row"><span id="mode" hidden>DRONE</span><span id="speed"></span><span id="alt"></span></div>
       <div id="near"></div>
     </div>
-    <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-tour" title="Shortcut: T">TOUR TOP 3</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button><button class="act" id="b-photo" hidden title="Google's photorealistic 3D tiles, live (needs a token: local runs only)">GOOGLE 3D</button></div>
+    <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button><button class="act" id="b-photo" hidden title="Google's photorealistic 3D tiles, live (needs a token: local runs only)">GOOGLE 3D</button></div>
   </div>
   <!-- 2026-09-27 declutter: one line of keys; M, T and K have buttons, L and G live on the LAYERS panel (all still work) -->
-  <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>Tab</b> walk, drive or fly</span>
+  <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span>
     <span><b>1-9</b> fly to a row</span><span><b>R</b> overview</span><span><b>H</b> hide HUD</span></div>
 </footer>
 </div>
@@ -1551,7 +1551,13 @@ function reveal(it) {
   store.set('filter', FILT);
   renderList();
 }
-let OUTSIDE = null;   // embedded: the page's filter, as a set of overlap ids (null: this world's own filter)
+let OUTSIDE = null;
+let INFO = {};   // embedded: the page's rough savings per overlap id, for the card
+function fillSave(o) {
+  const inf = INFO[o.id];
+  $('c-save-box').hidden = !inf;
+  if (inf) { $('c-save').textContent = inf.savings; $('c-save-k').textContent = inf.note; }
+}   // embedded: the page's filter, as a set of overlap ids (null: this world's own filter)
 function matches(o) {
   if (OUTSIDE) return OUTSIDE.has(o.id);
   const m = FMODES[FILT.mode];
@@ -1679,7 +1685,7 @@ function select(it, fly) {
   };
   pj(a, o.a_window, $('c-a')); pj(b, o.b_window, $('c-b'));
   $('c-time').textContent = timing(o);
-  $('c-reach').textContent = reach(o.dist_km);
+  fillSave(o);
   $('why').textContent = o.why || '';
   $('card').classList.add('show');
   dcDirty = true;
@@ -1781,17 +1787,14 @@ function flyTo(v) {
 }
 function setMode(m) { mode = m; mult = 1; $('mode').textContent = m; }
 $('b-fly').onclick = () => sel && flyTo(viewFor(sel));
-$('b-walk').onclick = () => sel && flyTo(walkGap(sel));
 
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,textarea,select')) return;
   const k = e.key.toLowerCase();
-  if (touring && k !== 't') endTour(false);
-  if (k === 'tab') { e.preventDefault(); setMode({ DRONE: 'WALK', WALK: 'DRIVE', DRIVE: 'DRONE' }[mode]); return; }
+  if (touring) endTour(false);
   if (k === 'r') { flyTo(overview()); return; }
   if (k === 'h') { document.body.classList.toggle('hide-hud'); return; }
   if (k === 'm') { setMeasuring(!measuring); return; }
-  if (k === 't') { touring ? endTour(false) : startTour(0); return; }
   if (k === 'g') { setGround(GROUND === 'sat' ? 'map' : 'sat'); return; }
   if (k === 'l') { $('layers').classList.toggle('open'); syncLayerSign(); return; }
   if (k === 'k' || e.key === '?') { toggleKey(); return; }
@@ -1861,7 +1864,7 @@ function addMeasurement(a, b) {
   const names = fa?.name && fb?.name && fa !== fb ? `${clean(fa.name)} → ${clean(fb.name)}: ` : '';
   const el = document.createElement('div');
   el.className = 'chip on'; el._lk = 'pin';   // your own measurement: never decluttered
-  el.innerHTML = `${names}${fmtLen(d)}<small>${fmtDur(d / 1000 / 5 * 60)} walk, ${fmtDur(d / 1000 / 60 * 60)} truck</small>`;
+  el.innerHTML = `${names}${fmtLen(d)}`;
   const lab = new CSS2DObject(el); lab.position.set((a.x + b.x) / 2, Math.max(a.y, b.y) + 70, (a.z + b.z) / 2); lab.center.set(0.5, 1);
   measureGroup.add(lab);
   $('near').textContent = `MEASURED ${names}${fmtLen(d)}. Click to start another, M or Esc to exit.`;
@@ -2100,7 +2103,7 @@ async function startTour(step) {
     }
     startTour(step + 1); return;
   }
-  touring = true; document.body.classList.add('touring'); $('b-tour').classList.add('on');
+  touring = true; document.body.classList.add('touring'); $('b-tour')?.classList.add('on');
   if (measuring) setMeasuring(false);
   reveal(it); select(it, false);
   const dur = flyTo(viewFor(it)) || 0;
@@ -2113,7 +2116,7 @@ async function startTour(step) {
 }
 function endTour(done) {
   clearTimeout(tourTimer);
-  touring = false; document.body.classList.remove('touring'); $('b-tour').classList.remove('on');
+  touring = false; document.body.classList.remove('touring'); $('b-tour')?.classList.remove('on');
   if (done) {
     $('cap-k').textContent = 'TOUR COMPLETE';
     $('cap-t').textContent = 'Top 3 opportunities';
@@ -2124,7 +2127,6 @@ function endTour(done) {
   } else $('caption').classList.remove('show');
   if (sel) $('card').classList.add('show');
 }
-$('b-tour').onclick = () => (touring ? endTour(false) : startTour(0));
 
 // ================================================================== label declutter (screen space, every 4th frame)
 // 2026-09-26: over Google's photo mesh the names piled up ("MONSANTO" on "PEACHTREE NUTRASWEET CO.", "URQUHART" twice,
@@ -2325,7 +2327,7 @@ function frame() {
     if (measuring) { /* keep the measure prompt */ }
     else if (sel) {
       const da = Math.hypot(cx - sel.o.pa[0], cy - sel.o.pa[1]) / 1000, db = Math.hypot(cx - sel.o.pb[0], cy - sel.o.pb[1]) / 1000;
-      $('near').innerHTML = `<span class="nf" style="color:var(--desc)">DESC point ${fmtKm(da)}</span><span class="nf" style="color:var(--gpc)">GPC point ${fmtKm(db)}</span><span class="nf">${fmtDur(Math.min(da, db) / 5 * 60)} walk</span>`;
+      $('near').innerHTML = `<span class="nf" style="color:var(--desc)">DESC point ${fmtKm(da)}</span><span class="nf" style="color:var(--gpc)">GPC point ${fmtKm(db)}</span>`;
     } else $('near').textContent = 'Pick an overlap: list, chips, or keys 1-9. T for the tour.';
   }
   drawMini();
@@ -2431,14 +2433,13 @@ if (qs.get('layers')) {  // test hook: ?layers=buildings:0,trees:1,...
 if (EMBED) {
   window.gridlock3d = {
     level: LEVEL.id,
-    // fly to an overlap of this level (false if it isn't here); walk: drop onto the ground at one end, facing the other
-    select(id, { fly = true, walk = false } = {}) {
+    // fly to an overlap of this level (false if it isn't here)
+    select(id, { fly = true } = {}) {
       const it = ovl.find(x => x.o.id === id);
       if (!it) return false;
       if (touring) endTour(false);
       if (!OUTSIDE) reveal(it);
-      select(it, fly && !walk);
-      if (walk) flyTo(walkGap(it));
+      select(it, fly);
       return true;
     },
     // the camera the way the map describes one: position, compass bearing, tilt from straight down, vertical FOV
@@ -2457,7 +2458,8 @@ if (EMBED) {
     },
     // the page's filter: only these overlaps (null: back to this world's own filter)
     setVisible(ids) { OUTSIDE = ids ? new Set(ids) : null; if (sel && !matches(sel.o)) deselect(); renderList(); },
-    tour() { touring ? endTour(false) : startTour(0); },
+    // the page's rough savings per overlap (the same numbers as its 2D card)
+    setInfo(info) { INFO = info || {}; if (sel) fillSave(sel.o); },
   };
   // GOOGLE 3D, where a token is served (local runs): reloads this level in Google 3D, keeping the pick
   const b = $('b-photo');
@@ -2478,7 +2480,7 @@ frame();
 if (qs.get('select')) {  // deep links: ?select=<overlap id | global rank> (yours too) flies there, &walk=1 drops you on the ground
   const q = qs.get('select'), it = ovl.find(x => x.o.id === q) || ovl.find(x => !x.user && String(x.o.rank) === q);
   // (2026-09-27: a saved filter could hide the linked overlap: card open, no row in the list. It is revealed first.)
-  if (it) { reveal(it); select(it, !qs.get('walk')); if (qs.get('walk')) flyTo(walkGap(it)); }
+  if (it) { reveal(it); select(it, true); }
   else {  // the other level's overlap (?select=1 is Augusta's #1): hop there, the way the tour does
     const l = (await getLevels()).find(l => l.level !== LEVEL.id && LEVELS.some(x => x.id === l.level)
       && ((l.overlap_ids || []).includes(q) || (l.ranks || []).map(String).includes(q)));

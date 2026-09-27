@@ -30,8 +30,7 @@ GridLock reads both utilities' public construction plans, puts every project on 
 - **Add your own project:** draw a line or drop a substation, and GridLock scores it against the other utility's plans instantly, with the same rules.
 - **See it:**
   - one page, two views: the 2D satellite map and the 3D world, switched in place at the same spot (the map leans in and the 3D camera takes over)
-  - a guided tour of the top opportunities
-  - a walkable 3D world of both border regions, built in Blender and Three.js, with real buildings, substations and satellite ground, plus an optional Google photorealistic 3D mode
+  - a 3D world of both border regions, flown like a drone, built in Blender and Three.js, with real buildings, substations and satellite ground, plus an optional Google photorealistic 3D mode
   - one click opens any opportunity in Google Earth's own 3D view
 - **Downloads:** the overlap and project tables in the column layout of Sperry's starter spreadsheet, and a Google Earth file (KML) with every project and overlap. Each pop-up shows the gap, the timing, the savings estimate and the source pages, so a planner can open it in the tools they already use.
 

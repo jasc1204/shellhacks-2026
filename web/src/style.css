@@ -42,7 +42,7 @@ button { font: inherit; color: inherit; }
 }
 .brand { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
 .logo { font-weight: 700; font-size: 22px; letter-spacing: 0.06em; }
-.logo span { background: linear-gradient(90deg, var(--ink), var(--desc) 55%, var(--gpc)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo span { color: var(--ink); }
 .tag, .micro { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em; color: var(--ink-2); white-space: nowrap; }
 .tag b { color: var(--hot); font-weight: 600; }
 .stats { display: flex; gap: 18px; margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
@@ -77,15 +77,15 @@ button { font: inherit; color: inherit; }
 
 /* ---------- 2D / 3D: one page, two ways to see the same overlaps (2026-09-27) ---------- */
 .viewswitch { position: relative; display: grid; grid-template-columns: 1fr 1fr; flex: none;
-  padding: 2px; border: 1px solid var(--line-2); border-radius: 4px; background: rgba(4, 9, 16, 0.6); }
+  padding: 2px; border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 4px; background: rgba(4, 9, 16, 0.6); }
 .viewswitch button { position: relative; z-index: 1; min-width: 50px; padding: 6px 14px; background: none; border: 0; cursor: pointer;
-  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.22em; color: var(--ink-2); transition: color 0.3s; }
-.viewswitch button:hover { color: var(--ink); }
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.22em; color: #fff; transition: color 0.3s; }
+.viewswitch button:hover { color: #fff; }
 .viewswitch button.on { color: var(--bg); }
 .viewswitch button:focus-visible { outline: 1px solid var(--desc); outline-offset: 2px; }
 /* the knob is live (it moves you between worlds), so it glows */
 .viewswitch .knob { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); border-radius: 3px;
-  background: linear-gradient(90deg, var(--ink), #bfe9ff); box-shadow: 0 0 14px rgba(111, 141, 255, 0.5);
+  background: #fff; box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
   transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
 .viewswitch.is3d .knob { transform: translateX(100%); }
 
@@ -155,26 +155,6 @@ body.in3d .method { visibility: hidden; }      /* closest points vs centers is a
 .newproj button[type="submit"] { border-color: var(--hot); color: var(--hot); }
 .newproj .err { color: var(--hot); font-family: var(--mono); font-size: 11px; }
 
-/* Guided tour */
-.tour-btn { border-color: var(--hot); color: var(--hot); }
-.tour-btn:hover { box-shadow: 0 0 14px rgba(255, 209, 102, 0.35); }
-.tourbar { left: 50%; bottom: 34px; transform: translateX(-50%); width: min(640px, calc(100% - 28px)); padding: 14px 18px 12px;
-  border-color: rgba(255, 209, 102, 0.55); box-shadow: 0 0 26px rgba(255, 209, 102, 0.12); }
-.tourbar .kicker { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.22em; color: var(--hot); }
-.tourbar h3 { margin: 4px 0 6px; font-size: 18px; }
-.tourbar .who { font-size: 13px; line-height: 1.5; color: var(--ink); }
-.tourbar .who b { color: var(--hot); font-weight: 700; margin: 0 4px; }
-.tourbar .big { display: flex; gap: 22px; margin: 10px 0 8px; flex-wrap: wrap; font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: 0.1em; }
-.tourbar .big b { display: block; font-family: var(--display); font-size: 21px; color: var(--ink); letter-spacing: 0; }
-.tourbar .big .hot b { color: var(--hot); }
-.tourbar .ctrl { display: flex; gap: 6px; align-items: center; }
-.tourbar .ctrl button { background: transparent; border: 1px solid var(--line-2); border-radius: 3px; padding: 5px 10px; cursor: pointer;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--ink); }
-.tourbar .ctrl .keys { margin-left: auto; display: flex; gap: 12px; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.1em; }
-.tourbar .progress { height: 2px; margin-top: 10px; background: var(--line); overflow: hidden; }
-.tourbar .progress i { display: block; height: 100%; width: 0; background: var(--hot); box-shadow: 0 0 8px var(--hot); }
-.tourbar .progress i.run { animation: tourfill var(--dur, 11s) linear forwards; }
-@keyframes tourfill { to { width: 100%; } }
 
 /* Your projects, in the side panel */
 .userbox { padding: 10px 12px; border-bottom: 1px solid var(--line); }

@@ -135,17 +135,17 @@ const SHOTS = {
     mark(page)
     await clickOn(page, page.locator('#viewswitch button[data-view="3d"]'))
     await waitFor3D(page)
-    await sleep(9000)
-    await clickOn(page, world(page).locator('#b-walk'), 400)
+    await sleep(8500)
+    await clickOn(page, world(page).locator('#c-save'), 300).catch(() => {})   // (a hover and a harmless click on the savings)
     await sleep(11000)
   },
   // 6. The top two: the 3D tour reaches Thurmond Dam
   async s6(page) {
-    await openApp(page, '#v=3d')
+    await openApp(page, '#o=DESC_35__GPC_16007&v=3d')   // start in the Augusta region at #4, so #1 is a flight, not a load
     await waitFor3D(page)
-    await sleep(2500)
+    await sleep(6000)
     mark(page)
-    await clickOn(page, page.locator('#tour-btn'))
+    await clickOn(page, page.locator('#ranked li[data-id="DESC_31__GPC_20793"]'))
     await sleep(19000)
   },
   // 7. A planning tool: draw a Georgia Power line near #3, score it, then see it in 3D
@@ -190,7 +190,7 @@ const SHOTS = {
     await page.setContent(`<!doctype html><html><head><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
       <style>html,body{margin:0;height:100%;background:radial-gradient(ellipse at 50% 40%,#0b1226,#020408 70%);color:#eef4ff;font-family:'Space Grotesk',sans-serif}
       .c{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
-      .logo{font-weight:700;font-size:120px;letter-spacing:.06em}.logo span{background:linear-gradient(90deg,#eef4ff,#4dd8ff 55%,#3b7dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+      .logo{font-weight:700;font-size:120px;letter-spacing:.06em}.logo span{color:#eef4ff}
       .t{font-size:34px;color:#eef4ff}.m{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.18em;color:#8fa3c4}
       .g{position:fixed;inset:0;background-image:linear-gradient(rgba(70,105,230,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(70,105,230,.07) 1px,transparent 1px);background-size:64px 64px}</style></head>
       <body><div class="g"></div><div class="c"><div class="logo">GRID<span>LOCK</span></div><div class="t">Find the overlap before the crews do.</div>

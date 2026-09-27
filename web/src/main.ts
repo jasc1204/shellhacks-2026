@@ -6,7 +6,7 @@ import './style.css'
 import type { Feature, Level, Loc, LonLat, Meta, Method, Overlap, ProjectProps, Utility } from './types'
 import { centerOf, scorePair } from './geo'
 import { addSatellite, satelliteStyle, setLayersVisible } from './layers'
-import { currentView, initWorld, preloadWorld, setVisible3D, show2D, show3D, tour3D, type Target, type View } from './world'
+import { currentView, initWorld, preloadWorld, setInfo3D, setVisible3D, show2D, show3D, type Target, type View } from './world'
 import { loadUserProjects, nextUserId, onUserProjectsChanged, saveUserState, toFeature, type UserProject } from './userProjects'
 
 // MapLibre v6 finds its worker next to its own bundle, which Vite moves. Serve the worker from public/ instead
@@ -716,121 +716,15 @@ function renderUserBox() {
   }).join('')
   box.innerHTML = `<div class="headrow"><span class="micro">YOUR PROJECTS</span><button class="chip add" data-add>+ ADD A PROJECT</button></div>
     ${items ? `<ul>${items}</ul>` : `<div class="hint">Draw a what-if line or substation and see what it overlaps.</div>`}`
-  box.querySelector('[data-add]')!.addEventListener('click', () => (state.drawing ? stopDrawing() : startDrawing()))
+  box.querySelector('[data-add]')!.addEventListener('click', () => {
+    if (state.drawing) return stopDrawing()
+    if (currentView() === '3d') show2D().then(startDrawing)   // you draw on the 2D map
+    else startDrawing()
+  })
   box.querySelectorAll<HTMLLIElement>('li[data-id]').forEach((li) => li.addEventListener('click', (e) => {
     const del = (e.target as HTMLElement).closest<HTMLElement>('[data-del]')
     if (del) { e.stopPropagation(); deleteUserProject(del.dataset.del!) } else showProject(li.dataset.id!)
   }))
-}
-
-// ------------------------------------------------------------------------------------------------ guided tour
-// One button for the pitch: the camera flies to each top opportunity with its numbers on screen.
-// (In 3D the same button runs the 3D world's own tour.)
-const TOUR_MS = 11000
-let tour: { steps: (Overlap | null)[]; i: number; timer: number; paused: boolean } | null = null
-
-function startTour() {
-  if (!map?.getLayer('sat')) return
-  if (state.drawing) stopDrawing()
-  closeDetail()
-  // Top 3 in spec order among what the current view shows (like the 3D world's tour), skipping a pair that meets at the
-  // same spot as one already shown (the two Thurmond Dam circuits). An empty view falls back to the full ranking.
-  const shown = visibleOverlaps().filter((o) => !o.user)
-  const top: Overlap[] = []
-  for (const o of shown.length ? shown : overlaps) {
-    if (top.length === 3) break
-    if (!top.some((x) => JSON.stringify(x.closest_points) === JSON.stringify(o.closest_points))) top.push(o)
-  }
-  const steps: (Overlap | null)[] = [null, ...top]
-  if (userOverlaps[0]) steps.push(userOverlaps[0])
-  tour = { steps, i: 0, timer: 0, paused: false }
-  tourGo(0)
-}
-
-function stopTour(restore = true) {
-  if (!tour) return
-  clearTimeout(tour.timer)
-  tour = null
-  $('#tourbar').hidden = true
-  $('#tour-btn').textContent = '▶ TOUR'
-  if (restore) highlight([])
-}
-
-// Compass direction from a to b, in degrees (0 = north).
-function azimuth(a: LonLat, b: LonLat) {
-  return (Math.atan2((b[0] - a[0]) * Math.cos((a[1] * Math.PI) / 180), b[1] - a[1]) * 180) / Math.PI
-}
-
-function tourGo(i: number) {
-  if (!tour) return
-  tour.i = (i + tour.steps.length) % tour.steps.length
-  clearTimeout(tour.timer)
-  const o = tour.steps[tour.i]
-  if (!o) {
-    highlight([])
-    map.fitBounds([[-82.5, 31.95], [-80.7, 33.85]], { pitch: 0, bearing: 0, duration: 3200, padding: 40 })
-  } else {
-    highlight([o.a, o.b], o.id)
-    const [p, q] = o.closest_points
-    const ca = byId[o.a].geometry.coordinates as LonLat[]
-    // Look across the gap: the connector runs left to right on screen (or the line, if they touch).
-    const touching = Math.hypot(p[0] - q[0], p[1] - q[1]) < 1e-6
-    const az = touching && Array.isArray(ca[0]) ? azimuth(ca[0], ca[ca.length - 1]) : azimuth(p, q)
-    // Frame the gap itself (the story), not the whole projects: a box a few km around the closest points.
-    const mid: LonLat = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]
-    const r = Math.max(2.5, o.closest_km * 1.6)
-    const dLat = r / 111.32, dLon = r / (111.32 * Math.cos((mid[1] * Math.PI) / 180))
-    map.fitBounds([[mid[0] - dLon, mid[1] - dLat], [mid[0] + dLon, mid[1] + dLat]], { pitch: 0, bearing: az - 90, maxZoom: 14,
-      duration: 4200, padding: { top: 60, bottom: Math.min(240, window.innerHeight * 0.3), left: 40, right: 40 } })
-  }
-  renderTourbar()
-  if (!tour.paused) tour.timer = window.setTimeout(() => tourGo(tour!.i + 1), TOUR_MS)
-}
-
-function renderTourbar() {
-  const bar = $('#tourbar')
-  if (!tour) { bar.hidden = true; return }
-  bar.hidden = false
-  $('#tour-btn').textContent = '■ STOP TOUR'
-  const n = tour.steps.length, o = tour.steps[tour.i]
-  let body: string
-  if (!o) {
-    body = `<div class="kicker">GUIDED TOUR 1 OF ${n}</div>
-      <h3>Two utilities, one river, ${meta.desc_projects + meta.gpc_projects} planned projects</h3>
-      <div class="who">Dominion Energy South Carolina and Georgia Power plan their transmission work separately. GridLock found
-        <b>${overlaps.length}</b> places where they'll build within 40 km of each other, <b>${overlaps.filter((x) => x.overlap_days > 0).length}</b> of them at the same time.</div>`
-  } else {
-    const a = byId[o.a].properties, b = byId[o.b].properties
-    const { total } = costModel(o)
-    body = `<div class="kicker">GUIDED TOUR ${tour.i + 1} OF ${n}, ${o.user ? 'YOUR PROJECT' : 'OPPORTUNITY ' + rankLabel(o)}</div>
-      <h3>${esc(o.tier_label)}: ${esc(o.can_share.replace(/^Can share /, 'they can share ').replace(/^Must coordinate/, 'they must coordinate'))}</h3>
-      <div class="who"><span class="dot ${dotClass(a)}"></span>${esc(a.name)}<b>×</b><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div>
-      <div class="big">
-        <div class="hot"><b>${o.tier === 1 ? 'Touching' : o.closest_km.toFixed(2) + ' km'}</b>APART</div>
-        <div><b>${o.overlap_days > 0 ? Math.round(o.overlap_days / 30.44) + ' mo' : gapText(o.window_gap_days)}</b>${o.overlap_days > 0 ? 'BUILDING AT THE SAME TIME' : 'BETWEEN BUILD WINDOWS'}</div>
-        <div class="hot"><b>${total > 0 ? '≈ ' + money(total) : 'Reschedule'}</b>${total > 0 ? 'ROUGH SAVINGS' : 'TO SHARE CREWS'}</div>
-      </div>`
-  }
-  bar.innerHTML = `${body}
-    <div class="ctrl"><button data-t="prev" aria-label="Previous">◀</button><button data-t="pause">${tour.paused ? '▶ PLAY' : '❚❚ PAUSE'}</button>
-      <button data-t="next" aria-label="Next">▶</button>${o ? '<button data-t="details">DETAILS</button>' : ''}<button data-t="exit">✕ EXIT</button>
-      <span class="keys"><span>← →</span><span>SPACE</span><span>ESC</span></span></div>
-    <div class="progress"><i class="${tour.paused ? '' : 'run'}" style="--dur:${TOUR_MS}ms"></i></div>`
-  bar.querySelectorAll<HTMLButtonElement>('[data-t]').forEach((btn) => btn.addEventListener('click', () => tourAction(btn.dataset.t!)))
-}
-
-function tourAction(act: string) {
-  if (!tour) return
-  if (act === 'prev') tourGo(tour.i - 1)
-  else if (act === 'next') tourGo(tour.i + 1)
-  else if (act === 'exit') stopTour()
-  else if (act === 'details') { const o = tour.steps[tour.i]; stopTour(false); if (o) selectOverlap(o.id) }
-  else if (act === 'pause') {
-    tour.paused = !tour.paused
-    clearTimeout(tour.timer)
-    if (!tour.paused) tour.timer = window.setTimeout(() => tourGo(tour!.i + 1), TOUR_MS)
-    renderTourbar()
-  }
 }
 
 // ------------------------------------------------------------------------------------------------ side panel
@@ -913,7 +807,7 @@ function renderRanked() {
 
 function rerender() {
   renderStats(); renderUserBox(); renderFilters(); renderRanked(); renderLegend(); refreshMap()
-  setVisible3D(visibleOverlaps().map((o) => o.id))   // the 3D world shows the same overlaps as the list
+  sync3D()
   if (state.selected && !visibleOverlaps().some((o) => o.id === state.selected)) closeDetail()
   else if (state.selected) setSelectionLabels(findOverlap(state.selected) ?? null)  // e.g. CLOSEST POINTS <-> CENTERS
 }
@@ -1039,8 +933,7 @@ function levelFor(o: Overlap) {
 
 function actions3d(o: Overlap) {
   const lv = levels.length ? levelFor(o) : null
-  const world = lv ? `<button class="btn3d" data-go3d="fly" title="Switch to 3D, in the ${esc(lv.title)} level">VIEW IN 3D</button>
-    <button class="btn3d hotbtn" data-go3d="walk" title="Switch to 3D and drop onto the ground at one end, facing the other">WALK THE GAP</button>`
+  const world = lv ? `<button class="btn3d" data-go3d="fly" title="Switch to 3D, in the ${esc(lv.title)} level">VIEW IN 3D</button>`
     : levels.length ? '<span class="m">NOT IN A 3D LEVEL YET</span>' : ''
   return `<div class="actions3d">${world}
     <a class="btn3d" href="${earthUrl(o)}" target="_blank" rel="noopener" title="Google Earth's own 3D view of this spot">GOOGLE EARTH ↗</a>
@@ -1076,14 +969,15 @@ function renderOverlapDetail(o: Overlap) {
     <div class="section-title">IMPACT ESTIMATE</div>
     ${renderCost(o)}`
   card.querySelector('.close')!.addEventListener('click', closeDetail)
-  card.querySelectorAll<HTMLButtonElement>('[data-go3d]').forEach((b) => b.addEventListener('click', () => setView('3d', b.dataset.go3d === 'walk')))
+  card.querySelectorAll<HTMLButtonElement>('[data-go3d]').forEach((b) => b.addEventListener('click', () => setView('3d')))
   card.querySelectorAll<HTMLInputElement>('input[data-cost]').forEach((inp) => inp.addEventListener('change', () => {
     (state.cost as any)[inp.dataset.cost!] = Number(inp.value)
     renderOverlapDetail(o)
+    sync3D()
   }))
 }
 
-// Whatever opens an overlap (the list, a tour stop, DETAILS, a project card, a #o= link from the 3D world) must be able
+// Whatever opens an overlap (the list, a project card, the 3D world, a #o= link) must be able
 // to see it: if the saved view hides it, switch to GEOGRAPHIC with its tier on (and to closest points if the centers
 // method doesn't flag it), so the card never opens for a pair that has no ring, connector or list row.
 function revealOverlap(o: Overlap) {
@@ -1116,13 +1010,23 @@ function selectOverlap(id: string, how: { from3d?: boolean } = {}) {
 }
 
 // ------------------------------------------------------------------------------------------------ 2D and 3D, one page
+/** The 3D world shows the same overlaps as the list, and its card the same rough savings as the 2D card. */
+function sync3D() {
+  const vis = visibleOverlaps()
+  setVisible3D(vis.map((o) => o.id))
+  setInfo3D(Object.fromEntries(vis.map((o) => {
+    const { total } = costModel(o)
+    return [o.id, { savings: total > 0 ? money(total) : 'Reschedule', note: total > 0 ? 'ROUGH SAVINGS' : 'TO SHARE CREWS' }]
+  })))
+}
+
 /** Where the 3D world should go: the picked overlap in its level, else the level under the map's center. */
-function worldTarget(o: Overlap | null, walk = false): Target | null {
+function worldTarget(o: Overlap | null): Target | null {
   if (!levels.length) return null
   const lv = o ? levelFor(o) : null
   if (o && lv) {
     const [p, q] = o.closest_points
-    return { level: lv.level, center: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], id: o.id, km: o.closest_km, walk }
+    return { level: lv.level, center: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], id: o.id, km: o.closest_km }
   }
   const c = map.getCenter()
   const l = levels.find((x) => c.lat >= x.bbox[0] && c.lng >= x.bbox[1] && c.lat <= x.bbox[2] && c.lng <= x.bbox[3]) ?? levels[0]
@@ -1131,14 +1035,13 @@ function worldTarget(o: Overlap | null, walk = false): Target | null {
 
 let shownProject: string | null = null   // the project whose card is open, if any
 
-function setView(v: View, walk = false) {
+function setView(v: View) {
   if (v === '3d') {
-    if (tour) stopTour(false)
     if (state.drawing) stopDrawing()
     // the picked overlap, or with a project's card open (say, one you just drew) that project's top overlap
     const o = state.selected ? findOverlap(state.selected) ?? null
       : shownProject ? allOverlaps().filter((x) => x.a === shownProject || x.b === shownProject).sort(specOrder)[0] ?? null : null
-    const t = worldTarget(o, walk)
+    const t = worldTarget(o)
     if (t) show3D(t)
     return
   }
@@ -1293,15 +1196,7 @@ function wireChrome() {
     document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b === btn))
     for (const t of ['ranked', 'quality', 'about']) $(`#tab-${t}`).hidden = t !== btn.dataset.tab
   }))
-  $('#tour-btn').addEventListener('click', () => (currentView() === '3d' ? tour3D() : tour ? stopTour() : startTour()))
   document.addEventListener('keydown', (e) => {
-    const typing = (e.target as HTMLElement)?.closest?.('input, textarea, select')
-    if (tour && !typing) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); return tourAction('next') }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); return tourAction('prev') }
-      if (e.key === ' ') { e.preventDefault(); return tourAction('pause') }
-      if (e.key === 'Escape') return stopTour()
-    }
     if (e.key !== 'Escape') return
     if (state.drawing) stopDrawing(); else closeDetail()
   })

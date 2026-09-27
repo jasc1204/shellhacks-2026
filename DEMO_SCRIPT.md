@@ -10,7 +10,7 @@ Round 1 is one judge for 3 minutes. Open the site before they arrive, in **2D** 
 | 1:10 | Toggle **CENTERS**, then back | "It's also the first overlap in Sperry's own sample. Their starter guide measures center to center, which makes it look about 4 miles apart. The spec says closest points: they share the same yard." |
 | 1:30 | Click **#3** | "The best pair to share as planned: DESC's new $23.8M Jasper–Okatie line and Georgia Power's McIntosh–Purrysburg work, **0.94 km apart**, both under construction for **the same 24 months**. That's one crew mobilization and shared land instead of two, roughly **$1M**, and every assumption is editable." |
 | 1:55 | With #3 open, press **3D** in the header | "Same spot, one click. The map leans in and the 3D camera takes over: the real river, real buildings, today's grid and both planned lines." |
-| 2:10 | **WALK THE GAP** on the 3D card (bottom right), then **2D** | "Stand at the DESC line and look across at Georgia Power's." (10 s, then back to 2D) |
+| 2:10 | Point at the 3D card (bottom right), then **2D** | "The numbers come along: 24 months together, about $1M saved." (then back to 2D) |
 | 2:25 | Back on the map: **+ ADD A PROJECT** | "It's a tool, not just a report. Say Georgia Power plans a new line here…" (click two points, SCORE IT) "…and it instantly shows which DESC projects it would collide with." |
 | 2:50 | Close | "78 overlaps, 34 happening at the same time, all checked against Sperry's own sample. Next: real line routes and more utilities." |
 
@@ -21,8 +21,7 @@ Round 1 is one judge for 3 minutes. Open the site before they arrive, in **2D** 
   - Three DESC budget tables don't add up in the source PDF.
   - Every manual location cites its evidence.
 - **Filters:** click **BOTH** to keep only the pairs that are close and timed together. Everything else dims.
-- **▶ TOUR in 3D:** press 3D, then ▶ TOUR, and the 3D world flies through the top 3.
-- **Walk the gap** in 3D for #3: stand at the DESC end and look at Georgia Power's line.
+- **#1 in 3D:** in 3D, click #1 in the list: the world switches to the Augusta region and flies to Thurmond Dam, where both utilities' lines end at the same spot.
 - **GOOGLE EARTH** on #1: the shared substation at Thurmond Dam in Google's 3D, one click from the card. The **GOOGLE 3D** button in 3D does the same inside our world (local run with a token only). Both need Wi-Fi.
 - **Downloads:** the overlap table in Sperry's own spreadsheet columns, and the Google Earth file with every project and overlap: "a planner can open this in the tools they already use."
 

@@ -12,8 +12,8 @@ The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
 
 Built during the hackathon:
 - **The data pipeline** below. It extracts 252 planned projects (44 DESC, 208 Georgia Power), locates their named end points, ranks the 78 cross-utility overlaps, and reproduces all 6 overlaps in Sperry's starter sample.
-- **`web/`:** the app (Vite, TypeScript, MapLibre GL): the 2D satellite map with the ranked list, and the 3D world embedded in place behind the **2D / 3D** switch, plus "add your own project", a guided tour, a Google Earth link for every opportunity and a Google Earth file of everything.
-- **`world3d/`:** a walkable 3D world of the two border regions (Savannah River and Augusta/Thurmond), built with Blender and Three.js from the same data, with an optional Google photorealistic 3D mode.
+- **`web/`:** the app (Vite, TypeScript, MapLibre GL): the 2D satellite map with the ranked list, and the 3D world embedded in place behind the **2D / 3D** switch, plus "add your own project", a Google Earth link for every opportunity and a Google Earth file of everything.
+- **`world3d/`:** a 3D world of the two border regions (Savannah River and Augusta/Thurmond), built with Blender and Three.js from the same data, with an optional Google photorealistic 3D mode.
 
 ## Data pipeline
 
@@ -54,15 +54,14 @@ The public site is built and deployed by `.github/workflows/pages.yml` (GitHub P
 - **Map:** both utilities' planned projects, with the overlaps drawn in gold between their closest points and the selected pair labeled on the map. Toggle **CENTERS** to compare with the center-to-center method from Sperry's starter guide.
 - **2D / 3D:** one page, two views of the same overlaps. **2D** is the satellite map: Sentinel-2 cloudless zoomed out, USGS aerial imagery up close. **3D** puts the 3D world in place of the map at the selected overlap: the map leans in toward it and the 3D camera takes over from the same spot. The 3D world builds in the background once the map is up, and draws nothing while you're in 2D (`web/src/world.ts`).
 - **Layers:** toggle either utility's projects, your projects, overlaps, the existing grid, line end points and place names.
-- **Opportunities:** the ranked list (distance tier first, then build timing). Three filters narrow it: **GEOGRAPHIC** (by distance tier), **TIMELINE** (by build timing) and **BOTH** (close and timed together); everything else on the map dims. Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate, **View in 3D** / **Walk the gap** (they switch to 3D in place), and **Google Earth**, which opens Google Earth's own 3D view at the gap.
+- **Opportunities:** the ranked list (distance tier first, then build timing). Three filters narrow it: **GEOGRAPHIC** (by distance tier), **TIMELINE** (by build timing) and **BOTH** (close and timed together); everything else on the map dims. Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate (the 3D card shows it too), **View in 3D** (switches in place), and **Google Earth**, which opens Google Earth's own 3D view at the gap.
 - **Add your own project:** draw a line or drop a substation, pick the utility and build window, and it's scored in the browser with exactly the same rules as the pipeline (`web/src/geo.ts`, checked against `overlaps.json`: the same 78 overlaps, distances within 1 m). Saved in the browser (`localStorage["gridlock.userProjects.v1"]`) and shown in the 3D world too.
-- **Guided tour** (▶ TOUR): in 2D the map flies to the top opportunities with their numbers on screen (arrow keys, Space and Esc control it). In 3D the same button runs the 3D world's own tour.
 - **Data quality:** downloads of the overlap and project tables in the column layout of Sperry's `Projects_Overlaps.xlsx` and of `gridlock.kml` (every mapped project and the ranked overlaps, with the gap, timing, savings estimate and source pages in each pop-up; opens in Google Earth or any GIS), the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
 - **Links:** `#o=<overlap id>` opens an opportunity, e.g. `#o=DESC_23__GPC_20277`, and `&v=3d` opens it straight in 3D (`#o=DESC_23__GPC_20277&v=3d`). The 3D world is served from the same site under `/world3d/viewer/`, embedded with `?embed=1` (the dev server serves `../world3d`; `npm run build` copies the files the viewer needs into `dist/world3d/`).
 
 ## 3D world
 
-`world3d/viewer/` (Three.js) is the app's **3D** view. It also runs on its own at `/world3d/viewer/?level=savannah` (or `augusta`): add `&select=1` to fly to overlap #1, and `&walk=1` to start on foot at the gap.
+`world3d/viewer/` (Three.js) is the app's **3D** view. It also runs on its own at `/world3d/viewer/?level=savannah` (or `augusta`): add `&select=1` to fly to overlap #1. In 3D, the panel at the top left switches between the two regions (L1 SAVANNAH, L2 AUGUSTA).
 
 - Satellite ground, real building footprints, today's grid with its towers (OpenStreetMap), substations, and both utilities' planned lines shown as see-through towers at real height. Your own projects from the map appear too.
 - **GOOGLE 3D** (`?photoreal=1`) swaps our ground for Google's photorealistic 3D tiles (via `3d-tiles-renderer`). It needs your own free token in `world3d/viewer/tokens.local.json`: `{"cesiumIonToken": "..."}` from cesium.com/ion, or `{"googleMapsKey": "..."}`. The file is git-ignored and only the dev server serves it, so a built site never includes it.
