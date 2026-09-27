@@ -1002,11 +1002,15 @@ function renderQuality() {
     const o = overlaps.find((x) => x.a === s.a && x.b === s.b)
     return `<tr><td class="mono">${s.id}</td><td>${s.mi.toFixed(2)} mi, ${s.gap} d</td><td>${o ? `${o.center_mi.toFixed(2)} mi, ${o.isd_gap_days} d → <b>${o.tier === 1 ? 'touching' : o.closest_km.toFixed(2) + ' km'}</b> (T${o.tier})` : 'missing'}</td></tr>`
   }).join('')
-  const dl = (f: string, label: string) => `<a class="btn3d" href="${import.meta.env.BASE_URL}data/${f}" download>${label} ↓</a>`
+  // keep "download": the dev server sends .kml with no content type, so without it the browser may just show the XML
+  const dl = (f: string, label: string, title = '') =>
+    `<a class="btn3d" href="${import.meta.env.BASE_URL}data/${f}" download${title ? ` title="${esc(title)}"` : ''}>${label} ↓</a>`
   $('#tab-quality').innerHTML = `<div class="prose">
     <h3>Download the tables</h3>
     <p>Same columns as Sperry's <span class="mono">Projects_Overlaps.xlsx</span>, so they open next to the starter sample. <b>distance_mi</b> and <b>time_gap (day)</b> keep the starter guide's definitions (center to center, in-service gap). Our closest-point distance, tier, build-window overlap and score come after.</p>
-    <div class="actions3d">${dl('overlaps_sperry_format.csv', 'OVERLAP TABLE (CSV)')}${dl('projects_located.csv', 'PROJECT TABLE (CSV)')}</div>
+    <div class="actions3d">${dl('overlaps_sperry_format.csv', 'OVERLAP TABLE (CSV)')}${dl('projects_located.csv', 'PROJECT TABLE (CSV)')}${dl('gridlock.kml', 'GOOGLE EARTH FILE (KML)',
+      'Google Earth web: Projects, New project, Import KML file from computer. Google Earth Pro: File, Open')}</div>
+    <p>The Google Earth file holds every mapped project and all ${overlaps.length} overlaps, with the gap, timing, savings and source pages in each pop-up.</p>
     <h3>Checked against Sperry's answer key</h3>
     <p>All 6 overlaps in Sperry's starter sample are reproduced. In-service gaps match to the day. Center distances differ slightly because we also located <b>Hooks</b> and <b>Purrysburg</b>, which the sample leaves blank. The closest-point rule shows two of those pairs are much closer than their centers suggest.</p>
     <table><tr><th>SAMPLE</th><th>THEIRS (CENTER, GAP)</th><th>OURS</th></tr>${sample}</table>
