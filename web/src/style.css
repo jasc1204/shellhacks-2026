@@ -75,6 +75,34 @@ button { font: inherit; color: inherit; }
 @keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 .loading.done { opacity: 0; }
 
+/* ---------- 2D / 3D: one page, two ways to see the same overlaps (2026-09-27) ---------- */
+.viewswitch { position: relative; display: grid; grid-template-columns: 1fr 1fr; flex: none;
+  padding: 2px; border: 1px solid var(--line-2); border-radius: 4px; background: rgba(4, 9, 16, 0.6); }
+.viewswitch button { position: relative; z-index: 1; min-width: 50px; padding: 6px 14px; background: none; border: 0; cursor: pointer;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.22em; color: var(--ink-2); transition: color 0.3s; }
+.viewswitch button:hover { color: var(--ink); }
+.viewswitch button.on { color: var(--bg); }
+.viewswitch button:focus-visible { outline: 1px solid var(--desc); outline-offset: 2px; }
+/* the knob is live (it moves you between worlds), so it glows */
+.viewswitch .knob { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); border-radius: 3px;
+  background: linear-gradient(90deg, var(--ink), #bfe9ff); box-shadow: 0 0 14px rgba(111, 141, 255, 0.5);
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
+.viewswitch.is3d .knob { transform: translateX(100%); }
+
+/* the 3D world sits on the map; hidden (display: none) while in 2D so it draws nothing */
+#world { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 4; display: none;
+  opacity: 0; transition: opacity 0.48s ease; background: transparent; }
+#world.on { opacity: 1; }
+.stage.v3d .hud, .stage.v3d .tooltip, .stage.v3d .loading { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.stage.v3d-done #map { visibility: hidden; }   /* covered by the 3D world: MapLibre stays idle */
+body.in3d .method { visibility: hidden; }      /* closest points vs centers is a 2D comparison */
+.worldveil { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; color: var(--ink-2); pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(4, 9, 16, 0.55), rgba(4, 9, 16, 0.85)); opacity: 0; transition: opacity 0.35s; }
+.worldveil.on { opacity: 1; }
+.worldveil .bar { width: 200px; height: 2px; background: var(--line); overflow: hidden; }
+.worldveil .bar i { display: block; height: 100%; width: 8%; background: linear-gradient(90deg, var(--ink), var(--desc)); box-shadow: 0 0 10px var(--desc); transition: width 0.2s; }
+
 /* ---------- map stage ---------- */
 .stage { position: relative; min-height: 0; }
 #map { position: absolute; inset: 0; background: var(--bg); }
@@ -90,11 +118,7 @@ button { font: inherit; color: inherit; }
 }
 /* Layers panel: legend and toggles in one HUD */
 .legend { left: 14px; top: 14px; padding: 10px 12px 11px; font-family: var(--mono); font-size: 11px; color: var(--ink-2); width: 236px; }
-.legend .seg { display: flex; gap: 4px; margin-bottom: 6px; }
-.legend .seg button { flex: 1; background: transparent; border: 1px solid var(--line-2); border-radius: 3px; padding: 5px 0;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-2); cursor: pointer; }
-.legend .seg button.on { color: var(--ink); border-color: var(--desc); box-shadow: 0 0 10px rgba(77, 216, 255, 0.25); }
-.legend .head { display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.2em; font-size: 10px; margin: 8px 0 2px; }
+.legend .head { display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.2em; font-size: 10px; margin: 0 0 2px; }
 .legend .head button { background: none; border: 0; color: var(--ink-3); cursor: pointer; font-family: var(--mono); font-size: 10px; }
 .legend label.row { display: flex; align-items: center; gap: 9px; padding: 3px 0; cursor: pointer; }
 .legend label.row input { accent-color: var(--desc); margin: 0; }

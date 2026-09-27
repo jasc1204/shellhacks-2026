@@ -5,7 +5,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import './style.css'
 import type { Feature, Level, Loc, LonLat, Meta, Method, Overlap, ProjectProps, Utility } from './types'
 import { centerOf, scorePair } from './geo'
-import { addMapModes, set3D, setLayersVisible, setSatellite } from './layers'
+import { addSatellite, satelliteStyle, setLayersVisible } from './layers'
+import { currentView, initWorld, preloadWorld, setVisible3D, show2D, show3D, tour3D, type Target, type View } from './world'
 import { loadUserProjects, nextUserId, onUserProjectsChanged, saveUserState, toFeature, type UserProject } from './userProjects'
 
 // MapLibre v6 finds its worker next to its own bundle, which Vite moves. Serve the worker from public/ instead
@@ -82,8 +83,6 @@ const state = {
   bothTiers: new Set([1, 2, 3]),
   selected: null as string | null,
   cost: { mobilizationPct: 3, easementPerAcre: 15000, rowWidthM: 0 },
-  satellite: false,
-  view3d: false,
   layers: Object.fromEntries(LAYER_GROUPS.map((g) => [g.key, true])) as Record<string, boolean>,
   legendCollapsed: window.innerWidth < 900,
   user: [] as UserProject[],
@@ -99,7 +98,6 @@ let userOverlaps: Overlap[] = []      // scored in the browser with the same rul
 let meta: Meta
 let levels: Level[] = []
 let levelOf: Record<string, { level: string; title: string }> = {}
-const WORLD_VIEWER = `${import.meta.env.BASE_URL}world3d/viewer/`
 let backdropData: any = null
 let endpointsData: any = null
 let draft: LonLat[] = []
@@ -135,8 +133,6 @@ async function load() {
 
 function pickUi(v: any) {
   const out: Partial<typeof state> = {}
-  if (typeof v.satellite === 'boolean') out.satellite = v.satellite
-  if (typeof v.view3d === 'boolean') out.view3d = v.view3d
   if (v.layers && typeof v.layers === 'object') out.layers = { ...state.layers, ...v.layers }
   if (MODES.some((m) => m.key === v.mode)) out.mode = v.mode
   const nums = (a: unknown, ok: number[]) => (Array.isArray(a) ? new Set(a.filter((t) => ok.includes(t))) : null)
@@ -149,8 +145,7 @@ function pickUi(v: any) {
 
 function saveUi() {
   try {
-    localStorage.setItem(UI_KEY, JSON.stringify({ satellite: state.satellite, view3d: state.view3d, layers: state.layers,
-      mode: state.mode, geoTiers: [...state.geoTiers], timeBuckets: [...state.timeBuckets], bothTiers: [...state.bothTiers] }))
+    localStorage.setItem(UI_KEY, JSON.stringify({ layers: state.layers, mode: state.mode, geoTiers: [...state.geoTiers], timeBuckets: [...state.timeBuckets], bothTiers: [...state.bothTiers] }))
   } catch { /* ignore */ }
 }
 
@@ -282,7 +277,7 @@ async function basemapStyle() {
     const layer = style.layers.find((l: any) => l.id === id)
     if (layer) layer.paint = { ...(layer.paint || {}), [prop]: value }
   }
-  return style
+  return satelliteStyle(style)
 }
 
 function initMap(style: any) {
@@ -302,6 +297,12 @@ function initMap(style: any) {
   map.addControl(new ScaleControl({ unit: 'metric' }), 'bottom-right')
   map.on('error', (e) => console.error('map error:', e.error?.message ?? e))
   if (import.meta.env.DEV) (window as any).__map = map
+  initWorld(map, $('.stage'), {
+    levels: () => levels,
+    visibleIds: () => visibleOverlaps().map((o) => o.id),
+    onView: viewChanged,
+    onSelect: (id) => (id ? selectOverlap(id, { from3d: true }) : closeDetail()),
+  })
 
   // 'style.load', not 'load': 'load' waits for every basemap tile, and our layers don't need them.
   map.once('style.load', () => {
@@ -387,31 +388,45 @@ function initMap(style: any) {
     map.addLayer({ id: 'draft-pts', type: 'circle', source: 'draft', filter: isPoint as any,
       paint: { 'circle-radius': 6, 'circle-color': ICE, 'circle-stroke-color': '#040910', 'circle-stroke-width': 2 } })
 
-    addMapModes(map, 'backdrop')
-    map.once('idle', () => $('#loading').classList.add('done'))
-    setTimeout(() => $('#loading').classList.add('done'), 8000)  // never leave it up on a slow tile server
+    addSatellite(map, 'backdrop')
+    // The breathing glow repaints the map, so the map would never go 'idle' while it runs: the loading screen used
+    // to sit there until its 8 s timeout. First frame in, then the glow. 2026-09-27.
+    let up = false
+    const ready = () => {
+      if (up) return
+      up = true
+      $('#loading').classList.add('done')
+      requestAnimationFrame(pulse)
+      // Build the 3D world in the background once the map is up, so the first switch to 3D doesn't wait.
+      if (levels.length) setTimeout(() => preloadWorld(worldTarget(null)!.level), 2500)
+    }
+    map.once('idle', ready)
+    setTimeout(ready, 8000)  // never leave it up on a slow tile server
     applyLayerState()
     applyProjectDim()
-    if (state.satellite) setSatellite(map, true)
-    if (state.view3d) set3D(map, true)
     wireMapEvents()
-    pulse()
-    const fromHash = new URLSearchParams(location.hash.slice(1)).get('o')
-    if (fromHash) selectOverlap(fromHash)
+    const hash = new URLSearchParams(location.hash.slice(1))
+    if (hash.get('o')) selectOverlap(hash.get('o')!)
+    if (hash.get('v') === '3d') setView('3d')   // shareable straight into the 3D world
   })
 }
 
 // The selected connector breathes: glow is for live things.
 // So do touching points (Tier 1, "must coordinate"): their halo swells and fades on a slower breath.
-function pulse() {
-  const t = performance.now() / 1000
+// Every paint change makes MapLibre redraw, so the breath runs at 30 fps (plenty for a slow swell) and stops while the
+// 3D world is on screen, where the map is hidden: no redraws nobody sees. 2026-09-27.
+let breathAt = 0
+function pulse(now: number) {
+  requestAnimationFrame(pulse)
+  if (currentView() === '3d' || now - breathAt < 33) return
+  breathAt = now
+  const t = now / 1000
   if (map.getLayer('conn-sel')) map.setPaintProperty('conn-sel', 'line-opacity', 0.55 + 0.45 * Math.abs(Math.sin(t * 2.2)))
   if (map.getLayer('touch-halo')) {
     const b = 0.5 + 0.5 * Math.sin(t * 2.4)
     map.setPaintProperty('touch-halo', 'circle-radius', 13 + 11 * b)
     map.setPaintProperty('touch-halo', 'circle-opacity', 0.55 - 0.35 * b)
   }
-  requestAnimationFrame(pulse)
 }
 
 function wireMapEvents() {
@@ -568,7 +583,7 @@ function fitTo(features: Feature[], extra: LonLat[] = []) {
   const pad = { top: 80, right: 60, bottom: 50, left: 60 }  // top: room for the labels above the points
   if (card && window.innerWidth >= 900) pad.left = Math.min(card.right - box.left + 30, box.width * 0.6)
   else if (card) pad.bottom = Math.min(box.bottom - card.top + 20, box.height * 0.6)
-  map.fitBounds(b, { padding: pad, maxZoom: 12.5, duration: 1400, pitch: state.view3d ? 62 : 0 })
+  map.fitBounds(b, { padding: pad, maxZoom: 12.5, duration: 1400, pitch: 0, bearing: 0 })   // 2D stays flat and north-up
 }
 
 // ------------------------------------------------------------------------------------------------ layers panel
@@ -582,23 +597,9 @@ function renderLegend() {
     </label>`).join('')
   $('#legend').classList.toggle('collapsed', state.legendCollapsed)
   $('#legend').innerHTML = `
-    <div class="seg"><button data-base="map" class="${state.satellite ? '' : 'on'}">MAP</button><button data-base="sat" class="${state.satellite ? 'on' : ''}" title="USGS aerial imagery">SATELLITE</button></div>
-    <div class="seg"><button data-view="2d" class="${state.view3d ? '' : 'on'}">2D</button><button data-view="3d" class="${state.view3d ? 'on' : ''}" title="Terrain (x4 height) and 3D buildings">3D TERRAIN</button></div>
     <div class="head"><span>LAYERS</span><button data-collapse title="Show or hide the layer list">${state.legendCollapsed ? '+' : '–'}</button></div>
     <div class="body">${rows}<div class="note">Faded: approximate location<br>Dimmed: no overlap in this view</div></div>`
   const L = $('#legend')
-  L.querySelectorAll<HTMLButtonElement>('[data-base]').forEach((b) => b.addEventListener('click', () => {
-    state.satellite = b.dataset.base === 'sat'
-    if (map?.getLayer('sat')) setSatellite(map, state.satellite)
-    saveUi(); renderLegend()
-  }))
-  L.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) => b.addEventListener('click', () => {
-    const want = b.dataset.view === '3d'
-    if (want === state.view3d) return
-    state.view3d = want
-    if (map?.getSource('dem')) set3D(map, want)
-    saveUi(); renderLegend()
-  }))
   L.querySelector<HTMLButtonElement>('[data-collapse]')!.addEventListener('click', () => { state.legendCollapsed = !state.legendCollapsed; renderLegend() })
   L.querySelectorAll<HTMLInputElement>('input[data-layer]').forEach((inp) => inp.addEventListener('change', () => {
     state.layers[inp.dataset.layer!] = inp.checked
@@ -723,12 +724,13 @@ function renderUserBox() {
 }
 
 // ------------------------------------------------------------------------------------------------ guided tour
-// One button for the pitch: satellite + 3D, then the camera flies to each top opportunity with its numbers on screen.
+// One button for the pitch: the camera flies to each top opportunity with its numbers on screen.
+// (In 3D the same button runs the 3D world's own tour.)
 const TOUR_MS = 11000
-let tour: { steps: (Overlap | null)[]; i: number; timer: number; paused: boolean; saved: { satellite: boolean; view3d: boolean } } | null = null
+let tour: { steps: (Overlap | null)[]; i: number; timer: number; paused: boolean } | null = null
 
 function startTour() {
-  if (!map?.getSource('dem')) return
+  if (!map?.getLayer('sat')) return
   if (state.drawing) stopDrawing()
   closeDetail()
   // Top 3 in spec order among what the current view shows (like the 3D world's tour), skipping a pair that meets at the
@@ -741,26 +743,17 @@ function startTour() {
   }
   const steps: (Overlap | null)[] = [null, ...top]
   if (userOverlaps[0]) steps.push(userOverlaps[0])
-  tour = { steps, i: 0, timer: 0, paused: false, saved: { satellite: state.satellite, view3d: state.view3d } }
-  if (!state.satellite) { state.satellite = true; setSatellite(map, true) }
-  if (!state.view3d) { state.view3d = true; set3D(map, true) }
-  renderLegend()
+  tour = { steps, i: 0, timer: 0, paused: false }
   tourGo(0)
 }
 
 function stopTour(restore = true) {
   if (!tour) return
   clearTimeout(tour.timer)
-  const { saved } = tour
   tour = null
   $('#tourbar').hidden = true
   $('#tour-btn').textContent = '▶ TOUR'
-  if (restore) {
-    if (state.satellite !== saved.satellite) { state.satellite = saved.satellite; setSatellite(map, saved.satellite) }
-    if (state.view3d !== saved.view3d) { state.view3d = saved.view3d; set3D(map, saved.view3d) }
-    highlight([])
-  }
-  renderLegend()
+  if (restore) highlight([])
 }
 
 // Compass direction from a to b, in degrees (0 = north).
@@ -775,7 +768,7 @@ function tourGo(i: number) {
   const o = tour.steps[tour.i]
   if (!o) {
     highlight([])
-    map.fitBounds([[-82.5, 31.95], [-80.7, 33.85]], { pitch: 55, bearing: -12, duration: 3200, padding: 40 })
+    map.fitBounds([[-82.5, 31.95], [-80.7, 33.85]], { pitch: 0, bearing: 0, duration: 3200, padding: 40 })
   } else {
     highlight([o.a, o.b], o.id)
     const [p, q] = o.closest_points
@@ -787,7 +780,7 @@ function tourGo(i: number) {
     const mid: LonLat = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]
     const r = Math.max(2.5, o.closest_km * 1.6)
     const dLat = r / 111.32, dLon = r / (111.32 * Math.cos((mid[1] * Math.PI) / 180))
-    map.fitBounds([[mid[0] - dLon, mid[1] - dLat], [mid[0] + dLon, mid[1] + dLat]], { pitch: 62, bearing: az - 90, maxZoom: 14,
+    map.fitBounds([[mid[0] - dLon, mid[1] - dLat], [mid[0] + dLon, mid[1] + dLat]], { pitch: 0, bearing: az - 90, maxZoom: 14,
       duration: 4200, padding: { top: 60, bottom: Math.min(240, window.innerHeight * 0.3), left: 40, right: 40 } })
   }
   renderTourbar()
@@ -920,6 +913,7 @@ function renderRanked() {
 
 function rerender() {
   renderStats(); renderUserBox(); renderFilters(); renderRanked(); renderLegend(); refreshMap()
+  setVisible3D(visibleOverlaps().map((o) => o.id))   // the 3D world shows the same overlaps as the list
   if (state.selected && !visibleOverlaps().some((o) => o.id === state.selected)) closeDetail()
   else if (state.selected) setSelectionLabels(findOverlap(state.selected) ?? null)  // e.g. CLOSEST POINTS <-> CENTERS
 }
@@ -1045,9 +1039,8 @@ function levelFor(o: Overlap) {
 
 function actions3d(o: Overlap) {
   const lv = levels.length ? levelFor(o) : null
-  const url = lv ? `${WORLD_VIEWER}?level=${encodeURIComponent(lv.level)}&select=${encodeURIComponent(o.id)}` : ''
-  const world = lv ? `<a class="btn3d" href="${url}" title="Opens the ${esc(lv.title)} level of the 3D world">VIEW IN 3D ↗</a>
-    <a class="btn3d hotbtn" href="${url}&walk=1" title="Drop onto the ground at one end, facing the other">WALK THE GAP ↗</a>`
+  const world = lv ? `<button class="btn3d" data-go3d="fly" title="Switch to 3D, in the ${esc(lv.title)} level">VIEW IN 3D</button>
+    <button class="btn3d hotbtn" data-go3d="walk" title="Switch to 3D and drop onto the ground at one end, facing the other">WALK THE GAP</button>`
     : levels.length ? '<span class="m">NOT IN A 3D LEVEL YET</span>' : ''
   return `<div class="actions3d">${world}
     <a class="btn3d" href="${earthUrl(o)}" target="_blank" rel="noopener" title="Google Earth's own 3D view of this spot">GOOGLE EARTH ↗</a>
@@ -1083,6 +1076,7 @@ function renderOverlapDetail(o: Overlap) {
     <div class="section-title">IMPACT ESTIMATE</div>
     ${renderCost(o)}`
   card.querySelector('.close')!.addEventListener('click', closeDetail)
+  card.querySelectorAll<HTMLButtonElement>('[data-go3d]').forEach((b) => b.addEventListener('click', () => setView('3d', b.dataset.go3d === 'walk')))
   card.querySelectorAll<HTMLInputElement>('input[data-cost]').forEach((inp) => inp.addEventListener('change', () => {
     (state.cost as any)[inp.dataset.cost!] = Number(inp.value)
     renderOverlapDetail(o)
@@ -1104,18 +1098,68 @@ function revealOverlap(o: Overlap) {
   rerender()
 }
 
-function selectOverlap(id: string) {
+function selectOverlap(id: string, how: { from3d?: boolean } = {}) {
   const o = findOverlap(id)
   if (!o || !byId[o.a] || !byId[o.b]) return
   if (state.drawing) stopDrawing()
   revealOverlap(o)
   state.selected = id
-  history.replaceState(null, '', `#o=${encodeURIComponent(id)}`)  // shareable, and the 3D viewer links back here
+  writeHash()
   renderRanked()
   $('#ranked').querySelector(`li[data-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })
   renderOverlapDetail(o)
   highlight([o.a, o.b], o.id)
-  fitTo([byId[o.a], byId[o.b]], o.closest_points)
+  // In 3D the map is hidden: the 3D world flies there instead, and the map catches up on the way back to 2D.
+  if (currentView() === '3d') { if (!how.from3d) { const t = worldTarget(o); if (t) show3D(t) } }
+  else fitTo([byId[o.a], byId[o.b]], o.closest_points)
+}
+
+// ------------------------------------------------------------------------------------------------ 2D and 3D, one page
+/** Where the 3D world should go: the picked overlap in its level, else the level under the map's center. */
+function worldTarget(o: Overlap | null, walk = false): Target | null {
+  if (!levels.length) return null
+  const lv = o ? levelFor(o) : null
+  if (o && lv) {
+    const [p, q] = o.closest_points
+    return { level: lv.level, center: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], id: o.id, km: o.closest_km, walk }
+  }
+  const c = map.getCenter()
+  const l = levels.find((x) => c.lat >= x.bbox[0] && c.lng >= x.bbox[1] && c.lat <= x.bbox[2] && c.lng <= x.bbox[3]) ?? levels[0]
+  return { level: l.level, center: [(l.bbox[1] + l.bbox[3]) / 2, (l.bbox[0] + l.bbox[2]) / 2], id: null, km: 0 }
+}
+
+function setView(v: View, walk = false) {
+  if (v === '3d') {
+    if (tour) stopTour(false)
+    if (state.drawing) stopDrawing()
+    const o = state.selected ? findOverlap(state.selected) ?? null : null
+    const t = worldTarget(o, walk)
+    if (t) show3D(t)
+    return
+  }
+  const o = state.selected ? findOverlap(state.selected) : null
+  show2D(o ? () => fitTo([byId[o.a], byId[o.b]], o.closest_points) : undefined)
+}
+
+/** The switch, the header and the side panel follow the view. */
+function viewChanged(v: View) {
+  const sw = $('#viewswitch')
+  sw.classList.toggle('is3d', v === '3d')
+  sw.querySelectorAll<HTMLButtonElement>('button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.view === v)
+    b.setAttribute('aria-pressed', String(b.dataset.view === v))
+  })
+  document.body.classList.toggle('in3d', v === '3d')
+  writeHash()
+}
+
+/** #o=<overlap>&v=3d: shareable, and a reload lands in the same place and view. */
+function writeHash() {
+  const h = new URLSearchParams()
+  if (state.selected) h.set('o', state.selected)
+  if (currentView() === '3d') h.set('v', '3d')
+  const s = h.toString()
+  history.replaceState(null, '', s ? `#${s}` : location.pathname + location.search)
 }
 
 function showProject(pid: string) {
@@ -1150,7 +1194,7 @@ function showProject(pid: string) {
 
 function closeDetail() {
   state.selected = null
-  if (location.hash) history.replaceState(null, '', location.pathname + location.search)
+  writeHash()
   $('#detail').hidden = true
   highlight([])
   renderRanked()
@@ -1230,11 +1274,9 @@ function renderAbout() {
 }
 
 function wireChrome() {
-  if (levels.length) {
-    const link = $<HTMLAnchorElement>('#world-link')
-    link.href = `${WORLD_VIEWER}?level=savannah`
-    link.hidden = false
-  }
+  // 2D / 3D: the 3D side only exists when the 3D world was built (world3d/build/levels.json)
+  $('#viewswitch').hidden = !levels.length
+  $('#viewswitch').querySelectorAll<HTMLButtonElement>('button').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view as View)))
   document.querySelectorAll<HTMLButtonElement>('.method button').forEach((btn) => btn.addEventListener('click', () => {
     state.method = btn.dataset.method as Method
     document.querySelectorAll('.method button').forEach((b) => b.classList.toggle('on', b === btn))
@@ -1244,7 +1286,7 @@ function wireChrome() {
     document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b === btn))
     for (const t of ['ranked', 'quality', 'about']) $(`#tab-${t}`).hidden = t !== btn.dataset.tab
   }))
-  $('#tour-btn').addEventListener('click', () => (tour ? stopTour() : startTour()))
+  $('#tour-btn').addEventListener('click', () => (currentView() === '3d' ? tour3D() : tour ? stopTour() : startTour()))
   document.addEventListener('keydown', (e) => {
     const typing = (e.target as HTMLElement)?.closest?.('input, textarea, select')
     if (tour && !typing) {
