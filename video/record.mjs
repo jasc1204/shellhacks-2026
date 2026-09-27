@@ -215,17 +215,25 @@ async function startCapture(page, dir) {
     cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
   })
   await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: W, maxHeight: H, everyNthFrame: 1 })
-  return async () => { await cdp.send('Page.stopScreencast').catch(() => {}); await sleep(400); await Promise.all(writes); return frames }
+  return async () => {
+    const end = Date.now() / 1000   // a still page sends no frames: the last one holds until here
+    await cdp.send('Page.stopScreencast').catch(() => {}); await sleep(400); await Promise.all(writes)
+    frames.end = end
+    return frames
+  }
 }
 
 function encode(frames, dir, dest) {
   if (frames.length < 2) throw new Error('no frames captured')
   const lines = ['ffconcat version 1.0']
   frames.forEach((fr, i) => {
-    const d = i + 1 < frames.length ? Math.max(0.001, frames[i + 1].t - fr.t) : 0.5
+    const d = i + 1 < frames.length ? Math.max(0.001, frames[i + 1].t - fr.t) : Math.max(0.5, (frames.end ?? fr.t) - fr.t)
     lines.push(`file '${path.basename(fr.f)}'`, `duration ${d.toFixed(4)}`)
   })
-  lines.push(`file '${path.basename(frames.at(-1).f)}'`)   // the concat demuxer drops the last duration without this
+  // the concat demuxer drops the last entry's duration and guesses it from the gap before it: end on two repeats of
+  // the last frame, 1/30 s apart, so the real hold counts and the guess is one frame
+  const lastF = `file '${path.basename(frames.at(-1).f)}'`
+  lines.push(lastF, 'duration 0.0333', lastF)
   fs.writeFileSync(path.join(dir, 'list.ffconcat'), lines.join('\n'))
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', path.join(dir, 'list.ffconcat'),
     '-vf', `scale=${W}:${H}:flags=lanczos,fps=30`, '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', dest])
@@ -252,6 +260,7 @@ for (const shot of order) {
   await ctx.close()
   // marks are wall-clock; frames carry Chrome's timestamps: line them up on the first frame
   if (frames.length && marks[shot] != null) marks[shot] = Math.max(0, marks[shot] + page.__t0 - frames[0].t)
+  if (process.env.DEBUG) console.log('frames at', frames.map((f) => (f.t - frames[0].t).toFixed(2)).join(' '), 'end at', (frames.end - frames[0].t).toFixed(2), 'mark', marks[shot])
   const dest = path.join(OUT, `${shot}.mp4`)
   try { encode(frames, dir, dest) } catch (e) { console.log(`ENCODE FAILED: ${e.message}`); continue }
   fs.rmSync(dir, { recursive: true, force: true })
