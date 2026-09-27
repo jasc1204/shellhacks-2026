@@ -29,7 +29,7 @@ GridLock reads both utilities' public construction plans, puts every project on 
 - **Filters:** GEOGRAPHIC (by tier), TIMELINE (by timing) or BOTH (close and timed together). Everything else dims, so the map stays readable.
 - **Add your own project:** draw a line or drop a substation, and GridLock scores it against the other utility's plans instantly, with the same rules.
 - **See it:**
-  - satellite imagery and 3D terrain in the map
+  - one page, two views: the 2D satellite map and the 3D world, switched in place at the same spot (the map leans in and the 3D camera takes over)
   - a guided tour of the top opportunities
   - a walkable 3D world of both border regions, built in Blender and Three.js, with real buildings, substations and satellite ground, plus an optional Google photorealistic 3D mode
   - one click opens any opportunity in Google Earth's own 3D view
@@ -46,7 +46,7 @@ GridLock reads both utilities' public construction plans, puts every project on 
   - Town-level fallbacks (Nominatim) are always labeled low confidence.
 - **Overlap engine:** closest points between point and line geometries (Shapely) in a local projection, the four tiers, and build-window overlap. The ranking follows the spec: tier, then timing, then distance. A 0–100 score (65% distance, 35% timing) is shown as a summary but never reorders pairs across tiers.
 - **Validation:** it reproduces **all 6 overlaps in Sperry's sample**, with in-service gaps matching to the day. The browser version of the math matches the Python pipeline exactly: the same 78 overlaps, distances within 1 m.
-- **Web app:** TypeScript + Vite + MapLibre GL, with an OpenFreeMap basemap, USGS satellite imagery and AWS terrain tiles, none of which need API keys.
+- **Web app:** TypeScript + Vite + MapLibre GL, with OpenFreeMap labels and Sentinel-2 cloudless (EOX) plus USGS satellite imagery, none of which need API keys. The 3D world is embedded in the same page, and the switch hands the camera over between the two.
 - **3D world:** Blender + Three.js, generated from the same data files. The optional Google 3D mode streams Google's photorealistic tiles through `3d-tiles-renderer`.
 
 ## Challenges I ran into
@@ -75,7 +75,7 @@ How transmission planning actually works: IRPs, regional forums like SERTP, CEII
 
 ## Built with
 
-python · shapely · poppler · openstreetmap · overpass-api · nominatim · typescript · vite · maplibre-gl · openfreemap · usgs-national-map · aws-terrain-tiles · blender · three.js · 3d-tiles-renderer · kml
+python · shapely · poppler · openstreetmap · overpass-api · nominatim · typescript · vite · maplibre-gl · openfreemap · usgs-national-map · sentinel-2 · aws-terrain-tiles · blender · three.js · 3d-tiles-renderer · kml
 
 ## Challenges to select on Devpost
 

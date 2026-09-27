@@ -71,19 +71,28 @@ function load(key: string) {
     frame.id = 'world'
     frame.title = 'GridLock 3D world'
     stage.appendChild(frame)
+    frame.addEventListener('load', frameLoaded)
   }
-  const f = frame, want = `level=${encodeURIComponent(key)}`
-  f.src = `${VIEWER}?embed=1&${want}`
+  frame.src = `${VIEWER}?embed=1&level=${encodeURIComponent(key)}`
+}
+
+/** Every page the frame loads: ours, or one the viewer navigated to itself (its tour hopping levels, GOOGLE 3D).
+ *  Follow its level, then wait for it to finish building. */
+let loads = 0
+function frameLoaded() {
+  const f = frame!, n = ++loads
+  ready = false
+  try { level = new URLSearchParams(f.contentWindow!.location.search).get('level') || level } catch { /* keep */ }
   const t0 = performance.now()
   const poll = () => {
-    if (f !== frame || level !== key) return
+    if (f !== frame || n !== loads) return
     let d: Document | null = null
-    try { d = f.contentWindow?.location.search.includes(want) ? f.contentDocument : null } catch { d = null }
+    try { d = f.contentDocument } catch { d = null }
     // the viewer takes its boot screen away once the level is built
     if (d && d.getElementById('stage') && !d.getElementById('boot')) { adopt(d); ready = true; api()?.setVisible?.(hooks.visibleIds()); return }
     if (performance.now() - t0 < 120000) setTimeout(poll, 120)
   }
-  setTimeout(poll, 200)
+  poll()
 }
 
 /** Older viewers (no ?embed=1 support): hide their own list and map link, and follow their selection through the
