@@ -42,6 +42,10 @@ body.measuring #stage canvas { cursor: crosshair; }
 .chip.user { border-style: dashed; }
 .chip small { color: var(--muted); font-weight: 400; margin-left: 6px; }
 .ring-cap { font: 500 10px/1 var(--mono); letter-spacing: .22em; color: var(--ink); white-space: nowrap; text-shadow: 0 0 6px #020408; }
+/* 2026-09-26 declutter: a label that collides with a more important one (or repeats a name nearby) fades out and stops
+   catching clicks; the class is set by declutter() a few times a second, so it never fights CSS2DRenderer's display */
+#labels > div > * { transition: opacity .22s; }
+#labels .dc { opacity: 0 !important; pointer-events: none !important; }
 
 /* HUD */
 .panel { position: fixed; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; backdrop-filter: blur(6px); }
@@ -129,7 +133,16 @@ button.act { flex: 1; font: 600 11px/1 var(--mono); letter-spacing: .16em; color
 button.act:hover { box-shadow: var(--glow); border-color: var(--ice); }
 button.act.hot, button.act.on { color: var(--bg); background: var(--ice); }
 button.act.on { box-shadow: var(--glow); }
+#card .btns button.act { white-space: nowrap; }
+#card .btns:has(#b-watch:not([hidden])) button.act { letter-spacing: .1em; padding: 9px 5px; }   /* three across still fit */
 #why { font: 400 11px/1.45 var(--mono); color: var(--faint); margin: 8px 0 0; }
+/* WATCH FLY-IN: a pre-rendered clip of the selected overlap, over a dimmed world */
+#clip { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 16px; background: rgba(2, 4, 8, .74); backdrop-filter: blur(3px); }
+#clip[hidden] { display: none; }
+#clip .panel { position: relative; width: min(1120px, 100%); border-color: var(--line-hi); box-shadow: var(--glow); }
+#clip video { display: block; width: 100%; max-height: calc(100vh - 96px); background: var(--bg); border-radius: 0 0 4px 4px; }
+#clip-x { font: 600 16px/1 var(--mono); color: var(--muted); background: none; border: 0; padding: 0 2px; cursor: pointer; }
+#clip-x:hover, #clip-x:focus-visible { color: var(--ice); outline: none; }
 
 #mini { top: 16px; right: 16px; padding: 8px; width: 218px; }
 #mini canvas { display: block; width: 200px; height: 200px; cursor: crosshair; border-radius: 2px; }
@@ -284,7 +297,7 @@ body.touring #key { display: none; }
     <div class="fact"><div class="kicker">ON FOOT / BY TRUCK</div><div class="v" id="c-reach"></div></div>
   </div>
   <p id="why"></p>
-  <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button></div>
+  <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button><button class="act" id="b-watch" title="Play the pre-rendered fly-in of this overlap. Esc closes it." hidden>WATCH FLY-IN</button></div>
 </section>
 
 <div id="dock">
@@ -321,6 +334,13 @@ body.touring #key { display: none; }
   <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>wheel</b> speed</span><span><b>Tab</b> walk, drive or fly</span>
     <span><b>1-9</b> fly to a row</span><span><b>M</b> measure</span><span><b>T</b> tour</span><span><b>K</b> key</span><span><b>L</b> layers</span><span><b>G</b> satellite or map</span><span><b>R</b> overview</span><span><b>H</b> hide HUD</span></div>
 </footer>
+</div>
+
+<div id="clip" hidden>
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="clip-k">
+    <div class="panel-h"><span class="kicker" id="clip-k">FLY-IN</span><button id="clip-x" aria-label="Close the video" title="Close (Esc)">×</button></div>
+    <video id="clip-v" muted autoplay playsinline controls preload="auto"></video>
+  </section>
 </div>
 
 <script type="module">
@@ -398,6 +418,7 @@ let S, TER, gltf, BLD = null, GROUND = 'map';
 let PHOTO = qs.get('photoreal') === '1', TOKENS = null, tiles = null;
 let anchorTiles = null, tileAnchor = null;   // Google 3D: re-anchored near the action (see anchorTiles below)
 let photoSurface = null, surfaceT = 0, photoRootRef = null;   // Google 3D: height of the photo mesh under the camera
+const TILE_ERR = { still: 12, moving: 20 };   // Google 3D: screen-space error target (px), camera settled / in flight
 const downRay = new THREE.Raycaster(), DOWN = new THREE.Vector3(0, -1, 0);
 try {
   progress(.05, 'fetching scene + terrain...');
@@ -492,8 +513,47 @@ const gradTex = stops => {  // tiny canvas gradients: sky + alpha fades
   g.fillStyle = gr; g.fillRect(0, 0, 4, 256);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 };
-const sky = new THREE.Mesh(new THREE.SphereGeometry(200000, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, fog: false, depthWrite: false }));
+const skyBasic = new THREE.MeshBasicMaterial({ side: THREE.BackSide, fog: false, depthWrite: false });
+const sky = new THREE.Mesh(new THREE.SphereGeometry(200000, 32, 16), skyBasic);
+sky.renderOrder = -1;   // drawn first, whichever material it wears
 world.add(sky);
+// 2026-09-26 Google 3D: the flat gradient read pale and cheap over the photo mesh. A shader sky instead: deep blue
+// overhead, a luminous haze band whose horizon is exactly the fog color (the far tiles melt into it with no seam),
+// and a soft warm glow toward a late-afternoon sun in the southwest. Below the horizon it's all haze.
+const PHOTO_HAZE = 0xc3d1de;
+// Its haze is linear, not exponential, and scaled by altitude every frame (frame()): at 450 m it starts at 2.3 km (past
+// all a drone sees looking 40 degrees down) and is total by 12 km; from 60 m it starts at 1.4 km. Exponential fog
+// couldn't do both: from low up, the 3-27 km of land at the horizon squeeze into a few pixels and stayed a hard dark line.
+const baseFog = world.fog, photoFog = new THREE.Fog(PHOTO_HAZE, 2300, 12000);
+const photoSky = new THREE.ShaderMaterial({
+  uniforms: {
+    uTop: { value: new THREE.Color(0x1b4a8f) }, uMid: { value: new THREE.Color(0x5b8fcf) }, uHaze: { value: new THREE.Color(PHOTO_HAZE) },
+    uSunCol: { value: new THREE.Color(0xffd6a0) }, uSun: { value: new THREE.Vector3(-0.63, 0.34, 0.63).normalize() },   // bearing 225, 20 deg up
+  },
+  vertexShader: `#include <common>
+    #include <logdepthbuf_pars_vertex>
+    varying vec3 vDir;
+    void main() {
+      vDir = position;   // the dome rides on the camera: position is the view direction
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      #include <logdepthbuf_vertex>
+    }`,
+  fragmentShader: `#include <common>
+    #include <logdepthbuf_pars_fragment>
+    uniform vec3 uTop, uMid, uHaze, uSunCol, uSun;
+    varying vec3 vDir;
+    void main() {
+      #include <logdepthbuf_fragment>
+      vec3 d = normalize(vDir);
+      float e = d.y;                                                  // sine of the elevation
+      vec3 col = mix(uMid, uTop, smoothstep(0.1, 0.85, e));           // the blue deepens overhead
+      col = mix(uHaze, col, pow(smoothstep(0.0, 0.34, e), 0.62));      // the haze band, exactly the fog color at 0
+      float s = max(dot(d, uSun), 0.0), low = smoothstep(0.0, 0.05, e) * (1.0 - 0.7 * smoothstep(0.05, 0.5, e));
+      col += uSunCol * (0.2 * pow(s, 4.0) + 0.45 * pow(s, 48.0)) * low;   // warm light low toward the sun
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+  side: THREE.BackSide, depthWrite: false, fog: false,
+});
 const fadeUp = gradTex([[0, '#ffffff'], [1, '#000000']]);    // alpha: bright at the top of the UV (v=1)
 const fadeDown = gradTex([[0, '#000000'], [0.35, '#1a1a1a'], [1, '#ffffff']]);  // alpha: bright at the bottom (v=0)
 fadeUp.colorSpace = fadeDown.colorSpace = THREE.NoColorSpace;
@@ -502,6 +562,8 @@ const MOODS = {
          hemi: [0x2a3f7a, 0x020408, 1.1], sun: [0x9fb8ff, 1.2, [-1, 0.45, -0.6]], bloom: 0.78, apron: 0x060b16, emissive: 0.92 },
   sat: { sky: [[0, '#16305a'], [0.3, '#3d6594'], [0.47, '#a9bdd2'], [0.5, '#c6d3df'], [0.56, '#9aa8a8'], [1, '#4a5044']], fog: 0xa6b7c7, fogD: 1.3e-5,
          hemi: [0xdce8ff, 0x3d3a2c, 1.25], sun: [0xfff0d8, 2.1, [0.55, 1.0, 0.45]], bloom: 1.02, apron: 0x49503f, emissive: 0.42 },
+  // Google 3D, whichever ground is picked (a night sky over a daylight photo reads wrong): photoSky + photoFog
+  photo: { fog: PHOTO_HAZE, hemi: [0xdce8ff, 0x3d3a2c, 1.25], sun: [0xfff0d8, 2.1, [0.55, 1.0, 0.45]], bloom: 1.02, apron: 0x49503f, emissive: 0.42 },
 };
 
 // ================================================================== terrain + satellite patches
@@ -561,8 +623,8 @@ async function buildPatches() {  // ~2 m/px USGS imagery draped on the same terr
 
 // ================================================================== lines helpers
 const lineMats = [];
-const lineMat = (color, width, opts = {}) => {
-  const m = new LineMaterial({ color, linewidth: width, transparent: true, ...opts });
+const lineMat = (color, width, opts = {}) => {   // Google 3D: lines sink into the haze with the land (no bright tangle on the horizon)
+  const m = new LineMaterial({ color, linewidth: width, transparent: true, fog: PHOTO, ...opts });
   m.resolution.set(innerWidth, innerHeight);
   lineMats.push(m);
   return m;
@@ -574,17 +636,31 @@ const segs = (pos, mat) => { const g = new LineSegmentsGeometry(); g.setPosition
 const towerH = kv => (kv || 0) >= 500 ? 48 : (kv || 0) >= 230 ? 36 : (kv || 0) >= 100 ? 27 : 20;
 
 // ================================================================== existing grid: far glow + sagging wires
-const glowPos = [], wirePos = [], segIndex = new Map(), SEG_CELL = 250;
+// 2026-09-26: prep_scene clips every OSM line at the level box, and with the far photo (or Google's tiles) running on
+// past it, a cut reads as a real dead end in a field (US-21 on St Helena Island: 22 cuts in Savannah, 43 in Augusta).
+// A line that ends ON the box now fades out over its last 1.3 km (per-segment alpha, fadeLines below), and the towers
+// in the faded half are dropped. Lines that really end near the edge (at a substation) keep full strength.
+const CUT_FADE = 1300, edgeDist = (x, y) => Math.min(W / 2 - Math.abs(x), H / 2 - Math.abs(y));
+const smooth01 = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+const glowPos = [], wirePos = [], glowFade = [], wireFade = [], cutEnds = [], segIndex = new Map(), SEG_CELL = 250;
 for (const line of S.grid) {
-  const h = towerH(line.kv), p = line.pts;
+  const h = towerH(line.kv), p = line.pts, last = p[p.length - 1];
+  const cutA = edgeDist(p[0][0], p[0][1]) < 15, cutB = edgeDist(last[0], last[1]) < 15;
+  if (cutA) cutEnds.push(p[0]);
+  if (cutB) cutEnds.push(last);
+  const s = [0];   // distance along the line
+  for (let i = 1; i < p.length; i++) s.push(s[i - 1] + (Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]) || 1));
+  const len = s[s.length - 1], fadeAt = d => Math.min(cutA ? smooth01(d / CUT_FADE) : 1, cutB ? smooth01((len - d) / CUT_FADE) : 1);
   for (let i = 0; i < p.length - 1; i++) {
     const [x0, y0, z0] = p[i], [x1, y1, z1] = p[i + 1];
     push(glowPos, x0, y0, z0 + 0.7 * h); push(glowPos, x1, y1, z1 + 0.7 * h);
+    glowFade.push(fadeAt(s[i]), fadeAt(s[i + 1]));
     const dx = x1 - x0, dy = y1 - y0, span = Math.hypot(dx, dy) || 1, sag = Math.min(0.03 * span, 0.35 * h);
     for (const side of [-1, 1]) {
       const ox = -dy / span * side * 0.28 * h, oy = dx / span * side * 0.28 * h;
       for (let k = 0; k < 6; k++) {
         for (const f of [k / 6, (k + 1) / 6]) push(wirePos, x0 + dx * f + ox, y0 + dy * f + oy, z0 + (z1 - z0) * f + 0.7 * h - 4 * sag * f * (1 - f));
+        wireFade.push(fadeAt(s[i] + span * k / 6), fadeAt(s[i] + span * (k + 1) / 6));
       }
     }
     // spatial index of spans: keeps trees out of the cleared right-of-way
@@ -596,9 +672,21 @@ for (const line of S.grid) {
     }
   }
 }
+function fadeLines(mat, geo, fade) {  // LineMaterial with alpha *= a per-segment (start, end) fade from the geometry
+  geo.setAttribute('instanceFade', new THREE.InstancedBufferAttribute(new Float32Array(fade), 2));
+  mat.onBeforeCompile = sh => {   // same source for every grid material, so they share one program
+    sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec2 instanceFade;\nvarying float vFade;\nvoid main() {\n\tvFade = ( position.y < 0.5 ) ? instanceFade.x : instanceFade.y;');
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'varying float vFade;\nvoid main() {')
+      .replace('gl_FragColor = vec4( diffuseColor.rgb, alpha );', 'gl_FragColor = vec4( diffuseColor.rgb, alpha * vFade );');
+  };
+}
 const gridGlow = segs(glowPos, lineMat(hot(COL.grid, 1.25), 1.5, { opacity: 0.85 }));
 const gridWires = segs(wirePos, lineMat(COL.steel, 1.1, { opacity: 0.9 }));
+fadeLines(gridGlow.material, gridGlow.geometry, glowFade);
+fadeLines(gridWires.material, gridWires.geometry, wireFade);
 world.add(gridGlow, gridWires);
+// towers in the faded half of a cut line would stand at the end of nothing: drop them (updateTowers reads S.towers)
+if (cutEnds.length) S.towers = S.towers.filter(t => !cutEnds.some(c => Math.hypot(t[0] - c[0], t[1] - c[1]) < CUT_FADE / 2));
 
 // ================================================================== real structures from OpenStreetMap
 const ST = S.structures || { facilities: [], equipment: [], stacks: [] };
@@ -653,8 +741,8 @@ const facLabels = [], padMeshes = [];
     }
     if (f.name) {
       const el = document.createElement('div');
-      el.className = `fac ${owner}`; el.textContent = clean(f.name);
-      const cx = (f.box[0] + f.box[2]) / 2, cy = (f.box[1] + f.box[3]) / 2;
+      el.className = `fac ${owner}`; el.textContent = clean(f.name); el._lk = 'fac';
+      const cx = (f.box[0] + f.box[2]) / 2, cy = (f.box[1] + f.box[3]) / 2; el._xy = [cx, cy];
       const o = new CSS2DObject(el); o.position.copy(V(cx, cy, f.z + 45)); o.visible = false; world.add(o);
       facLabels.push({ o, x: cx, y: cy });
     }
@@ -800,7 +888,7 @@ for (const p of S.projects) {
     g.setAttribute('position', new THREE.Float32BufferAttribute(c.cur, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(c.uv, 2));
     g.setIndex(c.idx);
-    const mesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: hot(col, 1.1), alphaMap: fadeUp, transparent: true, opacity: 0.28 * dim,
+    const mesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: hot(col, 1.1), alphaMap: fadeUp, transparent: true, opacity: (PHOTO ? 0.12 : 0.28) * dim,   // Google 3D: a veil, not a wall
       blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
     curtains.push({ mesh, side: p.side }); world.add(mesh);
   }
@@ -848,33 +936,69 @@ for (const p of S.projects) {
   if (!featured.has(p.id)) continue;
   for (const e of [p.a, p.b].filter(Boolean)) {
     let c = clusters.find(c => Math.hypot(c.x - e.x, c.y - e.y) < 300);
-    if (!c) clusters.push(c = { x: e.x, y: e.y, z: e.z, names: new Set(), sides: new Set(), low: false });
+    if (!c) clusters.push(c = { x: e.x, y: e.y, z: e.z, names: new Set(), sides: new Set(), ids: new Set(), low: false });
     if (clean(e.name)) c.names.add(clean(e.name));
-    c.sides.add(p.side); if (p.conf === 'low') c.low = true;
+    c.sides.add(p.side); c.ids.add(p.id); if (p.conf === 'low') c.low = true;
   }
 }
-const BEAM = 2600, beamGeo = new THREE.CylinderGeometry(45, 45, BEAM, 20, 1, true).translate(0, BEAM / 2, 0);
+// 2026-09-26 Google 3D: over the photo mesh the 2.6 km tall, 90 m wide beams read as purple slabs. There they are thin
+// light pillars instead (650 m, 9 m radius): brightest on the axis that faces you, fading up the shaft and into the haze.
+const BEAM = PHOTO ? 650 : 2600, BEAM_R = PHOTO ? 9 : 45;
+const beamGeo = new THREE.CylinderGeometry(BEAM_R, BEAM_R, BEAM, 20, 1, true).translate(0, BEAM / 2, 0);
+const glowMats = [];
+function glowMat(color, opacity) {
+  const m = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: color }, uOpacity: { value: opacity }, uFogNear: { value: 1e9 }, uFogFar: { value: 2e9 } },   // frame() feeds photoFog
+    vertexShader: `#include <common>
+      #include <logdepthbuf_pars_vertex>
+      varying float vUp, vFace, vDepth;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vFace = abs(dot(normalize(normalMatrix * normal), normalize(-mv.xyz)));   // 1 on the axis, 0 at the rim
+        vUp = uv.y; vDepth = -mv.z;
+        gl_Position = projectionMatrix * mv;
+        #include <logdepthbuf_vertex>
+      }`,
+    fragmentShader: `#include <common>
+      #include <logdepthbuf_pars_fragment>
+      uniform vec3 uColor; uniform float uOpacity, uFogNear, uFogFar;
+      varying float vUp, vFace, vDepth;
+      void main() {
+        #include <logdepthbuf_fragment>
+        // additive glow: fading it (not tinting it toward the haze color) keeps far pillars from turning into pale bars
+        gl_FragColor = vec4(uColor, uOpacity * pow(vFace, 2.2) * pow(1.0 - vUp, 1.8) * (1.0 - smoothstep(uFogNear, uFogFar, vDepth)));
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+  glowMats.push(m);
+  return m;
+}
 const placed = [], beacons = [], endLabels = [], placeLabels = [];
 for (const c of clusters) {
   const sides = [...c.sides].sort();
   sides.forEach((s, i) => {
-    const m = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: hot(COL[SIDE[s]], 1.3), alphaMap: fadeDown, transparent: true,
-      opacity: c.low ? 0.3 : 0.6, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
-    m.position.copy(V(c.x + (sides.length > 1 ? (i - 0.5) * 120 : 0), c.y, c.z));
-    m.userData.base = m.material.opacity; beacons.push(m); projObjs[s].push(m);
+    const col = hot(COL[SIDE[s]], PHOTO ? 1.7 : 1.3), op = (c.low ? 0.5 : 1) * (PHOTO ? 0.85 : 0.6);
+    const m = new THREE.Mesh(beamGeo, PHOTO ? glowMat(col, op) : new THREE.MeshBasicMaterial({ color: col, alphaMap: fadeDown, transparent: true,
+      opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    m.position.copy(V(c.x + (sides.length > 1 ? (i - 0.5) * (PHOTO ? 50 : 120) : 0), c.y, c.z));
+    m.userData.base = op; beacons.push(m); projObjs[s].push(m);
     world.add(m);
   });
-  let z = c.z + BEAM + 50;
-  while (placed.some(([x, y, zz]) => Math.hypot(c.x - x, c.y - y) < 3000 && Math.abs(z - zz) < 400)) z -= 480;
+  // names ride above the beam; in Google 3D they sit low on it instead (a drone at 450 m looks down on them), and the
+  // declutter pass, not this stagger, keeps them apart
+  let z = c.z + (PHOTO ? 150 : BEAM + 50);
+  while (!PHOTO && placed.some(([x, y, zz]) => Math.hypot(c.x - x, c.y - y) < 3000 && Math.abs(z - zz) < 400)) z -= 480;
   placed.push([c.x, c.y, z]);
   const el = document.createElement('div');
   el.className = `lbl ${sides.length > 1 ? 'both' : SIDE[sides[0]]}${c.low ? ' low' : ''}`;
   el.textContent = [...c.names].sort((a, b) => a.length - b.length)[0] || '?';
+  el._lk = 'end'; el._lr = c; el._xy = [c.x, c.y];   // declutter: a project end name (pinned while its overlap is selected)
   const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(c.x, c.y, z)); world.add(o);
   endLabels.push({ o, sides });
 }
 for (const pl of S.places) {
   const el = document.createElement('div'); el.className = `place ${pl.kind}`; el.textContent = pl.name;
+  el._lk = 'place'; el._lr = pl.kind; el._xy = [pl.x, pl.y];
   const o = new CSS2DObject(el); o.position.copy(V(pl.x, pl.y, pl.z + 60)); world.add(o);
   placeLabels.push(o);
 }
@@ -897,33 +1021,38 @@ function timing(o, compact = false) {
 }
 const SHOW = 6;
 const TIER_K = { 1: 2.6, 2: 2.4, 3: 1.6, 4: 0.9 };
+// Google 3D frames overlaps from a drone at ~450 m (viewFor), so there the arc and its tag stay under it: 90-230 m high
+const arcApex = d => PHOTO ? Math.min(230, Math.max(90, 0.22 * d)) : Math.max(520, 300 + 0.2 * d);
 function makeOverlapItem(o, parent, user = false) {
   const pa = o.pa, pb = o.pb, d = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
   const mid = [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2, (pa[2] + pb[2]) / 2];
-  const apex = Math.max(520, 300 + 0.2 * d);
+  const apex = arcApex(d);
   const group = new THREE.Group(); parent.add(group);
   let mat, top;
   if (d < 50) {  // touching: pillar + ring on the shared structure
     mat = lineMat(hot(COL.ice, 1.6), 2.5, { dashed: user, dashSize: 60, gapSize: 40 });
     const ring = []; for (let k = 0; k <= 72; k++) { const t = k / 72 * 2 * Math.PI; push(ring, pa[0] + 420 * Math.cos(t), pa[1] + 420 * Math.sin(t), pa[2] + 30); }
     group.add(polyline(ring, mat));
-    const pil = new THREE.Mesh(new THREE.CylinderGeometry(28, 28, 1900, 16, 1, true).translate(0, 950, 0), new THREE.MeshBasicMaterial({
-      color: hot(COL.ice, 2.0), alphaMap: fadeDown, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    const pil = PHOTO ? new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 800, 20, 1, true).translate(0, 400, 0), glowMat(hot(COL.ice, 1.8), 0.7))
+      : new THREE.Mesh(new THREE.CylinderGeometry(28, 28, 1900, 16, 1, true).translate(0, 950, 0), new THREE.MeshBasicMaterial({
+        color: hot(COL.ice, 2.0), alphaMap: fadeDown, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
     pil.position.copy(V(pa[0], pa[1], pa[2])); group.add(pil);
-    top = V(pa[0], pa[1], pa[2] + 2000);
+    top = V(pa[0], pa[1], pa[2] + (PHOTO ? 200 : 2000));
   } else {
     const pts = [];
     for (let k = 0; k <= 48; k++) { const f = k / 48; push(pts, pa[0] + (pb[0] - pa[0]) * f, pa[1] + (pb[1] - pa[1]) * f, pa[2] + (pb[2] - pa[2]) * f + 25 + 4 * apex * f * (1 - f)); }
+    const dk = PHOTO ? 0.4 : 1;   // Google 3D sees the arc from ~600 m, not 3 km: finer dashes
     mat = lineMat(hot(COL.ice, TIER_K[o.tier] || 1), o.tier >= 4 && !user ? 1.5 : 2.5,
-                  { dashed: user, dashSize: user ? 160 : 120, gapSize: user ? 90 : 80, opacity: o.tier >= 4 && !user ? 0.7 : 1 });
+                  { dashed: user, dashSize: (user ? 160 : 120) * dk, gapSize: (user ? 90 : 80) * dk, opacity: o.tier >= 4 && !user ? 0.7 : 1 });
     group.add(polyline(pts, mat));
-    top = V(mid[0], mid[1], mid[2] + 25 + apex + 120);
+    top = V(mid[0], mid[1], mid[2] + 25 + apex + (PHOTO ? 30 : 120));
   }
   const chip = document.createElement('div');
   chip.className = user ? 'chip user' : 'chip';
   chip.innerHTML = `${user ? 'YOU ' : ''}#${o.rank} ${fmtKm(o.dist_km)}<small>T${o.tier}</small>`;
   const lab = new CSS2DObject(chip); lab.position.copy(top); lab.center.set(0.5, 1); group.add(lab);
   const item = { o, d, mid, group, mat, chip, lab, user };
+  chip._lk = 'chip'; chip._lr = item; chip._xy = mid;   // declutter: ranked by the overlap's rank, pinned while selected
   chip.addEventListener('click', ev => { ev.stopPropagation(); select(item, true); });
   return item;
 }
@@ -963,11 +1092,11 @@ function buildUser(force = false) {
       const ring = [];
       for (let k = 0; k <= 48; k++) { const t = k / 48 * 2 * Math.PI; push(ring, e.x + 90 * Math.cos(t), e.y + 90 * Math.sin(t), e.z + 4); }
       const pm = lineMat(hot(COL.ice, 2), 2, { dashed: true, dashSize: 40, gapSize: 25 });
-      userGroup.add(polyline(ring, pm), polyline([e.x, e.z, -e.y, e.x, e.z + 700, -e.y], pm));
+      userGroup.add(polyline(ring, pm), polyline([e.x, e.z, -e.y, e.x, e.z + (PHOTO ? 300 : 700), -e.y], pm));   // Google 3D: under the drone
     }
     const el = document.createElement('div');
-    el.className = 'lbl user'; el.textContent = `YOUR PROJECT: ${rec.name}`;
-    const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(rec.a.x, rec.a.y, rec.a.z + 720)); userGroup.add(o);
+    el.className = 'lbl user'; el.textContent = `YOUR PROJECT: ${rec.name}`; el._lk = 'user'; el._xy = [rec.a.x, rec.a.y];
+    const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(rec.a.x, rec.a.y, rec.a.z + (PHOTO ? 320 : 720))); userGroup.add(o);
   }
   for (const e of data?.overlaps || []) {
     const cp = e.closest_points;
@@ -1001,7 +1130,7 @@ function drawRings(o) {
     const pts = [];
     for (let i = 0; i <= 180; i++) { const t = i / 180 * 2 * Math.PI, x = cx + r * Math.cos(t), y = cy + r * Math.sin(t); push(pts, x, y, hAt(x, y) + 25); }
     ringGroup.add(polyline(pts, lineMat(hot(COL.ice, k), r > 20000 ? 1 : 1.6, { opacity: r > 20000 ? 0.45 : 0.8 })));
-    const el = document.createElement('div'); el.className = 'ring-cap'; el.textContent = cap;
+    const el = document.createElement('div'); el.className = 'ring-cap'; el.textContent = cap; el._lk = 'ring';
     const o2 = new CSS2DObject(el); o2.position.copy(V(cx, cy - r, hAt(cx, cy - r) + 60)); ringGroup.add(o2);
   }
 }
@@ -1099,11 +1228,12 @@ $('sort-seg').addEventListener('click', e => {
 });
 
 let sel = null;
+let dcDirty = true, dcTick = 0;   // label declutter: rerun on the next frame (selection changed), frame counter
 function styleArcs() {
   for (const x of ovl) {
     const on = x === sel, t = x.o.tier;
-    x.mat.linewidth = on ? 5 : t >= 4 && !x.user ? 1.5 : 2.5;
-    x.mat.color.copy(hot(COL.ice, on ? 3 : TIER_K[t] || 1));
+    x.mat.linewidth = on ? (PHOTO ? 3.5 : 5) : t >= 4 && !x.user ? 1.5 : 2.5;   // Google 3D: close up, a 5 px bloom reads as a tube
+    x.mat.color.copy(hot(COL.ice, on ? (PHOTO ? 2.2 : 3) : TIER_K[t] || 1));
     x.mat.opacity = on || t < 4 || x.user ? 1 : 0.7;
     x.mat.dashed = on || x.user; x.mat.needsUpdate = true;
     x.chip.classList.toggle('on', on);
@@ -1139,10 +1269,11 @@ function select(it, fly) {
   $('c-reach').textContent = reach(o.dist_km);
   $('why').textContent = o.why || '';
   $('card').classList.add('show');
+  syncWatch(); dcDirty = true;
   if (fly) flyTo(viewFor(it));
 }
 function deselect() {
-  sel = null; styleArcs(); drawRings(null); setMapLink(null);
+  sel = null; styleArcs(); drawRings(null); setMapLink(null); syncWatch(); dcDirty = true;
   $('card').classList.remove('show');
   document.querySelectorAll('#ovl li.on').forEach(li => li.classList.remove('on'));
 }
@@ -1163,10 +1294,18 @@ function orbitView(target, bearing, dist, elev) {  // prefer `bearing`, rotate u
   const [yw, pt] = lookAngles(pos, target);
   return { pos, yaw: yw, pitch: pt, mode: 'DRONE' };
 }
+// 2026-09-26 Google 3D: Google's photo mesh melts up close and flattens into a map from km up; from a drone's height it
+// reads as real. So there every select / fly-over / tour stop ends 420-500 m up, pitched ~40 degrees down, aimed a
+// little above the ground so the (lowered) arc and its tag sit mid-frame. Walk the gap keeps its own framing.
+const droneAim = it => it.d < 50 ? 60 : 0.4 * (25 + arcApex(it.d));   // 40% up the arc
+function droneView(x, y, bearing, { alt = 450, el = 40, aim = 0 } = {}) {
+  return orbitView(V(x, y, hAt(x, y) + aim), bearing, (alt - aim) / Math.sin(el * DEG), el);
+}
 function viewFor(it) {
-  const t = V(it.mid[0], it.mid[1], hAt(it.mid[0], it.mid[1]) + 350);
   const dir = Math.atan2(it.o.pb[0] - it.o.pa[0], it.o.pb[1] - it.o.pa[1]) / DEG;   // compass bearing pa -> pb
   const side = it.d < 50 ? 160 : [dir + 90, dir - 90].sort((a, b) => Math.cos((b - 160) * DEG) - Math.cos((a - 160) * DEG))[0];
+  if (tiles) return droneView(it.mid[0], it.mid[1], side, { alt: Math.min(500, 420 + 0.06 * it.d), el: it.d > 1500 ? 36 : 40, aim: droneAim(it) });
+  const t = V(it.mid[0], it.mid[1], hAt(it.mid[0], it.mid[1]) + 350);
   return orbitView(t, side, Math.min(26000, Math.max(2600, 2000 + 2.2 * it.d)), 24);
 }
 function overview() {
@@ -1185,7 +1324,9 @@ function walkGap(it) {  // stand just outside the DESC end, face the GPC end, wa
   const tgt = it.d > 50 ? V(bx, by, hAt(bx, by) + 150) : V(ax + 500, ay, hAt(ax, ay) + 40);
   if (tiles) {  // Google's rural mesh is smeared at eye level: hover just over the canopy instead
     pos.y = hAt(x, y) + 60;
-    const [yw, pt] = lookAngles(pos, V(tgt.x, hAt(bx, by), tgt.z));
+    // (2026-09-26 fix: this target went through V(), which wants level coords, so the camera faced back at the DESC
+    // end, 20 degrees down into the melted mesh; tgt is already in three coords)
+    const [yw, pt] = lookAngles(pos, new THREE.Vector3(tgt.x, hAt(bx, by), tgt.z));
     return { pos, yaw: yw, pitch: Math.min(-0.05, Math.max(pt, -0.35)), mode: 'DRONE' };
   }
   const [yw, pt] = lookAngles(pos, tgt);
@@ -1213,6 +1354,7 @@ $('b-fly').onclick = () => sel && flyTo(viewFor(sel));
 $('b-walk').onclick = () => sel && flyTo(walkGap(sel));
 
 addEventListener('keydown', e => {
+  if (clipOpen()) { if (e.key === 'Escape') { e.preventDefault(); closeClip(); } return; }   // the video owns the keys while it's up
   if (e.target.closest && e.target.closest('input,textarea,select')) return;
   const k = e.key.toLowerCase();
   if (touring && k !== 't') endTour(false);
@@ -1289,7 +1431,7 @@ function addMeasurement(a, b) {
   const fa = facilityAt(a.x, -a.z), fb = facilityAt(b.x, -b.z);
   const names = fa?.name && fb?.name && fa !== fb ? `${clean(fa.name)} → ${clean(fb.name)}: ` : '';
   const el = document.createElement('div');
-  el.className = 'chip on';
+  el.className = 'chip on'; el._lk = 'pin';   // your own measurement: never decluttered
   el.innerHTML = `${names}${fmtLen(d)}<small>${fmtDur(d / 1000 / 5 * 60)} walk, ${fmtDur(d / 1000 / 60 * 60)} truck</small>`;
   const lab = new CSS2DObject(el); lab.position.set((a.x + b.x) / 2, Math.max(a.y, b.y) + 70, (a.z + b.z) / 2); lab.center.set(0.5, 1);
   measureGroup.add(lab);
@@ -1331,6 +1473,7 @@ function drawMini() {
 }
 mm.addEventListener('click', e => {
   const r = mm.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W - W / 2, y = H / 2 - (e.clientY - r.top) / r.height * H;
+  if (tiles) { flyTo(droneView(x, y, 180)); return; }   // Google 3D: arrive at a drone's height
   const pos = V(x, y - 2500, hAt(x, y) + 1800), [yw, pt] = lookAngles(pos, V(x, y, hAt(x, y)));
   flyTo({ pos, yaw: yw, pitch: pt, mode: 'DRONE' });
 });
@@ -1477,9 +1620,12 @@ async function setGround(g) {
     const mat = terrainMats[g];
     if (mat.map !== tex) { mat.map = mat.emissiveMap = tex; mat.needsUpdate = true; }
     terrain.material = mat;
-    const md = MOODS[g];
-    sky.material.map?.dispose(); sky.material.map = gradTex(md.sky); sky.material.needsUpdate = true;
-    world.fog.color.set(md.fog); world.fog.density = md.fogD;
+    const md = tiles ? MOODS.photo : MOODS[g];
+    if (tiles) { sky.material = photoSky; world.fog = photoFog; }   // (photoFog's range follows the altitude in frame())
+    else {
+      skyBasic.map?.dispose(); skyBasic.map = gradTex(md.sky); skyBasic.needsUpdate = true; sky.material = skyBasic;
+      world.fog = baseFog; world.fog.color.set(md.fog); world.fog.density = md.fogD;
+    }
     hemi.color.set(md.hemi[0]); hemi.groundColor.set(md.hemi[1]); hemi.intensity = md.hemi[2];
     sun.color.set(md.sun[0]); sun.intensity = md.sun[1]; sun.position.set(...md.sun[2]);
     apron.material.color.set(md.apron);
@@ -1513,7 +1659,8 @@ async function startTour(step) {
   const it = baseOvl.find(x => x.o.rank === rank);
   if (!it) {  // that opportunity lives in another level: hop there and keep going
     const lv = (await getLevels()).find(l => (l.ranks || []).includes(rank));
-    if (lv && lv.level !== LEVEL.id) { location.href = `?level=${lv.level}&tour=${step}${DATA_Q}`; return; }
+    // (keeps Google 3D on through the hop: a recorded tour shouldn't drop back to the USGS world mid-take)
+    if (lv && lv.level !== LEVEL.id) { location.href = `?level=${lv.level}&tour=${step}${DATA_Q}${qs.get('photoreal') === '1' ? '&photoreal=1' : ''}`; return; }
     startTour(step + 1); return;
   }
   touring = true; document.body.classList.add('touring'); $('b-tour').classList.add('on');
@@ -1541,6 +1688,77 @@ function endTour(done) {
   if (sel) $('card').classList.add('show');
 }
 $('b-tour').onclick = () => (touring ? endTour(false) : startTour(0));
+
+// ================================================================== label declutter (screen space, every 4th frame)
+// 2026-09-26: over Google's photo mesh the names piled up ("MONSANTO" on "PEACHTREE NUTRASWEET CO.", "URQUHART" twice,
+// "EVANS" running into "MARTINEZ"). Greedy pass in priority order: the selected overlap's own labels (tag, end names,
+// ring captions) and your measurements are never hidden; then overlap tags by rank, project and substation names, places.
+// A label that overlaps one already kept, or repeats a kept name nearby, fades out (class .dc; CSS2D owns `display`).
+function labelRank(el) {  // lower = more important; negative = pinned
+  const k = el._lk, r = el._lr;
+  if (k === 'pin' || k === 'ring') return -1;
+  if (k === 'chip') return r === sel ? -1 : (r.user ? 0 : 1) + r.o.rank * 1e-4;
+  if (k === 'end') return sel && (r.ids.has(sel.o.a) || r.ids.has(sel.o.b)) ? -1 : 2 + (r.low ? 0.4 : 0);
+  if (k === 'user') return 2.2;
+  if (k === 'fac') return 3;
+  if (k === 'place') return r === 'city' ? 4 : r === 'town' ? 4.3 : 4.6;
+  return 5;
+}
+function declutter() {
+  // Google 3D: names past most of the haze go too (they piled up along the horizon); the range grows with altitude
+  const far = tiles ? photoFog.far * 0.85 : Infinity, camX = camera.position.x, camY = -camera.position.z;
+  const cand = [];
+  for (const el of labels.domElement.children) {   // read every box first (one layout), then write classes
+    if (el.style.display === 'none') continue;
+    const r = el.getBoundingClientRect();
+    if (!r.width || r.right < 0 || r.bottom < 0 || r.left > innerWidth || r.top > innerHeight) continue;
+    cand.push({ el, r, p: labelRank(el), t: el.textContent.trim().toUpperCase(), cx: (r.left + r.right) / 2, cy: (r.top + r.bottom) / 2, xy: el._xy, was: el.classList.contains('dc') });
+  }
+  cand.sort((a, b) => a.p - b.p);
+  const kept = [];
+  // the same name twice (a plant's yard and the project end at it): keep one if they're < 300 px or < 2.5 km apart
+  const twin = (a, b) => a.t === b.t && (Math.hypot(a.cx - b.cx, a.cy - b.cy) < 300 || (a.xy && b.xy && Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) < 2500));
+  for (const c of cand) {
+    const r = c.r, pad = c.was ? 10 : 4;   // hysteresis: a hidden label needs a little more room to come back
+    const hide = c.p >= 0 && ((c.xy && Math.hypot(c.xy[0] - camX, c.xy[1] - camY) > far)
+      || kept.some(k => (r.left - pad < k.r.right && r.right + pad > k.r.left && r.top - pad < k.r.bottom && r.bottom + pad > k.r.top) || twin(c, k)));
+    if (hide !== c.was) c.el.classList.toggle('dc', hide);
+    if (!hide) kept.push(c);
+  }
+}
+
+// ================================================================== WATCH FLY-IN: pre-rendered clips of the top overlaps
+// Optional: web/public/clips/manifest.json lists {id, rank, level, file, poster, seconds}; file and poster are relative
+// to the clips folder. Missing or broken manifest = no button, silently.
+const CLIPS = new URL('../../clips/', location.href);
+let clipById = {};
+fetch(new URL('manifest.json', CLIPS), NOCACHE).then(r => r.ok ? r.json() : null).then(m => {
+  for (const c of Array.isArray(m?.clips) ? m.clips : []) if (c?.id && c.file) clipById[c.id] = c;
+  syncWatch();
+}).catch(() => {});
+function syncWatch() { $('b-watch').hidden = !(sel && !sel.user && clipById[sel.o.id]); }
+const clipOpen = () => !$('clip').hidden;
+function openClip() {
+  const c = sel && clipById[sel.o.id];
+  if (!c) return;
+  const v = $('clip-v');
+  $('clip-k').textContent = `FLY-IN #${sel.o.rank}, ${fmtKm(sel.o.dist_km).toUpperCase()}, TIER ${sel.o.tier}${c.seconds ? `, ${Math.round(c.seconds)} SEC` : ''}`;
+  v.poster = c.poster ? new URL(c.poster, CLIPS).href : '';
+  v.src = new URL(c.file, CLIPS).href;
+  $('clip').hidden = false;
+  if (touring) endTour(false);
+  keys.clear(); drag = null;
+  v.play().catch(() => {});   // muted autoplay is allowed; if not, the controls are right there
+  $('clip-x').focus({ preventScroll: true });
+}
+function closeClip() {
+  const v = $('clip-v');
+  v.pause(); v.removeAttribute('src'); v.removeAttribute('poster'); v.load();   // stop the download too
+  $('clip').hidden = true;
+}
+$('b-watch').addEventListener('click', openClip);
+$('clip-x').addEventListener('click', closeClip);
+$('clip').addEventListener('click', e => { if (e.target === $('clip')) closeClip(); });   // click the dimmed world to close
 
 // ================================================================== render loop
 const composer = new EffectComposer(renderer);
@@ -1598,6 +1816,7 @@ function frame() {
   requestAnimationFrame(frame);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!innerWidth || !innerHeight) return;   // hidden pane / minimized tab: nothing to draw into
+  if (clipOpen()) return;                    // a fly-in video is playing over the world: give it the GPU
   prev.copy(camera.position);
   if (flight) {
     flight.t = Math.min(1, flight.t + dt / flight.dur);
@@ -1624,11 +1843,17 @@ function frame() {
   }
   camera.quaternion.setFromEuler(euler.set(pitch, yaw, 0));
   sky.position.copy(camera.position);
-  if (sel?.mat.dashed) sel.mat.dashOffset -= dt * 400;
-  for (const x of userOvl) if (x !== sel) x.mat.dashOffset -= dt * 160;
-  for (const b of beacons) {
+  if (tiles) {  // Google 3D haze: clear around a low camera, pushed out as it climbs (the overview must not drown in it)
+    const up = Math.max(0, camera.position.y - hAt(camera.position.x, -camera.position.z));
+    photoFog.near = 1200 + 2.5 * up; photoFog.far = 8000 + 9 * up;
+    for (const m of glowMats) { m.uniforms.uFogNear.value = photoFog.near; m.uniforms.uFogFar.value = photoFog.far; }
+  }
+  if (sel?.mat.dashed) sel.mat.dashOffset -= dt * (PHOTO ? 160 : 400);
+  for (const x of userOvl) if (x !== sel) x.mat.dashOffset -= dt * (PHOTO ? 64 : 160);
+  for (const b of beacons) {   // a beam fades as you reach it (Google 3D's thin pillars only right at the foot)
     const d = Math.hypot(b.position.x - camera.position.x, b.position.z - camera.position.z);
-    b.material.opacity = b.userData.base * Math.min(1, Math.max(0.08, (d - 120) / 900));
+    const k = PHOTO ? Math.min(1, Math.max(0.12, (d - 40) / 300)) : Math.min(1, Math.max(0.08, (d - 120) / 900));
+    if (b.material.uniforms) b.material.uniforms.uOpacity.value = b.userData.base * k; else b.material.opacity = b.userData.base * k;
   }
   acc += dt;
   if (acc > 0.25) {  // HUD + LOD at 4 Hz
@@ -1647,6 +1872,7 @@ function frame() {
   }
   drawMini();
   if (tiles) {
+    tiles.errorTarget = flight ? TILE_ERR.moving : TILE_ERR.still;   // every frame: the auth plugin sets its own later
     camera.updateMatrixWorld(); tiles.setResolutionFromRenderer(camera, renderer); tiles.update();
     surfaceT += dt;
     if (surfaceT > 0.2 && photoRootRef) {  // 5 Hz: one ray straight down through the loaded tiles
@@ -1659,6 +1885,7 @@ function frame() {
   }   // every frame: the pane can start at 0x0 and resize later
   composer.render();
   labels.render(world, camera);
+  if (dcDirty || ++dcTick % 4 === 0) { dcDirty = false; declutter(); }   // after render: the labels' boxes are current
 }
 
 // ================================================================== Google 3D (optional; needs world3d/viewer/tokens.local.json)
@@ -1677,6 +1904,11 @@ if (PHOTO) {
     tiles.registerPlugin(reorient);
     tiles.setCamera(camera);
     tiles.setResolutionFromRenderer(camera, renderer);
+    // 2026-09-26 sharper near the camera: the library's default errorTarget is 16 px, and Google's recommended settings
+    // (applied by the auth plugin once the token resolves) raise it to 20. frame() asks for 12 px while the camera is
+    // settled and 20 in flight, so a drone stop sharpens without streaming full detail for every frame of a flight.
+    // The cache (default 6000-8000 tiles, 0.3-0.4 GB) gets room for the extra detail:
+    Object.assign(tiles.lruCache, { minSize: 9000, maxSize: 12000, minBytesSize: 0.55 * 2 ** 30, maxBytesSize: 0.8 * 2 ** 30 });
     window.__diag = { tilesLoaded: 0, errors: 0 };   // read by tests and shown in the status line
     tiles.addEventListener('load-model', () => { window.__diag.tilesLoaded++; });
     tiles.addEventListener('load-error', e => { window.__diag.errors++; console.warn('Google 3D tile error', e?.error?.message || e?.url || ''); });
@@ -1706,7 +1938,7 @@ if (PHOTO) {
     $('photo-note').classList.add('show');
     setTimeout(() => $('photo-note').classList.remove('show'), 9000);
     addEventListener('keydown', e => {
-      if (e.key === '[' || e.key === ']') { nudge += e.key === ']' ? 2 : -2; photoRoot.position.y = nudge; $('near').textContent = `ground offset ${nudge} m`; }
+      if (!clipOpen() && (e.key === '[' || e.key === ']')) { nudge += e.key === ']' ? 2 : -2; photoRoot.position.y = nudge; $('near').textContent = `ground offset ${nudge} m`; }
     });
   } catch (err) {
     console.error(err);
@@ -1744,6 +1976,9 @@ frame();
 if (qs.get('select')) {  // deep links: ?select=<overlap id | global rank> (yours too) flies there, &walk=1 drops you on the ground
   const q = qs.get('select'), it = ovl.find(x => x.o.id === q) || ovl.find(x => !x.user && String(x.o.rank) === q);
   if (it) { select(it, !qs.get('walk')); if (qs.get('walk')) flyTo(walkGap(it)); }
+} else if (tiles && !qs.get('cam') && qs.get('tour') == null) {   // Google 3D, no deep link: drop in on the list's top overlap
+  const top = rowOrder.find(x => !x.user) || baseOvl[0];
+  if (top) flyTo(viewFor(top));
 }
 if (qs.get('tour') != null) setTimeout(() => startTour(+qs.get('tour') || 0), 600);
 </script>
