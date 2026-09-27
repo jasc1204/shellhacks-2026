@@ -35,3 +35,8 @@ web/dist/
 
 # Blender auto-backups
 *.blend1
+
+# demo video: recorder deps, raw takes and renders (the script VOICEOVER.md and the scripts are tracked)
+video/node_modules/
+video/takes/
+video/out/
