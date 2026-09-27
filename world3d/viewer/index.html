@@ -36,6 +36,7 @@ body.measuring #stage canvas { cursor: crosshair; }
 .place.city { font-size: 13px; color: var(--ink); }
 .fac { font: 600 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; text-shadow: 0 0 6px #020408, 0 0 2px #020408; }
 .fac.desc { color: var(--desc); } .fac.gpc { color: var(--gpc); } .fac.other { color: var(--ink); }
+.fac.gen { font-weight: 400; font-size: 9px; letter-spacing: .12em; opacity: .8; }   /* a yard with no name in OSM: what it is */
 .chip { pointer-events: auto; cursor: pointer; font: 600 11px/1 var(--mono); letter-spacing: .08em; color: var(--ice);
         background: rgba(6, 11, 20, .82); border: 1px solid var(--line-hi); border-radius: 3px; padding: 5px 7px; white-space: nowrap; }
 .chip:hover, .chip.on { border-color: var(--ice); box-shadow: var(--glow); }
@@ -69,34 +70,26 @@ body:not(.touring):has(#card.show) #dock { right: 412px; }   /* make room for th
 #list { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .panel-h { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 #ovl { list-style: none; margin: 0; padding: 0 0 4px; overflow-y: auto; min-height: 0; }
-/* tier cards: the legend IS the filter (click one to hide that tier, in the list and in the world) */
-#list-tools { flex: none; display: grid; gap: 8px; padding: 9px 10px 10px; border-bottom: 1px solid var(--line); }
-.tiercards { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-.tc { text-align: left; font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 3px;
-      padding: 6px 7px 6px; cursor: pointer; }
-.tc:hover { border-color: var(--line-hi); }
-.tc .h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font: 600 10px/1 var(--mono); letter-spacing: .1em; }
-.tc .h i { font-style: normal; font-weight: 400; color: var(--muted); letter-spacing: 0; }
-.tc .s { display: block; margin-top: 5px; font: 400 9.5px/1.3 var(--mono); color: var(--muted); }
-.tc.t1 .h b { color: var(--ice); } .tc.t2 .h b { color: var(--desc); } .tc.t3 .h b { color: var(--steel); } .tc.t4 .h b { color: var(--muted); }
-.tc.t1:not(.off):not(.none) { border-color: rgba(244, 248, 255, .45); }
-.tc.none { opacity: .5; }
-.tc.off { opacity: .38; border-style: dashed; }
-.tc.off .h b { text-decoration: line-through; }
-.sortrow { display: flex; align-items: center; gap: 10px; }
-.sortrow .seg { flex: 1; margin: 0; }
-/* groups: what a utility would do about each overlap */
-#ovl li.grp { display: grid; grid-template-columns: 1fr auto 12px; gap: 0 8px; align-items: baseline; padding: 11px 12px 7px; cursor: pointer;
-              border-left: 0; border-top: 1px solid var(--line); user-select: none; }
-#ovl li.grp:first-child { border-top: 0; }
-#ovl li.grp:hover, #ovl li.grp:focus-visible { background: rgba(59, 125, 255, .06); outline: none; }
-#ovl .gt { font: 600 10px/1 var(--mono); letter-spacing: .2em; color: var(--ink); }
-#ovl li.grp[data-g="must"] .gt { color: var(--ice); }
-#ovl .gn { font: 600 10px/1 var(--mono); color: var(--muted); }
-#ovl .gs { font: 600 12px/1 var(--mono); color: var(--muted); text-align: right; }
-#ovl .gd { grid-column: 1 / -1; margin-top: 5px; font: 400 10px/1.4 var(--mono); color: var(--faint); }
-#ovl li.grp:not(.open) .gt { color: var(--muted); }
-#ovl li.empty { padding: 14px 12px; font: 400 11px/1.45 var(--mono); color: var(--muted); }
+/* 2026-09-27 the map's filter, same three buttons: GEOGRAPHIC / TIMELINE / BOTH, and under the one that's on, its
+   toggles with counts. It replaced the tier cards, the sort row and the folding groups: one flat list in spec order. */
+#list-tools { flex: none; display: grid; gap: 7px; padding: 9px 10px 10px; border-bottom: 1px solid var(--line); }
+.fmode { display: flex; border: 1px solid var(--line-hi); border-radius: 3px; overflow: hidden; }
+.fmode button { flex: 1; font: 600 10px/1 var(--mono); letter-spacing: .14em; color: var(--muted); background: transparent; border: 0;
+                padding: 8px 4px; cursor: pointer; }
+.fmode button + button { border-left: 1px solid var(--line); }
+.fmode button:hover { color: var(--ice); }
+.fmode button.on { color: var(--bg); background: var(--ice); }
+.fsub { display: flex; flex-wrap: wrap; gap: 5px; }
+.fsub button { font: 600 9.5px/1 var(--mono); letter-spacing: .08em; color: var(--ice); background: rgba(111, 141, 255, .12);
+               border: 1px solid var(--line-hi); border-radius: 3px; padding: 6px 7px; cursor: pointer; }
+.fsub button i { font-style: normal; font-weight: 400; color: var(--steel); }
+.fsub button:hover { border-color: var(--ice); }
+.fsub button.off { color: var(--faint); background: transparent; border: 1px dashed var(--line); }
+.fsub button.off i { color: var(--faint); }
+.fsub button.none { opacity: .45; }
+.fhint { margin: 0; font: 400 10px/1.4 var(--mono); color: var(--faint); }
+#ovl li.empty { display: block; cursor: default; padding: 14px 12px; font: 400 11px/1.45 var(--mono); color: var(--muted); }
+#ovl li.empty:hover { background: none; }
 #ovl li { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; align-items: center; padding: 7px 12px; cursor: pointer;
           border-left: 2px solid transparent; }
 #ovl li:hover { background: rgba(59, 125, 255, .08); }
@@ -134,16 +127,7 @@ button.act:hover { box-shadow: var(--glow); border-color: var(--ice); }
 button.act.hot, button.act.on { color: var(--bg); background: var(--ice); }
 button.act.on { box-shadow: var(--glow); }
 #card .btns button.act { white-space: nowrap; }
-#card .btns:has(#b-watch:not([hidden])) button.act { letter-spacing: .1em; padding: 9px 5px; }   /* three across still fit */
 #why { font: 400 11px/1.45 var(--mono); color: var(--faint); margin: 8px 0 0; }
-/* WATCH FLY-IN: a pre-rendered clip of the selected overlap, over a dimmed world */
-#clip { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 16px; background: rgba(2, 4, 8, .74); backdrop-filter: blur(3px); }
-#clip[hidden] { display: none; }
-#clip .panel { position: relative; width: min(1120px, 100%); border-color: var(--line-hi); box-shadow: var(--glow); }
-#clip video { display: block; width: 100%; max-height: calc(100vh - 116px); background: var(--bg); }
-#clip .clip-credit { padding: 7px 12px 8px; font: 400 9px/1.4 var(--mono); color: var(--faint); letter-spacing: .04em; }
-#clip-x { font: 600 16px/1 var(--mono); color: var(--muted); background: none; border: 0; padding: 0 2px; cursor: pointer; }
-#clip-x:hover, #clip-x:focus-visible { color: var(--ice); outline: none; }
 
 #mini { top: 16px; right: 16px; padding: 8px; width: 218px; }
 #mini canvas { display: block; width: 200px; height: 200px; cursor: crosshair; border-radius: 2px; }
@@ -220,7 +204,7 @@ body.touring #key { display: none; }
 @media (max-width: 760px) {
   #leftcol { right: 16px; width: auto; bottom: auto; }
   #list { max-height: 42vh; }
-  .tc .s { display: none; }   /* phones: tier cards shrink to one line; the tooltip still explains them */
+  .fhint { display: none; }   /* phones: the tooltips still explain the filter */
   #dock, body:not(.touring):has(#card.show) #dock { left: 16px; right: 16px; }
   #mini, #layers, #key, .keys { display: none !important; }
   #card { left: 16px; right: 16px; width: auto; }
@@ -258,10 +242,9 @@ body.touring #key { display: none; }
   <section id="list" class="panel">
     <div class="panel-h"><span class="kicker">RANKED OVERLAPS</span><span class="kicker" id="count"></span></div>
     <div id="list-tools">
-      <div class="tiercards" id="tiercards"></div>
-      <div class="sortrow"><span class="kicker">SORT</span>
-        <div class="seg" id="sort-seg"><button data-sort="score" title="The pipeline's score: distance first, build timing second">BEST</button><button data-sort="dist" title="Closest points first">CLOSEST</button><button data-sort="time" title="Longest shared build time first, then the smallest gap">TIMING</button></div>
-      </div>
+      <div class="fmode" id="fmode"></div>
+      <div class="fsub" id="fsub"></div>
+      <p class="fhint" id="fhint"></p>
     </div>
     <ol id="ovl"></ol>
   </section>
@@ -298,7 +281,7 @@ body.touring #key { display: none; }
     <div class="fact"><div class="kicker">ON FOOT / BY TRUCK</div><div class="v" id="c-reach"></div></div>
   </div>
   <p id="why"></p>
-  <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button><button class="act" id="b-watch" title="Play the pre-rendered fly-in of this overlap. Esc closes it." hidden>WATCH FLY-IN</button></div>
+  <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button></div>
 </section>
 
 <div id="dock">
@@ -312,9 +295,9 @@ body.touring #key { display: none; }
   <div class="panel-h"><span class="kicker">WHAT YOU'RE SEEING</span><button id="key-close" aria-label="Close the key" title="Close (K)">×</button></div>
   <div id="key-body">
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 18 L35 11" stroke="#3b7dff" stroke-width="1.6"/><path d="M9 22 L12 6 L15 22 M7.5 10 L16.5 10 M10 15 L14 15" stroke="#7aa8ff" stroke-width="1.2" fill="none" opacity="1"/></svg><span><b>Today's grid</b>Blue lines, towers and wires: already built (OpenStreetMap).</span></div>
-    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 7 L35 7" stroke="#4dd8ff" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #4dd8ff)"/><path d="M1 17 L35 17" stroke="#ffd166" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #ffd166)"/></svg><span><b>Planned projects</b>Glowing overhead lines: sky-blue = Dominion, yellow = Georgia Power. Straight between named end points (real routes aren't public).</span></div>
-    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M8 22 L11 6 L14 22 M6.5 10 L15.5 10 M9 15 L13 15" stroke="#4dd8ff" stroke-width="1.2" fill="none" opacity="0.55"/><path d="M22 22 L25 6 L28 22 M20.5 10 L29.5 10 M23 15 L27 15" stroke="#ffd166" stroke-width="1.2" fill="none" opacity="0.55"/></svg><span><b>Preview towers</b>See-through sky-blue or yellow towers: a planned line shown at real height.</span></div>
-    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M3 22 Q18 -6 33 22" stroke="#f4f8ff" stroke-width="1.8" fill="none" style="filter:drop-shadow(0 0 2px #f4f8ff)"/></svg><span><b>Overlap</b>White arc with a tag like <span class="tag">#1 0.94 km T2</span>: rank, distance between the closest points, tier. Click to select.</span></div>
+    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 7 L35 7" stroke="#4dd8ff" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #4dd8ff)"/><path d="M1 17 L35 17" stroke="#ffd166" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #ffd166)"/></svg><span><b>Planned projects</b>Glowing overhead lines: sky-blue = Dominion, yellow = Georgia Power. Straight between named end points (real routes aren't public). Faded: in no overlap the filter shows.</span></div>
+    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M8 22 L11 6 L14 22 M6.5 10 L15.5 10 M9 15 L13 15" stroke="#4dd8ff" stroke-width="1.2" fill="none" opacity="0.55"/><path d="M22 22 L25 6 L28 22 M20.5 10 L29.5 10 M23 15 L27 15" stroke="#ffd166" stroke-width="1.2" fill="none" opacity="0.55"/></svg><span><b>Preview towers</b>See-through sky-blue or yellow towers: a planned line at real height, spaced like today's lines nearby, kept out of water and houses.</span></div>
+    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M3 22 Q18 -6 33 22" stroke="#f4f8ff" stroke-width="1.8" fill="none" style="filter:drop-shadow(0 0 2px #f4f8ff)"/></svg><span><b>Overlap</b>White arc with a tag like <span class="tag">#3 0.94 km T2</span>: rank, distance between the closest points, tier. Click to select.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><g fill="none" stroke="#f4f8ff"><ellipse cx="18" cy="14" rx="5" ry="2.4" opacity=".95"/><ellipse cx="18" cy="14" rx="11" ry="5" opacity=".7"/><ellipse cx="18" cy="14" rx="17" ry="8" opacity=".4"/></g></svg><span><b>Sharing circles</b>Around a selected overlap: within 1.6 km they share the land, within 8 km laydown yards, within 40 km crews.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><ellipse cx="18" cy="19" rx="11" ry="3.5" stroke="#f4f8ff" stroke-width="1.6" fill="none"/><rect x="16" y="0" width="4" height="19" fill="#f4f8ff" opacity=".85" style="filter:drop-shadow(0 0 2px #f4f8ff)"/></svg><span><b>Touching</b>Ring + pillar: the two projects meet (tier 1). Must coordinate outages and crossings.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><defs><linearGradient id="kb" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#4dd8ff"/><stop offset="1" stop-color="#4dd8ff" stop-opacity="0"/></linearGradient><linearGradient id="kg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ffd166" stop-opacity="0"/></linearGradient></defs><rect x="9" y="0" width="5" height="24" fill="url(#kb)"/><rect x="23" y="0" width="5" height="24" fill="url(#kg)" opacity=".4"/></svg><span><b>Light beams</b>End points and substations of the top overlaps. A dim beam = location less certain.</span></div>
@@ -332,17 +315,10 @@ body.touring #key { display: none; }
     </div>
     <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-tour" title="Shortcut: T">TOUR TOP 3</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button></div>
   </div>
-  <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>wheel</b> speed</span><span><b>Tab</b> walk, drive or fly</span>
-    <span><b>1-9</b> fly to a row</span><span><b>M</b> measure</span><span><b>T</b> tour</span><span><b>K</b> key</span><span><b>L</b> layers</span><span><b>G</b> satellite or map</span><span><b>R</b> overview</span><span><b>H</b> hide HUD</span></div>
+  <!-- 2026-09-27 declutter: one line of keys; M, T and K have buttons, L and G live on the LAYERS panel (all still work) -->
+  <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>Tab</b> walk, drive or fly</span>
+    <span><b>1-9</b> fly to a row</span><span><b>R</b> overview</span><span><b>H</b> hide HUD</span></div>
 </footer>
-</div>
-
-<div id="clip" hidden>
-  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="clip-k">
-    <div class="panel-h"><span class="kicker" id="clip-k">FLY-IN</span><button id="clip-x" aria-label="Close the video" title="Close (Esc)">×</button></div>
-    <video id="clip-v" muted autoplay playsinline controls preload="auto"></video>
-    <div class="clip-credit">Rendered in Blender from USGS The National Map imagery, AWS Terrain Tiles elevation and OpenStreetMap data (© OpenStreetMap contributors)</div>
-  </section>
 </div>
 
 <script type="module">
@@ -416,7 +392,7 @@ let VER = '';                            // ?v=<build stamp> on textures and mod
 const loadTex = url => (texCache[url] ||= texLoader.loadAsync(url + VER).then(t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = MAX_ANISO; return t; }));
 
 // ================================================================== load the level
-let S, TER, gltf, BLD = null, GROUND = 'map';
+let S, TER, gltf, BLD = null, WATER = null, GROUND = 'map';
 let PHOTO = qs.get('photoreal') === '1', TOKENS = null, tiles = null;
 let anchorTiles = null, tileAnchor = null;   // Google 3D: re-anchored near the action (see anchorTiles below)
 let photoSurface = null, surfaceT = 0, photoRootRef = null;   // Google 3D: height of the photo mesh under the camera
@@ -439,6 +415,11 @@ try {
     progress(.4, 'loading real buildings...');
     BLD = await fetch(DATA + S.structures.buildings.file, NOCACHE).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
   }
+  // preview towers keep their feet dry. water.png isn't on the map app's server (it copies a whitelist), so the water is
+  // read off the night map instead: prep_scene paints the same OSM water there as (2, 5, 12), land as (6, 11, 22)
+  // (2026-09-27 loosened from b < 17 && g < 9: read at half size, a shoreline pixel is half water and half land, and 8
+  // preview towers stood one pixel into the river. Land stays out: its g is 10-13.)
+  if (S.ground.web) WATER = await loadMask(DATA + S.ground.web, (r, g, b) => b < 20 && g < 10, 4096).catch(() => null);
   progress(.5, GROUND === 'sat' ? 'loading satellite imagery (USGS)...' : 'loading the night map...');
   await loadTex(DATA + groundFile(GROUND));
   if (PHOTO) {
@@ -472,6 +453,19 @@ try {
   throw err;
 }
 function groundFile(g) { return g === 'sat' ? S.ground.sat.file : (S.ground.web || S.ground.file); }
+// an image over the level box -> 1 byte per pixel: a black/white mask (veg.png, water.png), or any image and a color test
+async function loadMask(url, test = r => r > 127, maxW = 0) {
+  const img = await new THREE.ImageLoader().loadAsync(url + VER), k = maxW && img.width > maxW ? maxW / img.width : 1;
+  const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, c.width, c.height);
+  const d = g.getImageData(0, 0, c.width, c.height).data, m = new Uint8Array(c.width * c.height);
+  for (let i = 0; i < m.length; i++) m[i] = test(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]) ? 1 : 0;
+  return { w: c.width, h: c.height, m };
+}
+const maskAt = (mk, x, y) => {
+  const px = Math.floor((x + S.size_m[0] / 2) / S.size_m[0] * mk.w), py = Math.floor((S.size_m[1] / 2 - y) / S.size_m[1] * mk.h);
+  return px >= 0 && py >= 0 && px < mk.w && py < mk.h && mk.m[py * mk.w + px] === 1;
+};
 
 const [W, H] = S.size_m;
 const KX = R_EARTH * Math.cos(S.origin.lat * DEG) * DEG, KY = R_EARTH * DEG;   // same local projection as prep_scene.py
@@ -482,6 +476,15 @@ const hAt = (x, y) => {  // bilinear terrain height (world z; exaggerated unless
   const fy = Math.min(Math.max((H / 2 - y) / H * (TER.ny - 1), 0), TER.ny - 1.001);
   const x0 = fx | 0, y0 = fy | 0, wx = fx - x0, wy = fy - y0, n = TER.nx, z = TER.z;
   return z[y0 * n + x0] * (1 - wx) * (1 - wy) + z[y0 * n + x0 + 1] * wx * (1 - wy) + z[(y0 + 1) * n + x0] * (1 - wx) * wy + z[(y0 + 1) * n + x0 + 1] * wx * wy;
+};
+// 2026-09-27 the height of the terrain mesh exactly as drawn (its two triangles per cell, not the bilinear blend): fences
+// and gantries stand on it. PlaneGeometry splits each cell a-b-d / b-c-d (a top left, b bottom left, c bottom right).
+const hMesh = (x, y) => {
+  const fx = Math.min(Math.max((x + W / 2) / W * (TER.nx - 1), 0), TER.nx - 1.001);
+  const fy = Math.min(Math.max((H / 2 - y) / H * (TER.ny - 1), 0), TER.ny - 1.001);
+  const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, n = TER.nx, z = TER.z;
+  const za = z[y0 * n + x0], zd = z[y0 * n + x0 + 1], zb = z[(y0 + 1) * n + x0], zc = z[(y0 + 1) * n + x0 + 1];
+  return u + v <= 1 ? za + (zd - za) * u + (zb - za) * v : zc + (zb - zc) * (1 - u) + (zd - zc) * (1 - v);
 };
 const EDGE = 2500;   // the level eases down to sea level over its last 2.5 km, meeting the far ground without a cliff
 const edgeK = (x, y) => { const t = Math.max(0, Math.min(1, Math.min(W / 2 - Math.abs(x), H / 2 - Math.abs(y)) / EDGE)); return t * t * (3 - 2 * t); };
@@ -504,7 +507,9 @@ const dropCSS = obj => obj.traverse(o => { if (o.isCSS2DObject) o.element.remove
 // ================================================================== scene, sky, moods
 const world = new THREE.Scene();
 world.fog = new THREE.FogExp2(COL.haze, 2.1e-5);
-const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 1, 260000);
+// near plane 0.5 m (was 1): the walker's eye is 1.8 m up and can stand inside a slimmed beam or at a tower's foot; the
+// logarithmic depth buffer keeps the 0.5 m .. 260 km range free of z-fighting
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.5, 260000);
 const hemi = new THREE.HemisphereLight(0x2a3f7a, 0x020408, 1.1);
 const sun = new THREE.DirectionalLight(0x9fb8ff, 1.2);
 world.add(hemi, sun);
@@ -636,61 +641,50 @@ const hot = (hex, k) => new THREE.Color(hex).multiplyScalar(k);   // > 1 = HDR, 
 const polyline = (pts, mat) => { const g = new LineGeometry(); g.setPositions(pts); const l = new Line2(g, mat); l.computeLineDistances(); return l; };
 const segs = (pos, mat) => { const g = new LineSegmentsGeometry(); g.setPositions(pos); return new LineSegments2(g, mat); };
 const towerH = kv => (kv || 0) >= 500 ? 48 : (kv || 0) >= 230 ? 36 : (kv || 0) >= 100 ? 27 : 20;
-
-// ================================================================== existing grid: far glow + sagging wires
-// 2026-09-26: prep_scene clips every OSM line at the level box, and with the far photo (or Google's tiles) running on
-// past it, a cut reads as a real dead end in a field (US-21 on St Helena Island: 22 cuts in Savannah, 43 in Augusta).
-// A line that ends ON the box now fades out over its last 1.3 km (per-segment alpha, fadeLines below), and the towers
-// in the faded half are dropped. Lines that really end near the edge (at a substation) keep full strength.
-const CUT_FADE = 1300, edgeDist = (x, y) => Math.min(W / 2 - Math.abs(x), H / 2 - Math.abs(y));
-const smooth01 = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
-const glowPos = [], wirePos = [], glowFade = [], wireFade = [], cutEnds = [], segIndex = new Map(), SEG_CELL = 250;
-for (const line of S.grid) {
-  const h = towerH(line.kv), p = line.pts, last = p[p.length - 1];
-  const cutA = edgeDist(p[0][0], p[0][1]) < 15, cutB = edgeDist(last[0], last[1]) < 15;
-  if (cutA) cutEnds.push(p[0]);
-  if (cutB) cutEnds.push(last);
-  const s = [0];   // distance along the line
-  for (let i = 1; i < p.length; i++) s.push(s[i - 1] + (Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]) || 1));
-  const len = s[s.length - 1], fadeAt = d => Math.min(cutA ? smooth01(d / CUT_FADE) : 1, cutB ? smooth01((len - d) / CUT_FADE) : 1);
-  for (let i = 0; i < p.length - 1; i++) {
-    const [x0, y0, z0] = p[i], [x1, y1, z1] = p[i + 1];
-    push(glowPos, x0, y0, z0 + 0.7 * h); push(glowPos, x1, y1, z1 + 0.7 * h);
-    glowFade.push(fadeAt(s[i]), fadeAt(s[i + 1]));
-    const dx = x1 - x0, dy = y1 - y0, span = Math.hypot(dx, dy) || 1, sag = Math.min(0.03 * span, 0.35 * h);
-    for (const side of [-1, 1]) {
-      const ox = -dy / span * side * 0.28 * h, oy = dx / span * side * 0.28 * h;
-      for (let k = 0; k < 6; k++) {
-        for (const f of [k / 6, (k + 1) / 6]) push(wirePos, x0 + dx * f + ox, y0 + dy * f + oy, z0 + (z1 - z0) * f + 0.7 * h - 4 * sag * f * (1 - f));
-        wireFade.push(fadeAt(s[i] + span * k / 6), fadeAt(s[i] + span * (k + 1) / 6));
-      }
-    }
-    // spatial index of spans: keeps trees out of the cleared right-of-way
-    const steps = Math.ceil(span / SEG_CELL), seg = [x0, y0, x1, y1];
-    for (let k = 0; k <= steps; k++) {
-      const key = `${Math.floor((x0 + dx * k / steps) / SEG_CELL)},${Math.floor((y0 + dy * k / steps) / SEG_CELL)}`;
-      if (!segIndex.has(key)) segIndex.set(key, []);
-      const list = segIndex.get(key); if (list[list.length - 1] !== seg) list.push(seg);
-    }
-  }
-}
-function fadeLines(mat, geo, fade) {  // LineMaterial with alpha *= a per-segment (start, end) fade from the geometry
-  geo.setAttribute('instanceFade', new THREE.InstancedBufferAttribute(new Float32Array(fade), 2));
-  mat.onBeforeCompile = sh => {   // same source for every grid material, so they share one program
-    sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec2 instanceFade;\nvarying float vFade;\nvoid main() {\n\tvFade = ( position.y < 0.5 ) ? instanceFade.x : instanceFade.y;');
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'varying float vFade;\nvoid main() {')
-      .replace('gl_FragColor = vec4( diffuseColor.rgb, alpha );', 'gl_FragColor = vec4( diffuseColor.rgb, alpha * vFade );');
+const segDist = (x, y, x0, y0, x1, y1) => {
+  const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / l2));
+  return Math.hypot(x - x0 - t * dx, y - y0 - t * dy);
+};
+// 2026-09-27 solid lines. Jose: "the quality of the lines is really bad". A lone 1-2 px line scratched over the satellite
+// photo and went to mush in the bloom. Now every grid and planned line is three passes over ONE geometry: a soft additive
+// glow (the bloom's food, drawn first), a dark casing twice the core's width, and a crisp core on top that stays under the
+// bloom threshold so it keeps its edge. Map-road trick: the casing is what makes a 3 px line read solid on any ground.
+// (The composer also renders with 4x MSAA now; before, its render target had none and every line was jagged.)
+// (casing and core stay opaque in EVERY state: a see-through casing or core blends twice where two segments overlap at
+// a joint, and the line came out beaded. 2026-09-27 that still happened to low-confidence and filter-dimmed lines, which
+// passed opacity < 1 in; `k` now dims the core by color, toward its own casing, and only the additive glow by opacity.)
+const casingOf = hex => new THREE.Color(hex).multiplyScalar(0.14);
+// draw order in the see-through pass: line glow 1, casing 2, core 3, then the additive volumes (beams, curtains, fences,
+// the touching pillar, preview towers) at VOLUME. They write no depth and the cores do, so a nearer core still hides
+// them while a farther line gets their light on top (2026-09-27: the lines at 1-3 drew over nearer beams at 0)
+const VOLUME = 4;
+function solid(geo, Ctor, { color, core = color, width, glow = 0.3, glowW = width * 3.5, k = 1, fade = null }, like = null) {   // like: share its materials
+  const g = new THREE.Group();
+  const add = (key, mat, order) => {
+    const l = new Ctor(geo, mat); l.renderOrder = order;
+    if (fade) fadeMat(mat);
+    g.add(l); g.userData[key] = mat; return l;
   };
+  if (fade) geo.setAttribute('instanceFade', new THREE.InstancedBufferAttribute(new Float32Array(fade), 2));
+  if (Ctor === Line2) new Line2(geo).computeLineDistances();   // once per geometry (dashes)
+  const L = like?.userData;
+  if (glow) add('glow', L?.glow || lineMat(hot(color, 1.3), glowW, { opacity: glow * k, blending: THREE.AdditiveBlending, depthWrite: false }), 1);
+  add('casing', L?.casing || lineMat(casingOf(color), width * 2, { depthWrite: false }), 2);
+  add('core', L?.core || lineMat(new THREE.Color(core), width), 3);
+  Object.assign(g.userData, { w: width, glowW, glowK: glow, coreCol: new THREE.Color(core), casingCol: casingOf(color) });
+  styleSolid(g, width, k);
+  return g;
 }
-const gridGlow = segs(glowPos, lineMat(hot(COL.grid, 1.25), 1.5, { opacity: 0.85 }));
-const gridWires = segs(wirePos, lineMat(COL.steel, 1.1, { opacity: 0.9 }));
-fadeLines(gridGlow.material, gridGlow.geometry, glowFade);
-fadeLines(gridWires.material, gridWires.geometry, wireFade);
-world.add(gridGlow, gridWires);
-// towers in the faded half of a cut line would stand at the end of nothing: drop them (updateTowers reads S.towers)
-if (cutEnds.length) S.towers = S.towers.filter(t => !cutEnds.some(c => Math.hypot(t[0] - c[0], t[1] - c[1]) < CUT_FADE / 2));
+function styleSolid(g, width, k) {   // re-weight a solid() line: selection, filter dimming, confidence (k 0..1)
+  const u = g.userData;
+  u.core.linewidth = width; u.casing.linewidth = 2 * width; if (u.glow) u.glow.linewidth = u.glowW * width / u.w;
+  u.core.color.copy(u.casingCol).lerp(u.coreCol, 0.25 + 0.75 * k);   // k = 0 keeps a quarter of the hue: faded, not gone
+  if (u.glow) u.glow.opacity = u.glowK * k;
+}
+const lineGeo = pts => { const g = new LineGeometry(); g.setPositions(pts); return g; };
+const segGeo = pos => { const g = new LineSegmentsGeometry(); g.setPositions(pos); return g; };
 
-// ================================================================== real structures from OpenStreetMap
+// ================================================================== yards (OSM substations + plants): the grid needs them first
 const ST = S.structures || { facilities: [], equipment: [], stacks: [] };
 const ownerOf = op => /georgia power|savannah electric/i.test(op || '') ? 'gpc' : /dominion|south carolina electric|sce&g/i.test(op || '') ? 'desc' : 'other';
 const OWNER_COL = { gpc: COL.gpc, desc: COL.desc, other: COL.steel };
@@ -707,6 +701,133 @@ for (const f of ST.facilities) {  // bounding boxes make point-in-yard checks ch
   f.box = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 const facilityAt = (x, y) => ST.facilities.find(f => x >= f.box[0] && x <= f.box[2] && y >= f.box[1] && y <= f.box[3] && f.rings.some(r => insidePoly(x, y, r)));
+const nearFence = (f, x, y, r) => x >= f.box[0] - r && x <= f.box[2] + r && y >= f.box[1] - r && y <= f.box[3] + r
+  && f.rings.some(g => insidePoly(x, y, g) || g.some((q, i) => i && segDist(x, y, g[i - 1][0], g[i - 1][1], q[0], q[1]) < r));
+
+// ================================================================== existing grid: far glow + sagging wires
+// 2026-09-26: prep_scene clips every OSM line at the level box, and with the far photo (or Google's tiles) running on
+// past it, a cut reads as a real dead end in a field (US-21 on St Helena Island: 22 cuts in Savannah, 43 in Augusta).
+// A line that ends ON the box now fades out over its last 1.3 km (per-segment alpha, fadeLines below), and the towers
+// in the faded half are dropped. Lines that really end near the edge (at a substation) keep full strength.
+// 2026-09-27 Jose: "the wires point to nothing". The towers had been taken out of the yards (audit F8: every OSM vertex
+// was a lattice tower, 71 of them inside the McIntosh fence) but the wires still ran on through the yards at tower
+// height. Now a line ends the way it does at a real substation: on a dead-end gantry (two steel poles and a crossbar,
+// 15 m for 115 kV, 20 m for 230 kV) at its first vertex inside the fence; the wires come down from the last tower
+// outside to the crossbar, and nothing runs on to the yard's inner vertices. A vertex is "in a yard" only when the
+// yard is a substation, or when the line ENDS in (or within 30 m of) it: a line that just crosses a plant's big
+// polygon (1.6 km over Shaw Creek Solar) keeps its towers and wires.
+const CUT_FADE = 1300, edgeDist = (x, y) => Math.min(W / 2 - Math.abs(x), H / 2 - Math.abs(y));
+const smooth01 = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+const gantryH = kv => (kv || 0) >= 500 ? 26 : (kv || 0) >= 230 ? 20 : (kv || 0) >= 100 ? 15 : 12;
+const gKey = (x, y) => `${Math.round(x)},${Math.round(y)}`;
+const yardOf = p => {
+  const ends = [p[0], p[p.length - 1]];
+  return p.map(([x, y]) => {
+    const f = facilityAt(x, y);
+    return f && (f.kind === 'substation' || ends.some(e => nearFence(f, e[0], e[1], 30))) ? f : null;
+  });
+};
+const GANTRY = new Map();   // gKey of a yard vertex -> the dead-end gantry standing on it
+for (const line of S.grid) {   // pass 1: where each line crosses into a yard
+  const p = line.pts, yard = line.yard = yardOf(p), w = 0.28 * towerH(line.kv) + 1.2;
+  for (let i = 0; i < p.length; i++) {
+    if (!yard[i]) continue;
+    const out = [i - 1, i + 1].filter(j => j >= 0 && j < p.length && yard[j] !== yard[i]);
+    if (!out.length) continue;   // deeper in: no structure, no wire
+    const [a, b] = out.length === 2 ? [p[i - 1], p[i + 1]] : out[0] < i ? [p[i - 1], p[i]] : [p[i], p[i + 1]];
+    const k = gKey(p[i][0], p[i][1]), g = GANTRY.get(k), gh = gantryH(line.kv);
+    if (g) { g.h = Math.max(g.h, gh); g.w = Math.max(g.w, w); continue; }   // two circuits on one gantry: the bigger frame
+    GANTRY.set(k, { x: p[i][0], y: p[i][1], z: hMesh(p[i][0], p[i][1]), h: gh, w, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) });
+  }
+}
+const cutEnds = [], segIndex = new Map(), SEG_CELL = 250;
+// the lines go in 8 km tiles (by span midpoint): frustum culling, and the 12-piece wire pairs only near the camera (lod())
+const GT = 8000, gTiles = new Map();
+const gTile = (x, y) => { const k = `${Math.floor(x / GT)},${Math.floor(y / GT)}`; if (!gTiles.has(k)) gTiles.set(k, { x0: Math.floor(x / GT) * GT, y0: Math.floor(y / GT) * GT, glowPos: [], glowFade: [], wirePos: [], wireFade: [] }); return gTiles.get(k); };
+const yardPts = new Map(), plainPts = new Set();   // for the tower filter below
+for (const line of S.grid) {   // pass 2: the wires
+  const h = towerH(line.kv), p = line.pts, yard = line.yard, last = p[p.length - 1];
+  const cutA = edgeDist(p[0][0], p[0][1]) < 15, cutB = edgeDist(last[0], last[1]) < 15;
+  if (cutA) cutEnds.push(p[0]);
+  if (cutB) cutEnds.push(last);
+  p.forEach(([x, y], i) => {
+    if (!yard[i]) { plainPts.add(gKey(x, y)); return; }
+    const c = `${Math.floor(x / 10)},${Math.floor(y / 10)}`;
+    if (!yardPts.has(c)) yardPts.set(c, []);
+    yardPts.get(c).push([x, y]);
+  });
+  const s = [0];   // distance along the line
+  for (let i = 1; i < p.length; i++) s.push(s[i - 1] + (Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]) || 1));
+  const len = s[s.length - 1], fadeAt = d => Math.min(cutA ? smooth01(d / CUT_FADE) : 1, cutB ? smooth01((len - d) / CUT_FADE) : 1);
+  const top = i => { const g = yard[i] && GANTRY.get(gKey(p[i][0], p[i][1])); return g ? g.z + g.h - 0.5 : p[i][2] + 0.7 * h; };   // crossbar or arm tips
+  for (let i = 0; i < p.length - 1; i++) {
+    const [x0, y0] = p[i], [x1, y1] = p[i + 1];
+    const dx = x1 - x0, dy = y1 - y0, span = Math.hypot(dx, dy) || 1;
+    // spatial index of spans: keeps trees out of the cleared right-of-way
+    const steps = Math.ceil(span / SEG_CELL), seg = [x0, y0, x1, y1];
+    for (let k = 0; k <= steps; k++) {
+      const key = `${Math.floor((x0 + dx * k / steps) / SEG_CELL)},${Math.floor((y0 + dy * k / steps) / SEG_CELL)}`;
+      if (!segIndex.has(key)) segIndex.set(key, []);
+      const list = segIndex.get(key); if (list[list.length - 1] !== seg) list.push(seg);
+    }
+    if (yard[i] && yard[i] === yard[i + 1]) continue;   // inside one yard: the gantry is where the line ends
+    const t0 = top(i), t1 = top(i + 1), sag = Math.min(0.03 * span, 0.35 * h);
+    const { glowPos, glowFade, wirePos, wireFade } = gTile((x0 + x1) / 2, (y0 + y1) / 2);
+    push(glowPos, x0, y0, t0); push(glowPos, x1, y1, t1);
+    glowFade.push(fadeAt(s[i]), fadeAt(s[i + 1]));
+    for (const side of [-1, 1]) {
+      const ox = -dy / span * side * 0.28 * h, oy = dx / span * side * 0.28 * h;
+      for (let k = 0; k < 6; k++) {
+        for (const f of [k / 6, (k + 1) / 6]) push(wirePos, x0 + dx * f + ox, y0 + dy * f + oy, t0 + (t1 - t0) * f - 4 * sag * f * (1 - f));
+        wireFade.push(fadeAt(s[i] + span * k / 6), fadeAt(s[i] + span * (k + 1) / 6));
+      }
+    }
+  }
+}
+function fadeMat(mat) {  // LineMaterial with alpha *= a per-segment (start, end) fade from the geometry (solid(): fade)
+  mat.onBeforeCompile = sh => {   // same source for every grid material, so they share one program
+    sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec2 instanceFade;\nvarying float vFade;\nvoid main() {\n\tvFade = ( position.y < 0.5 ) ? instanceFade.x : instanceFade.y;');
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'varying float vFade;\nvoid main() {')
+      .replace('gl_FragColor = vec4( diffuseColor.rgb, alpha );', 'gl_FragColor = vec4( diffuseColor.rgb, alpha * vFade );');
+  };
+}
+// from afar one line per circuit (core in today's-grid blue, a notch lighter than the map's so it holds on the photo;
+// thinner than the planned lines, which are the story); under 700 m up, the two sagging conductors per span. Both keep
+// their glow pass, so the light never switches off as you come down (it used to: the glow gave way to 1 px wires at
+// 2.5 km). The switch moved down from 2.5 km because up there the conductor pair read as railway track.
+// (2026-09-27: three passes over every one of ~100k wire pieces, all at once, had doubled the frame time. Now each 8 km
+// tile has both looks, sharing one set of materials, and lod() shows the wire pair only within ~6 km of the camera
+// below 700 m; farther tiles keep the one-line glow, which at that distance is what the pair looks like anyway.)
+const gridGlow = new THREE.Group(), gridWires = new THREE.Group(), gridTiles = [];
+{
+  let gLike = null, wLike = null;
+  for (const t of gTiles.values()) {
+    const glow = t.glowPos.length ? solid(segGeo(t.glowPos), LineSegments2, { color: COL.grid, core: 0x3b7dff, width: 1.3, glow: 0.16, glowW: 5, fade: t.glowFade }, gLike) : null;
+    const wires = t.wirePos.length ? solid(segGeo(t.wirePos), LineSegments2, { color: COL.grid, core: 0x8fb4ff, width: 1.4, glow: 0.22, glowW: 5, fade: t.wireFade }, wLike) : null;
+    gLike ||= glow; wLike ||= wires;
+    if (glow) gridGlow.add(glow);
+    if (wires) gridWires.add(wires);
+    gridTiles.push({ x0: t.x0, y0: t.y0, glow, wires });
+  }
+}
+world.add(gridGlow, gridWires);
+// towers in the faded half of a cut line would stand at the end of nothing: drop them (updateTowers reads S.towers)
+if (cutEnds.length) S.towers = S.towers.filter(t => !cutEnds.some(c => Math.hypot(t[0] - c[0], t[1] - c[1]) < CUT_FADE / 2));
+// and no lattice tower on a yard vertex (its gantry, or nothing, stands there). A tower that is also a plain vertex of
+// another line stays.
+const TOWER_STATS = window.__towers = { osm: S.towers.length, gantries: GANTRY.size,
+  near: (x, y, r) => [...GANTRY.values()].filter(g => Math.hypot(g.x - x, g.y - y) < r).map(g => [g.x, g.y, g.h]) };   // test readout
+const onYardVertex = ([x, y]) => {
+  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+    for (const [px, py] of yardPts.get(`${Math.floor(x / 10) + i},${Math.floor(y / 10) + j}`) || []) if (Math.hypot(px - x, py - y) < 6.5) return true;
+  }
+  return false;
+};
+S.towers = S.towers.filter(t => plainPts.has(gKey(t[0], t[1])) || !onYardVertex(t));
+TOWER_STATS.inYardsSkipped = TOWER_STATS.osm - S.towers.length;
+TOWER_STATS.insideAnyYard = S.towers.filter(t => facilityAt(t[0], t[1])).length;   // kept: lines that only cross a plant
+
+// ================================================================== real structures from OpenStreetMap
 const longestEdgeAngle = ring => {
   let best = 0, ang = 0;
   for (let i = 0; i < ring.length - 1; i++) {
@@ -719,6 +840,18 @@ const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vect
 const structGroup = new THREE.Group(); world.add(structGroup);
 const pickables = [terrain];          // what the measure tool can click on
 const facLabels = [], padMeshes = [];
+// a short owner for a yard with no name: the two utilities by their brand, the rest trimmed of Inc, LLC, Company...
+const OP_SHORT = [[/georgia power|savannah electric/i, 'GEORGIA POWER'], [/dominion|south carolina electric|sce&g/i, 'DOMINION'],
+  [/public service authority|santee/i, 'SANTEE COOPER'], [/oglethorpe/i, 'OGLETHORPE POWER'], [/corps of engineers/i, 'ARMY CORPS'],
+  [/georgia-pacific/i, 'GEORGIA-PACIFIC'], [/international paper/i, 'INTERNATIONAL PAPER'], [/graphic packaging/i, 'GRAPHIC PACKAGING']];
+const opShort = op => !op ? '' : OP_SHORT.find(([re]) => re.test(op))?.[1] || op.split(',')[0]
+  .replace(/\b(inc|llc|lp|co|corp|corporation|company|property|international|federal solutions|renewables|farm|[iv]+)\b\.?/gi, '')
+  .replace(/[\s&-]+$/, '').replace(/\s+/g, ' ').trim().toUpperCase();
+const yardLabel = f => {
+  const who = opShort(f.op);
+  if (f.kind === 'plant') return who ? `${who} ${/SOLAR/.test(who) ? 'FARM' : 'POWER PLANT'}` : 'POWER PLANT';
+  return `${who ? who + ' ' : ''}SUBSTATION${f.kv ? `, ${f.kv} KV` : ''}`;
+};
 {
   const pads = { gpc: [], desc: [], other: [] }, walls = { gpc: [], desc: [], other: [] }, tops = { gpc: [], desc: [], other: [] };
   for (const f of ST.facilities) {
@@ -726,27 +859,37 @@ const facLabels = [], padMeshes = [];
     f.owner = owner; f.angle = longestEdgeAngle(f.rings[0]);
     const shapes = f.rings.map(r => new THREE.Shape(r.map(([x, y]) => new THREE.Vector2(x, y))));
     for (const h of f.holes || []) shapes[0].holes.push(new THREE.Path(h.map(([x, y]) => new THREE.Vector2(x, y))));
-    const g = new THREE.ShapeGeometry(shapes).rotateX(-Math.PI / 2).translate(0, f.z + 0.6, 0);
+    const g = new THREE.ShapeGeometry(shapes).rotateX(-Math.PI / 2);
+    const gp = g.attributes.position;   // the pad follows the ground at its corners too (it was flat at the yard's one z)
+    for (let i = 0; i < gp.count; i++) gp.setY(i, hMesh(gp.getX(i), -gp.getZ(i)) + 0.6);
     pads[owner].push(g.index ? g.toNonIndexed() : g);
-    for (const r of f.rings) {  // fence: a 3 m glowing strip plus a bright top rail
+    // fence: a 3 m glowing strip plus a bright top rail. 2026-09-27 Jose: "Burton's fence looks unfinished". It stood at
+    // the yard's single z, and on the exaggerated ground (x6 in Savannah) half of it sank under a slope. Now every edge
+    // is cut every ~12 m and draped on the terrain mesh as drawn (hMesh), its foot a little below the surface.
+    for (const r of f.rings) {
       const pos = [], uv = [];
       for (let i = 0; i < r.length - 1; i++) {
-        const [x0, y0] = r[i], [x1, y1] = r[i + 1];
-        pos.push(x0, f.z, -y0, x1, f.z, -y1, x1, f.z + 3, -y1, x0, f.z, -y0, x1, f.z + 3, -y1, x0, f.z + 3, -y0);
-        uv.push(0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1);
-        tops[owner].push(x0, f.z + 3.2, -y0, x1, f.z + 3.2, -y1);
+        const [x0, y0] = r[i], [x1, y1] = r[i + 1], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 12));
+        for (let k = 0; k < n; k++) {
+          const xa = x0 + (x1 - x0) * k / n, ya = y0 + (y1 - y0) * k / n, xb = x0 + (x1 - x0) * (k + 1) / n, yb = y0 + (y1 - y0) * (k + 1) / n;
+          const za = hMesh(xa, ya), zb = hMesh(xb, yb);
+          pos.push(xa, za - 0.3, -ya, xb, zb - 0.3, -yb, xb, zb + 3.2, -yb, xa, za - 0.3, -ya, xb, zb + 3.2, -yb, xa, za + 3.2, -ya);
+          uv.push(0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1);
+          tops[owner].push(xa, za + 3.4, -ya, xb, zb + 3.4, -yb);
+        }
       }
       const wg = new THREE.BufferGeometry();
       wg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
       wg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
       walls[owner].push(wg);
     }
-    if (f.name) {
-      const el = document.createElement('div');
-      el.className = `fac ${owner}`; el.textContent = clean(f.name); el._lk = 'fac';
+    {  // 2026-09-27: 56 of Savannah's 142 yards have no OSM name and showed a fence with nothing on it. They get what is
+       // known instead: "DOMINION SUBSTATION, 230 KV", "SUBSTATION, 115 KV", "POWER PLANT" (low priority, close up only)
+      const el = document.createElement('div'), gen = !f.name;
+      el.className = `fac ${owner}${gen ? ' gen' : ''}`; el.textContent = gen ? yardLabel(f) : clean(f.name); el._lk = gen ? 'facgen' : 'fac';
       const cx = (f.box[0] + f.box[2]) / 2, cy = (f.box[1] + f.box[3]) / 2; el._xy = [cx, cy];
-      const o = new CSS2DObject(el); o.position.copy(V(cx, cy, f.z + 45)); o.visible = false; world.add(o);
-      facLabels.push({ o, x: cx, y: cy });
+      const o = new CSS2DObject(el); o.position.copy(V(cx, cy, Math.max(f.z, hAt(cx, cy)) + (gen ? 30 : 45))); o.visible = false; world.add(o);
+      facLabels.push({ o, x: cx, y: cy, gen });
     }
   }
   for (const owner of ['gpc', 'desc', 'other']) {
@@ -754,8 +897,9 @@ const facLabels = [], padMeshes = [];
     const pad = new THREE.Mesh(mergeGeometries(pads[owner]), new THREE.MeshLambertMaterial({
       color: 0x121c30, emissive: new THREE.Color(OWNER_COL[owner]).multiplyScalar(0.06) }));
     world.add(pad); padMeshes.push(pad); pickables.push(pad);
-    structGroup.add(new THREE.Mesh(mergeGeometries(walls[owner]), new THREE.MeshBasicMaterial({ color: hot(OWNER_COL[owner], 1.2),
-      alphaMap: fadeDown, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })));
+    const wall = new THREE.Mesh(mergeGeometries(walls[owner]), new THREE.MeshBasicMaterial({ color: hot(OWNER_COL[owner], 1.2),
+      alphaMap: fadeDown, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    wall.renderOrder = VOLUME; structGroup.add(wall);
     structGroup.add(segs(tops[owner], lineMat(hot(OWNER_COL[owner], 1.4), 1.3)));
   }
 }
@@ -772,7 +916,7 @@ const facLabels = [], padMeshes = [];
     const im = new THREE.InstancedMesh(geo, eqMat, list.length);
     list.forEach((e, i) => {
       const f = facilityAt(e.x, e.y);
-      _m.compose(V(e.x, e.y, (f ? f.z + 0.6 : e.z)), _q.setFromAxisAngle(_up, f ? f.angle : 0), _s.set(1, 1, 1));
+      _m.compose(V(e.x, e.y, (f ? hMesh(e.x, e.y) + 0.6 : e.z)), _q.setFromAxisAngle(_up, f ? f.angle : 0), _s.set(1, 1, 1));   // on the draped yard
       im.setMatrixAt(i, _m);
     });
     structGroup.add(im); pickables.push(im);
@@ -797,9 +941,36 @@ const bMats = {
   map: new THREE.MeshLambertMaterial({ color: 0x14224a, emissive: 0x0a1430, emissiveIntensity: 1, flatShading: true }),
   sat: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, emissive: 0x151515 }),
 };
+// footprints by 100 m cell (each padded 7 m): houseAt() keeps preview towers out of people's houses
+const B_CELL = 100, B_PAD = 7, bIdx = new Map();
+let bXY = null;
+const houseAt = (x, y) => {
+  const list = bIdx.get(`${Math.floor(x / B_CELL)},${Math.floor(y / B_CELL)}`);
+  if (!list) return false;
+  for (const [off, n, x0, y0, x1, y1] of list) {
+    if (x < x0 || x > x1 || y < y0 || y > y1) continue;
+    let c = false;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = bXY[2 * (off + i)], yi = bXY[2 * (off + i) + 1], xj = bXY[2 * (off + j)], yj = bXY[2 * (off + j) + 1];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+      if (segDist(x, y, xi, yi, xj, yj) < B_PAD) return true;   // a tower's footing is ~10 m across
+    }
+    if (c) return true;
+  }
+  return false;
+};
 if (BLD) {
   const meta = S.structures.buildings, N = meta.count, P = meta.points;
   const xy = new Float32Array(BLD, 0, 2 * P), npts = new Uint16Array(BLD, 8 * P, N);
+  bXY = xy;
+  for (let i = 0, off = 0; i < N; off += npts[i], i++) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (let k = 0; k < npts[i]; k++) { const x = xy[2 * (off + k)], y = xy[2 * (off + k) + 1]; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    const e = [off, npts[i], x0 - B_PAD, y0 - B_PAD, x1 + B_PAD, y1 + B_PAD];
+    for (let cx = Math.floor(e[2] / B_CELL); cx <= Math.floor(e[4] / B_CELL); cx++) for (let cy = Math.floor(e[3] / B_CELL); cy <= Math.floor(e[5] / B_CELL); cy++) {
+      const key = `${cx},${cy}`; if (!bIdx.has(key)) bIdx.set(key, []); bIdx.get(key).push(e);
+    }
+  }
   const hdm = new Uint16Array(BLD, 8 * P + 2 * N, N), zdm = new Int16Array(BLD, 8 * P + 4 * N, N);
   const rgb = BLD.byteLength >= 8 * P + 9 * N ? new Uint8Array(BLD, 8 * P + 6 * N, 3 * N) : null;
   const LIN = Array.from({ length: 256 }, (_, i) => { const c = i / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
@@ -855,6 +1026,24 @@ const towerIM = new THREE.InstancedMesh(towerSrc.geometry, towerSrc.material, MA
 towerIM.material.emissiveIntensity = 1.4;
 towerIM.count = 0; towerIM.frustumCulled = false;
 world.add(towerIM);
+// the dead-end gantries where lines enter the yards (built in the grid pass): two poles a little taller than the
+// crossbar, in the towers' own steel, the crossbar as wide as the tower's arms so the wires land on it
+const gantryGroup = new THREE.Group(); world.add(gantryGroup);
+if (GANTRY.size) {
+  const G = [...GANTRY.values()];
+  const poles = new THREE.InstancedMesh(new THREE.BoxGeometry(0.55, 1, 0.55).translate(0, 0.5, 0), towerSrc.material, 2 * G.length);
+  const bars = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.7, 0.5), towerSrc.material, 2 * G.length);
+  G.forEach((g, i) => {
+    const across = g.ang + Math.PI / 2, ox = Math.cos(across) * g.w, oy = Math.sin(across) * g.w;
+    _q.setFromAxisAngle(_up, across);
+    for (const [j, sd] of [[0, -1], [1, 1]]) {
+      _m.compose(V(g.x + sd * ox, g.y + sd * oy, g.z - 0.5), _q, _s.set(1, g.h + 2.5, 1)); poles.setMatrixAt(2 * i + j, _m);
+    }
+    _m.compose(V(g.x, g.y, g.z + g.h - 0.2), _q, _s.set(2 * g.w + 0.6, 1, 1)); bars.setMatrixAt(2 * i, _m);            // the crossbar
+    _m.compose(V(g.x, g.y, g.z + 0.62 * g.h), _q, _s.set(2 * g.w, 0.6, 0.8)); bars.setMatrixAt(2 * i + 1, _m);         // a lower tie
+  });
+  for (const im of [poles, bars]) { im.computeBoundingSphere(); gantryGroup.add(im); }
+}
 const subScale = s => s.kind === 'plant' ? 220 : (s.kv || 0) >= 500 ? 240 : (s.kv || 0) >= 230 ? 160 : (s.kv || 0) >= 100 ? 110 : 70;
 const genericSubs = S.substations.filter(s => !facilityAt(s.x, s.y));   // real outlines replace the generic yard model
 for (const src of meshesOf('substation_model')) {
@@ -865,10 +1054,10 @@ for (const src of meshesOf('substation_model')) {
 
 // ================================================================== planned projects (per utility, so layers can switch them)
 const byId = Object.fromEntries(S.projects.map(p => [p.id, p]));
-const featured = new Set(S.overlaps.filter(o => o.level_rank <= 4).flatMap(o => [o.a, o.b]));
+const kvOf = name => Math.max(0, ...[...String(name).matchAll(/(\d{2,3})\s*kv/gi)].map(m => +m[1]));
 const LIFT = 140;
-const projObjs = { DESC: [], GPC: [] }, curtains = [];
-function corridor(a, b) {  // top line + curtain geometry along a straight corridor lifted over the land
+const projObjs = { DESC: [], GPC: [] }, curtains = [], planned = [];
+function corridor(a, b) {  // top line + curtain geometry along a straight corridor lifted over the land (your projects)
   const n = Math.max(2, Math.round(Math.hypot(b.x - a.x, b.y - a.y) / 250));
   const pts = [], cur = [], uv = [], idx = [];
   for (let k = 0; k <= n; k++) {
@@ -879,68 +1068,218 @@ function corridor(a, b) {  // top line + curtain geometry along a straight corri
   }
   return { pts, cur, uv, idx };
 }
-for (const p of S.projects) {
-  const col = COL[SIDE[p.side]], feat = featured.has(p.id), dim = p.conf === 'low' ? 0.45 : 1;
-  if (!p.b) continue;
-  const c = corridor(p.a, p.b);
-  const line = polyline(c.pts, lineMat(hot(col, feat ? 1.7 : 1.0), feat ? 3.5 : 2, { opacity: dim }));
-  world.add(line); projObjs[p.side].push(line);
-  if (feat) {  // fading curtain from the corridor down to the land
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(c.cur, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(c.uv, 2));
-    g.setIndex(c.idx);
-    const mesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: hot(col, 1.1), alphaMap: fadeUp, transparent: true, opacity: (PHOTO ? 0.12 : 0.28) * dim,   // Google 3D: a veil, not a wall
-      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
-    curtains.push({ mesh, side: p.side }); world.add(mesh);
-  }
-}
-// planned lines as translucent "ghost" towers + wires at real height, so walking the gap shows both future lines
-const ghosts = [];
-{
-  const kvOf = name => Math.max(0, ...[...String(name).matchAll(/(\d{2,3})\s*kv/gi)].map(m => +m[1]));
-  for (const side of ['DESC', 'GPC']) {
-    const spots = [], wires = [];
-    for (const p of S.projects) {
-      if (p.side !== side || !p.b) continue;
-      const h = towerH(kvOf(p.name) || 115), dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy);
-      if (len < 400) continue;
-      const n = Math.max(1, Math.round((len - 300) / 320)), heading = Math.atan2(dy, dx) / DEG;
-      let prevTop = null;
-      for (let k = 0; k <= n; k++) {
-        const f = (150 + (len - 300) * k / n) / len, x = p.a.x + dx * f, y = p.a.y + dy * f, z = hAt(x, y);
-        spots.push([x, y, z, heading, h]);
-        const top = [x, y, z + 0.7 * h];
-        if (prevTop) for (const s of [-1, 1]) {  // two sagging conductors between arm tips
-          const ox = -dy / len * s * 0.28 * h, oy = dx / len * s * 0.28 * h, span = Math.hypot(top[0] - prevTop[0], top[1] - prevTop[1]);
-          const sag = Math.min(0.03 * span, 0.35 * h);
-          for (let q = 0; q < 6; q++) for (const t of [q / 6, (q + 1) / 6]) {
-            push(wires, prevTop[0] + (top[0] - prevTop[0]) * t + ox, prevTop[1] + (top[1] - prevTop[1]) * t + oy, prevTop[2] + (top[2] - prevTop[2]) * t - 4 * sag * t * (1 - t));
-          }
-        }
-        prevTop = top;
-      }
+
+// ---- preview towers where a line crew would put them (2026-09-27, audit F6, F7, F11)
+// Spacing: the median straight-run span of today's lines in this same level, per voltage class (bends and yard stubs
+// left out; 115 kV comes out ~125 m in Savannah and ~155 m in Augusta, 230 kV ~185 / ~215 m). It was 320 m for all.
+// Footing: walk the row; a tower that lands in water, on a house, inside a yard or on top of one of today's towers
+// slides up to 40% of a span to dry, open ground. Where the obstacle is too wide for that (a river, the Beaufort sound)
+// the wires span it from a taller crossing tower on each bank. New wire or equipment on today's towers (reconductor,
+// reactors, relays, banks) gets no row, unless the project also rebuilds (GPC_16007 RECONDUCTOR/REBUILD does), and two
+// projects on the same geometry share one.
+// The rows are cut into chunks of 8 towers with their own bounds: frustum culling plus a distance limit in lod() (all
+// 916 towers and their wires were drawn at any distance, and the frame time had doubled).
+const spanOf = (() => {
+  const cls = kv => kv >= 500 ? 500 : kv >= 230 ? 230 : 115, bins = { 115: [], 230: [], 500: [] }, out = {};
+  const brg = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
+  const turn = (a, b, c) => { const d = Math.abs(brg(b, c) - brg(a, b)); return d > Math.PI ? 2 * Math.PI - d : d; };
+  for (const l of S.grid) {
+    if (!(l.kv >= 100)) continue;
+    const p = l.pts;
+    for (let i = 1; i < p.length - 2; i++) {
+      const d = Math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]);
+      if (d >= 40 && d <= 800 && turn(p[i - 1], p[i], p[i + 1]) < 0.06 && turn(p[i], p[i + 1], p[i + 2]) < 0.06) bins[cls(l.kv)].push(d);
     }
-    if (!spots.length) continue;
-    const im = new THREE.InstancedMesh(towerSrc.geometry, new THREE.MeshBasicMaterial({ color: hot(COL[SIDE[side]], 1.5), transparent: true, opacity: 0.42,
-      blending: THREE.AdditiveBlending, depthWrite: false }), spots.length);
-    spots.forEach(([x, y, z, hd, h], i) => { _m.compose(V(x, y, z), _q.setFromAxisAngle(_up, (hd + 90) * DEG), _s.set(h, h, h)); im.setMatrixAt(i, _m); });
-    im.frustumCulled = false; world.add(im);
-    const wl = segs(wires, lineMat(hot(COL[SIDE[side]], 1.4), 1.3, { opacity: 0.75 }));
-    world.add(wl);
-    ghosts.push({ side, objs: [im, wl] });
+  }
+  const FALLBACK = { 115: 150, 230: 200, 500: 390 };   // what the two levels' own lines say, rounded
+  for (const c in bins) { const a = bins[c].sort((x, y) => x - y); out[c] = a.length >= 30 ? Math.round(a[a.length >> 1]) : FALLBACK[c]; }
+  return kv => out[cls(kv || 115)];
+})();
+const NO_NEW_TOWERS = /RECONDUCTOR|REACTOR|RELAY|BANK/i, BUILDS_TOWERS = /REBUILD|CONSTRUCT/i;
+const GHOSTS = window.__ghosts = { rows: 0, towers: 0, chunks: 0, spacing: {}, nominalInWater: 0, nominalInHouse: 0, nominalInYard: 0, nominalOnTower: 0,
+                                   slid: 0, spannedOver: 0, stillOnBadGround: 0, bankTowers: 0, noRow: [], sharedRow: [] };
+GHOSTS.water = WATER ? `${WATER.w}x${WATER.h}, ${(WATER.m.reduce((a, b) => a + b, 0) / WATER.m.length * 100).toFixed(1)}% water` : 'no mask';
+const ghosts = [], ghostRows = [];
+const TW_CELL = 50, twIdx = new Map();   // today's towers by 50 m cell: a preview tower keeps 12 m from them
+for (const t of S.towers) { const k = `${Math.floor(t[0] / TW_CELL)},${Math.floor(t[1] / TW_CELL)}`; if (!twIdx.has(k)) twIdx.set(k, []); twIdx.get(k).push(t); }
+const nearTower = (x, y, r = 12) => {
+  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+    for (const t of twIdx.get(`${Math.floor(x / TW_CELL) + i},${Math.floor(y / TW_CELL) + j}`) || []) if (Math.hypot(t[0] - x, t[1] - y) < r) return true;
+  }
+  return false;
+};
+{
+  const near = (e, f) => Math.hypot(e.x - f.x, e.y - f.y) < 60, done = [], STEP = 8, CHUNK = 8;
+  for (const p of S.projects) {
+    if (!p.b) continue;
+    if (NO_NEW_TOWERS.test(p.name) && !BUILDS_TOWERS.test(p.name)) { GHOSTS.noRow.push(p.id); continue; }
+    const twin = done.find(r => (near(r.p.a, p.a) && near(r.p.b, p.b)) || (near(r.p.a, p.b) && near(r.p.b, p.a)));
+    if (twin) { twin.gh.ids.push(p.id); GHOSTS.sharedRow.push(p.id); continue; }
+    const kv = kvOf(p.name) || 115, h = towerH(kv), span = spanOf(kv), conf = p.conf === 'low' ? 0.45 : 1;
+    const dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy);
+    if (len < 400) continue;
+    GHOSTS.spacing[kv >= 500 ? 500 : kv >= 230 ? 230 : 115] = span;
+    const at = s => [p.a.x + dx * s / len, p.a.y + dy * s / len];
+    const wet = s => { const [x, y] = at(s); return !!WATER && maskAt(WATER, x, y); };
+    const bad = s => { const [x, y] = at(s); return wet(s) || houseAt(x, y) || !!facilityAt(x, y) || nearTower(x, y); };
+    let s0 = 40, s1 = len - 40;   // the end structures: just outside the end yards, on open ground
+    while (s0 < len / 3 && bad(s0)) s0 += STEP;
+    while (s1 > 2 * len / 3 && bad(s1)) s1 -= STEP;
+    const runs = [];   // stretches of the line where no tower can stand
+    for (let s = s0; s <= s1; s += STEP) {
+      if (!bad(s)) continue;
+      const r = runs[runs.length - 1];
+      if (r && s - r.b <= STEP + 0.01) r.b = s; else runs.push({ a: s, b: s });
+    }
+    const n = Math.max(1, Math.round((s1 - s0) / span)), spots = [];
+    for (let k = 0; k <= n; k++) {
+      const s = s0 + (s1 - s0) * k / n, r = runs.find(r => s >= r.a - STEP && s <= r.b + STEP && bad(s));
+      if (!r) { spots.push({ s }); continue; }
+      const [x, y] = at(s);
+      if (wet(s)) GHOSTS.nominalInWater++; else if (houseAt(x, y)) GHOSTS.nominalInHouse++; else if (facilityAt(x, y)) GHOSTS.nominalInYard++; else GHOSTS.nominalOnTower++;
+      const lo = r.a - STEP, hi = r.b + STEP, to = s - lo <= hi - s ? lo : hi;   // the nearest open ground
+      if (Math.abs(to - s) <= 0.4 * span && to >= s0 && to <= s1) spots.push({ s: to, slid: true });
+      else { r.cross = true; GHOSTS.spannedOver++; }
+    }
+    for (const r of runs) if (r.cross) {
+      if (r.a - STEP >= s0) spots.push({ s: r.a - STEP, tall: true });
+      if (r.b + STEP <= s1) spots.push({ s: r.b + STEP, tall: true });
+    }
+    spots.sort((a, b) => a.s - b.s);
+    const row = [];
+    for (const q of spots) {   // two closer than 40% of a span: keep one, the crossing tower if either is
+      const last = row[row.length - 1];
+      if (last && q.s - last.s < 0.4 * span) { if (q.tall && !last.tall) row[row.length - 1] = q; continue; }
+      row.push(q);
+    }
+    GHOSTS.rows++; GHOSTS.towers += row.length; GHOSTS.stillOnBadGround += row.filter(q => bad(q.s)).length;
+    GHOSTS.slid += row.filter(q => q.slid).length; GHOSTS.bankTowers += row.filter(q => q.tall).length;
+    const heading = Math.atan2(dy, dx) / DEG;
+    const pos = row.map(q => { const [x, y] = at(q.s); return [x, y, hAt(x, y), q.tall ? 1.4 * h : h]; });
+    const span2 = (out, i) => {   // two sagging conductors between arm tips, tower i-1 to tower i
+      const [x0, y0, z0, h0] = pos[i - 1], [x1, y1, z1, h1] = pos[i];
+      const t0 = z0 + 0.7 * h0, t1 = z1 + 0.7 * h1, sp = Math.hypot(x1 - x0, y1 - y0), sag = Math.min(0.03 * sp, 0.35 * h);
+      for (const sd of [-1, 1]) {
+        const ox = -dy / len * sd * 0.28 * h, oy = dx / len * sd * 0.28 * h;
+        for (let q = 0; q < 6; q++) for (const t of [q / 6, (q + 1) / 6]) push(out, x0 + (x1 - x0) * t + ox, y0 + (y1 - y0) * t + oy, t0 + (t1 - t0) * t - 4 * sag * t * (1 - t));
+      }
+    };
+    const col = COL[SIDE[p.side]];
+    const tm = new THREE.MeshBasicMaterial({ color: hot(col, 1.5), transparent: true, opacity: 0.42 * conf, blending: THREE.AdditiveBlending, depthWrite: false });
+    // the wires stay opaque (see-through, their 6 pieces per span showed beads at the joints) and dim by color, like solid()
+    const wm = lineMat(hot(col, 1.4), 1.4), wCol = hot(col, 1.4), wCas = casingOf(col);
+    const gh = { side: p.side, ids: [p.id], conf, tm, tmBase: tm.opacity, wm, wCol, wCas, chunks: [] };
+    for (let c0 = 0; c0 < pos.length; c0 += CHUNK) {
+      const c1 = Math.min(pos.length, c0 + CHUNK), im = new THREE.InstancedMesh(towerSrc.geometry, tm, c1 - c0), w = [];
+      for (let i = c0; i < c1; i++) {
+        const [x, y, z, hh] = pos[i];
+        _m.compose(V(x, y, z), _q.setFromAxisAngle(_up, (heading + 90) * DEG), _s.set(hh, hh, hh)); im.setMatrixAt(i - c0, _m);
+        if (i) span2(w, i);   // the span that arrives at tower i rides with it
+      }
+      im.computeBoundingSphere(); im.renderOrder = VOLUME; world.add(im);
+      const objs = [im];
+      if (w.length) { const wl = segs(w, wm); world.add(wl); objs.push(wl); }
+      const a = pos[Math.max(0, c0 - 1)], b = pos[c1 - 1];
+      gh.chunks.push({ objs, x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, r: Math.hypot(b[0] - a[0], b[1] - a[1]) / 2 });
+      GHOSTS.chunks++;
+    }
+    ghosts.push(gh); done.push({ p, gh });
+    ghostRows.push({ p, h, len, st: row.map((q, i) => ({ s: q.s, top: pos[i][2] + pos[i][3] })) });
   }
 }
 
-// beacons + names at every featured endpoint (merged within 300 m; both colors side by side where utilities meet)
+// 2026-09-27: every planned line is built the same way now (solid line + light curtain); the filter decides how it looks
+// (focus(): lit = one of its overlaps is drawn in the world, match = in the filtered list, dim = neither: faded, still there).
+// Up close the line comes DOWN: from 140 m over the land (a diagram line, read from a drone) to just over the preview
+// towers' peaks, curtain and all. Walking up to a planned line you now find its light on the towers, not 140 m over your
+// head and out of the top of the frame (half of Jose's "the lines of light disappear when I get close").
+// (2026-09-27 review: that drop was one number per line, taken from 250 m samples, and at the Beaufort bluff the lowered
+// line ran underground and through the preview towers. The lowered path is its own now: over the row's tower tops, bank
+// towers included, and never less than half a tower over the highest ground near it; rows with no towers ride a tower
+// height over the ground, sampled every 40 m. frame() moves each vertex between the two paths, the curtain's top with it.)
+const DROP = { value: 0 };   // 0 = lifted, 1 = down on the towers; frame() eases it with the camera's height
+const sameRoute = (p, q) => { const n = (e, f) => Math.hypot(e.x - f.x, e.y - f.y) < 60; return p.side === q.side && ((n(p.a, q.a) && n(p.b, q.b)) || (n(p.a, q.b) && n(p.b, q.a))); };
+function plannedPath(p) {   // stations along a -> b with the lifted and lowered heights at each (three.js y)
+  const dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy) || 1, at = s => [p.a.x + dx * s / len, p.a.y + dy * s / len];
+  const n250 = Math.max(2, Math.round(len / 250)), coarse = [];
+  for (let k = 0; k <= n250; k++) coarse.push(hAt(...at(len * k / n250)) + LIFT);
+  const liftAt = s => { const f = Math.min(n250 - 1e-9, s / len * n250), k = f | 0; return coarse[k] + (coarse[k + 1] - coarse[k]) * (f - k); };
+  const n = (e, f) => Math.hypot(e.x - f.x, e.y - f.y) < 60;
+  const gr = ghostRows.find(r => (n(r.p.a, p.a) && n(r.p.b, p.b)) || (n(r.p.a, p.b) && n(r.p.b, p.a)));
+  const flip = gr && !n(gr.p.a, p.a), st = gr ? gr.st.map(q => ({ s: flip ? gr.len - q.s : q.s, top: q.top })).sort((a, b) => a.s - b.s) : [];
+  const h = gr ? gr.h : towerH(kvOf(p.name) || 115);
+  const S0 = [];
+  for (let s = 0; s < len; s += 40) S0.push(s);
+  S0.push(len);
+  const ss = [...S0.filter(s => !st.some(q => Math.abs(q.s - s) < 6)), ...st.map(q => q.s)].sort((a, b) => a - b);
+  const gMax = s => Math.max(hAt(...at(Math.max(0, s - 20))), hAt(...at(s)), hAt(...at(Math.min(len, s + 20))));
+  const out = { x: [], y: [], g: [], up: [], dn: [] };
+  let k = 0;
+  for (const s of ss) {
+    const [x, y] = at(s), g = hAt(x, y);
+    while (k < st.length - 1 && st[k + 1].s <= s) k++;
+    let dn;
+    if (st.length && s >= st[0].s && s <= st[st.length - 1].s) {   // over the row: tower top to tower top
+      const A = st[k], B = st[Math.min(k + 1, st.length - 1)], f = B.s > A.s ? (s - A.s) / (B.s - A.s) : 0;
+      dn = A.top + (B.top - A.top) * f + 0.08 * h;
+    } else dn = g + 1.08 * h;   // past the end towers, or no row: a tower's height over the land
+    dn = Math.max(dn, gMax(s) + (st.length ? 0.5 : 1.08) * h);
+    out.x.push(x); out.y.push(y); out.g.push(g); out.up.push(Math.max(liftAt(s), dn)); out.dn.push(dn);
+  }
+  return out;
+}
+for (const p of S.projects) {
+  if (!p.b) continue;
+  const twin = planned.find(q => sameRoute(q.p, p));   // two projects, one route (DESC_6/7, DESC_14/15): one line, not two stacked
+  if (twin) { twin.ids.push(p.id); continue; }
+  const col = COL[SIDE[p.side]], conf = p.conf === 'low' ? 0.45 : 1, c = plannedPath(p), N = c.x.length;
+  const pts = [], cur = [], uv = [], idx = [], drop = [];
+  for (let i = 0; i < N; i++) {
+    pts.push(c.x[i], c.up[i], -c.y[i]);
+    cur.push(c.x[i], c.g[i], -c.y[i], c.x[i], c.up[i], -c.y[i]);
+    uv.push(i / (N - 1), 0, i / (N - 1), 1); drop.push(0, c.up[i] - c.dn[i]);
+    if (i) idx.push(2 * i - 2, 2 * i, 2 * i + 1, 2 * i - 2, 2 * i + 1, 2 * i - 1);
+  }
+  const geo = lineGeo(pts);
+  geo.computeBoundingSphere(); geo.boundingSphere.radius += LIFT;   // it holds the lowered path too
+  const line = solid(geo, Line2, { color: col, width: 3, glow: 0.24, glowW: 9, k: conf });
+  world.add(line); projObjs[p.side].push(line);
+  const g = new THREE.BufferGeometry();   // fading curtain from the corridor down to the land
+  g.setAttribute('position', new THREE.Float32BufferAttribute(cur, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('drop', new THREE.Float32BufferAttribute(drop, 1));
+  g.setIndex(idx);
+  const cm = new THREE.MeshBasicMaterial({ color: hot(col, 1.1), alphaMap: fadeUp, transparent: true, opacity: (PHOTO ? 0.12 : 0.24) * conf,   // Google 3D: a veil, not a wall
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  cm.onBeforeCompile = sh => {   // the curtain's top edge follows the line down, vertex by vertex; its foot stays on the land
+    sh.uniforms.uK = DROP;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float drop;\nuniform float uK;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed.y -= drop * uK;');
+  };
+  const mesh = new THREE.Mesh(g, cm);
+  mesh.userData.base = cm.opacity; mesh.renderOrder = VOLUME;
+  const ids = [p.id];
+  curtains.push({ mesh, side: p.side, ids }); world.add(mesh);
+  planned.push({ p, ids, line, conf, state: '', geo, up: Float32Array.from(c.up), dn: Float32Array.from(c.dn) });
+}
+function setDrop(k) {   // move every planned line between its lifted and lowered path (the curtains read DROP themselves)
+  DROP.value = k;
+  for (const q of planned) {
+    const buf = q.geo.attributes.instanceStart.data, a = buf.array, up = q.up, dn = q.dn;
+    for (let i = 0; i < up.length - 1; i++) { a[6 * i + 1] = up[i] + (dn[i] - up[i]) * k; a[6 * i + 4] = up[i + 1] + (dn[i + 1] - up[i + 1]) * k; }
+    buf.needsUpdate = true;
+  }
+}
+
+// beacons + names at every project end (merged within 300 m; both colors side by side where utilities meet). All of
+// them are built; focus() lights only the ends of the overlaps the filter puts in the world.
 const clusters = [];
 for (const p of S.projects) {
-  if (!featured.has(p.id)) continue;
   for (const e of [p.a, p.b].filter(Boolean)) {
     let c = clusters.find(c => Math.hypot(c.x - e.x, c.y - e.y) < 300);
-    if (!c) clusters.push(c = { x: e.x, y: e.y, z: e.z, names: new Set(), sides: new Set(), ids: new Set(), low: false });
+    if (!c) clusters.push(c = { x: e.x, y: e.y, z: e.z, names: new Set(), sides: new Set(), ids: new Set(), bySide: { DESC: new Set(), GPC: new Set() }, low: false });
     if (clean(e.name)) c.names.add(clean(e.name));
-    c.sides.add(p.side); c.ids.add(p.id); if (p.conf === 'low') c.low = true;
+    c.sides.add(p.side); c.ids.add(p.id); c.bySide[p.side].add(p.id); if (p.conf === 'low') c.low = true;
   }
 }
 // 2026-09-26 Google 3D: over the photo mesh the 2.6 km tall, 90 m wide beams read as purple slabs. There they are thin
@@ -948,9 +1287,9 @@ for (const p of S.projects) {
 const BEAM = PHOTO ? 650 : 2600, BEAM_R = PHOTO ? 9 : 45;
 const beamGeo = new THREE.CylinderGeometry(BEAM_R, BEAM_R, BEAM, 20, 1, true).translate(0, BEAM / 2, 0);
 const glowMats = [];
-function glowMat(color, opacity) {
+function glowMat(color, opacity, nearFloor = 0.45) {   // nearFloor 0: no rim floor up close (the touching pillar)
   const m = new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: color }, uOpacity: { value: opacity }, uFogNear: { value: 1e9 }, uFogFar: { value: 2e9 } },   // frame() feeds photoFog
+    uniforms: { uColor: { value: color }, uOpacity: { value: opacity }, uNearFloor: { value: nearFloor }, uFogNear: { value: 1e9 }, uFogFar: { value: 2e9 } },   // frame() feeds photoFog
     vertexShader: `#include <common>
       #include <logdepthbuf_pars_vertex>
       varying float vUp, vFace, vDepth;
@@ -963,40 +1302,43 @@ function glowMat(color, opacity) {
       }`,
     fragmentShader: `#include <common>
       #include <logdepthbuf_pars_fragment>
-      uniform vec3 uColor; uniform float uOpacity, uFogNear, uFogFar;
+      uniform vec3 uColor; uniform float uOpacity, uNearFloor, uFogNear, uFogFar;
       varying float vUp, vFace, vDepth;
       void main() {
         #include <logdepthbuf_fragment>
-        // additive glow: fading it (not tinting it toward the haze color) keeps far pillars from turning into pale bars
-        gl_FragColor = vec4(uColor, uOpacity * pow(vFace, 2.2) * pow(1.0 - vUp, 1.8) * (1.0 - smoothstep(uFogNear, uFogFar, vDepth)));
+        // additive glow: fading it (not tinting it toward the haze color) keeps far pillars from turning into pale bars.
+        // 2026-09-27: within ~300 m the rim term gets a floor. Standing at a pillar's foot (or inside it) you look along
+        // its skin, vFace goes to 0, and the light used to vanish exactly when you arrived.
+        float nearK = 1.0 - smoothstep(60.0, 300.0, vDepth);
+        float face = mix(pow(vFace, 2.2), 1.0, uNearFloor * nearK);
+        gl_FragColor = vec4(uColor, uOpacity * face * pow(1.0 - vUp, 1.8) * (1.0 - smoothstep(uFogNear, uFogFar, vDepth)));
       }`,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
   glowMats.push(m);
   return m;
 }
-const placed = [], beacons = [], endLabels = [], placeLabels = [];
+const beacons = [], endLabels = [], placeLabels = [];
 for (const c of clusters) {
   const sides = [...c.sides].sort();
   sides.forEach((s, i) => {
     const col = hot(COL[SIDE[s]], PHOTO ? 1.7 : 1.3), op = (c.low ? 0.5 : 1) * (PHOTO ? 0.85 : 0.6);
     const m = new THREE.Mesh(beamGeo, PHOTO ? glowMat(col, op) : new THREE.MeshBasicMaterial({ color: col, alphaMap: fadeDown, transparent: true,
       opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    m.renderOrder = VOLUME;
     m.position.copy(V(c.x + (sides.length > 1 ? (i - 0.5) * (PHOTO ? 50 : 120) : 0), c.y, c.z));
-    m.userData.base = op; beacons.push(m); projObjs[s].push(m);
+    m.userData = { base: op, ids: c.bySide[s], side: s }; m.visible = false; beacons.push(m);
     world.add(m);
   });
   // names ride above the beam; in Google 3D they sit low on it instead (a drone at 450 m looks down on them), and the
   // declutter pass, not this stagger, keeps them apart
   let z = c.z + (PHOTO ? 150 : BEAM + 50);
-  while (!PHOTO && placed.some(([x, y, zz]) => Math.hypot(c.x - x, c.y - y) < 3000 && Math.abs(z - zz) < 400)) z -= 480;
-  placed.push([c.x, c.y, z]);
   const el = document.createElement('div');
   el.className = `lbl ${sides.length > 1 ? 'both' : SIDE[sides[0]]}${c.low ? ' low' : ''}`;
   el.textContent = [...c.names].sort((a, b) => a.length - b.length)[0] || '?';
   el._lk = 'end'; el._lr = c; el._xy = [c.x, c.y];   // declutter: a project end name (pinned while its overlap is selected)
-  const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(c.x, c.y, z)); world.add(o);
-  endLabels.push({ o, sides });
+  const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(c.x, c.y, z)); o.visible = false; world.add(o);
+  endLabels.push({ o, sides, c, z });
 }
 for (const pl of S.places) {
   const el = document.createElement('div'); el.className = `place ${pl.kind}`; el.textContent = pl.name;
@@ -1025,20 +1367,25 @@ const SHOW = 6;
 const TIER_K = { 1: 2.6, 2: 2.4, 3: 1.6, 4: 0.9 };
 // Google 3D frames overlaps from a drone at ~450 m (viewFor), so there the arc and its tag stay under it: 90-230 m high
 const arcApex = d => PHOTO ? Math.min(230, Math.max(90, 0.22 * d)) : Math.max(520, 300 + 0.2 * d);
+const pillars = [];   // the touching pillars (frame() slims them near the camera)
 function makeOverlapItem(o, parent, user = false) {
   const pa = o.pa, pb = o.pb, d = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
   const mid = [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2, (pa[2] + pb[2]) / 2];
   const apex = arcApex(d);
   const group = new THREE.Group(); parent.add(group);
-  let mat, top;
+  let mat, top, cas = null;
   if (d < 50) {  // touching: pillar + ring on the shared structure
     mat = lineMat(hot(COL.ice, 1.6), 2.5, { dashed: user, dashSize: 60, gapSize: 40 });
     const ring = []; for (let k = 0; k <= 72; k++) { const t = k / 72 * 2 * Math.PI; push(ring, pa[0] + 420 * Math.cos(t), pa[1] + 420 * Math.sin(t), pa[2] + 30); }
     group.add(polyline(ring, mat));
-    const pil = PHOTO ? new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 800, 20, 1, true).translate(0, 400, 0), glowMat(hot(COL.ice, 1.8), 0.7))
+    // (2026-09-27: at its foot the pillar whited out the screen, in both modes. frame() slims it and caps its light with
+    // the camera's distance, like the beams, and hides it once the camera is inside it; Google 3D's version has no near
+    // rim floor)
+    const pil = PHOTO ? new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 800, 20, 1, true).translate(0, 400, 0), glowMat(hot(COL.ice, 1.8), 0.7, 0))
       : new THREE.Mesh(new THREE.CylinderGeometry(28, 28, 1900, 16, 1, true).translate(0, 950, 0), new THREE.MeshBasicMaterial({
         color: hot(COL.ice, 2.0), alphaMap: fadeDown, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
-    pil.position.copy(V(pa[0], pa[1], pa[2])); group.add(pil);
+    pil.position.copy(V(pa[0], pa[1], pa[2])); pil.renderOrder = VOLUME; group.add(pil);
+    pil.userData = { base: PHOTO ? 0.7 : 0.8, r: PHOTO ? 11 : 28 }; pillars.push(pil);
     top = V(pa[0], pa[1], pa[2] + (PHOTO ? 200 : 2000));
   } else {
     const pts = [];
@@ -1047,19 +1394,23 @@ function makeOverlapItem(o, parent, user = false) {
     mat = lineMat(hot(COL.ice, TIER_K[o.tier] || 1), o.tier >= 4 && !user ? 1.5 : 2.5,
                   { dashed: user, dashSize: (user ? 160 : 120) * dk, gapSize: (user ? 90 : 80) * dk, opacity: o.tier >= 4 && !user ? 0.7 : 1 });
     group.add(polyline(pts, mat));
+    // a dark casing under the arc (solid, even when the arc is dashed): same trick as the lines, it holds on the photo
+    cas = lineMat(casingOf(0x0b1a3a), 5, { depthWrite: false });
+    const cl = new Line2(group.children[0].geometry, cas); cl.renderOrder = 2; group.children[0].renderOrder = 3; group.add(cl);
     top = V(mid[0], mid[1], mid[2] + 25 + apex + (PHOTO ? 30 : 120));
   }
   const chip = document.createElement('div');
   chip.className = user ? 'chip user' : 'chip';
   chip.innerHTML = `${user ? 'YOU ' : ''}#${o.rank} ${fmtKm(o.dist_km)}<small>T${o.tier}</small>`;
   const lab = new CSS2DObject(chip); lab.position.copy(top); lab.center.set(0.5, 1); group.add(lab);
-  const item = { o, d, mid, group, mat, chip, lab, user };
+  const item = { o, d, mid, group, mat, cas, chip, lab, user };
   chip._lk = 'chip'; chip._lr = item; chip._xy = mid;   // declutter: ranked by the overlap's rank, pinned while selected
   chip.addEventListener('click', ev => { ev.stopPropagation(); select(item, true); });
   return item;
 }
 const ovlGroup = new THREE.Group(); world.add(ovlGroup);
 const baseOvl = S.overlaps.map(o => makeOverlapItem(o, ovlGroup));
+for (const b of beacons) b.userData.touch = baseOvl.some(x => x.d < 50 && Math.hypot(x.o.pa[0] - b.position.x, x.o.pa[1] + b.position.z) < 300);
 let userOvl = [], ovl = [...baseOvl];
 
 // ---- your own projects (the 2D app writes localStorage["gridlock.userProjects.v1"]; same origin under /world3d/)
@@ -1072,6 +1423,7 @@ function buildUser(force = false) {
   if (raw === userRaw && !force) return false;
   userRaw = raw;
   dropCSS(userGroup); userGroup.clear();
+  for (let i = pillars.length - 1; i >= 0; i--) if (!pillars[i].parent?.parent) pillars.splice(i, 1);   // your old ones
   userById = {}; userOvl = []; userProjCount = 0;
   let data = null;
   try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
@@ -1129,9 +1481,11 @@ function drawRings(o) {
   if (!o) return;
   const [cx, cy] = o.pa;
   for (const [r, cap, k] of [[1600, 'WITHIN 1.6 KM SHARE THE LAND', 1.3], [8000, 'WITHIN 8 KM SHARE LAYDOWN YARDS', 1.0], [40000, 'WITHIN 40 KM SHARE CREWS', 0.6]]) {
-    const pts = [];
-    for (let i = 0; i <= 180; i++) { const t = i / 180 * 2 * Math.PI, x = cx + r * Math.cos(t), y = cy + r * Math.sin(t); push(pts, x, y, hAt(x, y) + 25); }
-    ringGroup.add(polyline(pts, lineMat(hot(COL.ice, k), r > 20000 ? 1 : 1.6, { opacity: r > 20000 ? 0.45 : 0.8 })));
+    // (2026-09-27: the 40 km ring was 1 px at ice x0.3, darker than the haze it crossed, and its 1.4 km chords cut under
+    // the hills, so it read as a dark broken line. Now 1.6 px, above the haze, a vertex every ~350 m, riding 40 m up.)
+    const pts = [], N = r > 20000 ? 720 : 180, up = r > 20000 ? 40 : 25;
+    for (let i = 0; i <= N; i++) { const t = i / N * 2 * Math.PI, x = cx + r * Math.cos(t), y = cy + r * Math.sin(t); push(pts, x, y, hAt(x, y) + up); }
+    ringGroup.add(polyline(pts, lineMat(hot(COL.ice, r > 20000 ? 0.75 : 0.8 * k), 1.6)));   // opaque, dimmed by color (no dotted joints)
     const el = document.createElement('div'); el.className = 'ring-cap'; el.textContent = cap; el._lk = 'ring';
     const o2 = new CSS2DObject(el); o2.position.copy(V(cx, cy - r, hAt(cx, cy - r) + 60)); ringGroup.add(o2);
   }
@@ -1142,124 +1496,167 @@ $('title').textContent = S.title.toUpperCase();
 $('subtitle').textContent = S.subtitle;
 const short = n => (n || '').replace(/^SAV:\s*/i, '');
 const projOf = (id, fallback) => userById[id] || byId[id] || (fallback ? { name: fallback, side: /^GPC/.test(id) ? 'GPC' : 'DESC', utility: '' } : null);
-// ---- the list, grouped by what a utility would do about each overlap (2026-09-26). Most pairs inside 40 km are
-// built years apart; those only share crews, and crews need the same time, so they drop to a folded group at the end.
-const TIERS = {   // the spec's four tiers (closest points, not centers)
-  1: { d: 'TOUCHING', s: 'must coordinate outages', share: 'TOUCHING', tip: 'Touching or crossing: must coordinate outage timing and crossing structures' },
-  2: { d: '< 1.6 KM', s: 'share land and permits', share: 'LAND', tip: 'Under 1.6 km: can share the land itself (right-of-way, access roads, permits)' },
-  3: { d: '< 8 KM', s: 'share yards and deliveries', share: 'YARDS', tip: 'Under 8 km: can share site logistics (laydown yards, deliveries)' },
-  4: { d: '< 40 KM', s: 'share crews and equipment', share: 'CREWS', tip: 'Under 40 km, a morning\'s drive from one staging yard: can share crews and equipment' },
+// ---- the filter + the list (2026-09-27). Same three buttons as the map: GEOGRAPHIC is the spec's primary signal (every
+// pair within 40 km, closest points, by tier), TIMELINE its strong secondary one (build windows), BOTH the two together
+// (close enough to share AND building at the same time). One flat list in spec order: tier, then timing, then distance;
+// rows show the pipeline's exported rank. What the filter drops leaves the world too.
+const TIERS = {   // the spec's four tiers and what each can share
+  1: { f: 'TOUCHING', share: 'TOUCHING', tip: 'Must coordinate outage timing and crossing structures' },
+  2: { f: 'UNDER 1.6 KM', share: 'LAND', tip: 'Can share the land itself: right-of-way, access roads, permits' },
+  3: { f: 'UNDER 8 KM', share: 'YARDS', tip: 'Can share site logistics: laydown yards, deliveries' },
+  4: { f: 'UNDER 40 KM', share: 'CREWS', tip: 'Can share crews and equipment' },
 };
-const ALIGN_DAYS = 180;   // same rule as the map's savings estimate: windows under ~6 months apart can still hand crews over
-const gapDays = o => o.overlap_days > 0 ? 0 : (o.window_gap_days ?? o.time_gap_days ?? Infinity);
-const aligned = o => gapDays(o) < ALIGN_DAYS;
-const GROUPS = [
-  { k: 'must', t: 'MUST COORDINATE', d: 'They touch or cross. Outages and crossing structures get planned together, whatever the dates.' },
-  { k: 'now', t: 'SHARE AS PLANNED', d: 'Build windows overlap or are under 6 months apart: land, yards or crews can be shared on today\'s schedules.' },
-  { k: 'shift', t: 'SHIFT A SCHEDULE', d: 'Close enough to share land or yards, but built at different times. Moving one schedule unlocks it.' },
-  { k: 'far', t: 'DIFFERENT YEARS', d: 'Only crews could be shared at this distance, and the build windows are far apart: nothing to share as planned.' },
+const same = o => o.overlap_days > 0;
+const gapDays = o => same(o) ? 0 : (o.window_gap_days ?? o.time_gap_days ?? Infinity);
+const WHEN = [   // TIMELINE: one bucket per overlap
+  { k: 'same', f: 'SAME WINDOW', tip: 'The two build windows overlap', test: o => same(o) },
+  { k: 'm6', f: 'UNDER 6 MONTHS APART', tip: 'Back to back or under 6 months apart: crews can move straight from one job to the other', test: o => !same(o) && gapDays(o) < 183 },
+  { k: 'y2', f: 'UNDER 2 YEARS APART', tip: '6 months to 2 years apart: moving one schedule could line them up', test: o => !same(o) && gapDays(o) >= 183 && gapDays(o) < 730 },
+  { k: 'far', f: '2 YEARS OR MORE', tip: '2 years or more apart (or dates unknown)', test: o => !same(o) && !(gapDays(o) < 730) },
 ];
-const groupOf = o => o.tier === 1 ? 'must' : aligned(o) ? 'now' : o.tier <= 3 ? 'shift' : 'far';
-const timeKey = o => o.overlap_days > 0 ? -o.overlap_days : gapDays(o);
-const SORTS = {
-  score: (a, b) => a.o.rank - b.o.rank,
-  dist: (a, b) => a.o.dist_km - b.o.dist_km || a.o.rank - b.o.rank,
-  time: (a, b) => timeKey(a.o) - timeKey(b.o) || a.o.rank - b.o.rank,
+const inBoth = o => o.tier <= 3 && (same(o) || gapDays(o) < 183);
+const tierSubs = ts => ts.map(t => ({ k: 't' + t, f: TIERS[t].f, tip: TIERS[t].tip, test: o => o.tier === t }));
+const FMODES = {
+  geo: { t: 'GEOGRAPHIC', tip: 'Every pair within 40 km, measured between the closest points (the primary signal)',
+         hint: 'Within 40 km at the closest points. The closer, the more they can share.', base: () => true, subs: () => tierSubs([1, 2, 3, 4]) },
+  time: { t: 'TIMELINE', tip: 'The same pairs, by how their build windows line up (the strong secondary signal)',
+          hint: 'By how the build windows line up. The list stays in rank order.', base: () => true, subs: () => WHEN },
+  both: { t: 'BOTH', tip: 'Under 8 km AND building at the same time (same window or under 6 months apart)',
+          hint: 'Close enough to share, and building at the same time', base: inBoth,
+          subs: () => tierSubs([1, 2, 3]), present: true },   // buttons only for the tiers this level has (the tour reads all)
 };
-const OPEN = { user: true, must: true, now: true, shift: true, far: false, ...store.get('groups', {}) };
-let sortBy = SORTS[store.get('sort', 'score')] ? store.get('sort', 'score') : 'score';
+const FILT = { mode: 'geo', geo: {}, time: {}, both: {}, ...store.get('filter', {}) };   // a sub toggle is on unless false
+if (!FMODES[FILT.mode]) FILT.mode = 'geo';
+// ?filter=geo|time|both (recordings, tests), kept like a click on the button so the level links and a tour's hop keep it
+if (FMODES[qs.get('filter')]) { FILT.mode = qs.get('filter'); store.set('filter', FILT); }
+// make the filter show one overlap (a deep link or a tour stop it hides): its own view's sub back on, or, when that
+// view can't hold it at all (BOTH wants under 8 km and the same time), GEOGRAPHIC with its tier on
+function reveal(it) {
+  if (!it || matches(it.o)) return;
+  if (!FMODES[FILT.mode].base(it.o)) FILT.mode = 'geo';
+  const s = FMODES[FILT.mode].subs().find(s => s.test(it.o));
+  if (s) delete FILT[FILT.mode][s.k];
+  store.set('filter', FILT);
+  renderList();
+}
+function matches(o) {
+  const m = FMODES[FILT.mode];
+  if (!m.base(o)) return false;
+  const s = m.subs().find(s => s.test(o));
+  return !!s && FILT[FILT.mode][s.k] !== false;
+}
+// the level's own rows keep the pipeline's exported rank (its key: tier, time score, window gap, closest km, location
+// check, id); your projects, which have no pipeline rank, get the same key as near as the map's data allows
+const specCmp = (a, b) => a.tier - b.tier || same(b) - same(a) || (gapDays(a) - gapDays(b) || 0) || a.dist_km - b.dist_km || String(a.id).localeCompare(String(b.id));
+const bySpec = (x, y) => x.user || y.user ? specCmp(x.o, y.o) : x.o.rank - y.o.rank;
 let rowOrder = [], topArcs = new Set();   // what the list shows, in order: keys 1-9 and the arcs in the world follow it
 
+function renderFilter() {
+  const m = FMODES[FILT.mode], on = FILT[FILT.mode], count = s => ovl.filter(x => m.base(x.o) && s.test(x.o)).length;
+  const subs = m.subs().filter(s => !m.present || count(s));
+  $('fmode').innerHTML = Object.entries(FMODES).map(([k, v]) =>
+    `<button data-f="${k}" class="${k === FILT.mode ? 'on' : ''}" title="${v.tip}" aria-pressed="${k === FILT.mode}">${v.t}</button>`).join('');
+  $('fsub').innerHTML = subs.map(s => {
+    const n = count(s), off = on[s.k] === false;
+    return `<button data-s="${s.k}" class="${off ? 'off' : ''}${n ? '' : ' none'}" aria-pressed="${!off}"
+      title="${s.tip}. ${off ? 'Click to show them again.' : 'Click to hide them.'}">${s.f} <i>(${n})</i></button>`;
+  }).join('');
+  $('fhint').textContent = subs.length ? m.hint : 'No pair in this level is under 8 km AND building at the same time.';
+}
 function renderList() {
-  const tierOn = it => LAY['t' + it.o.tier] !== false;
   const row = it => {
     const o = it.o, a = projOf(o.a, o.a_name), b = projOf(o.b, o.b_name), tm = timing(o, true);
     const nm = p => `<span class="${p?.conf === 'user' ? 'u' : p?.side === 'GPC' ? 'g' : 'd'}">${short(p?.name) || '?'}</span>`;
     return `<li data-i="${ovl.indexOf(it)}" class="${it.user ? 'user' : ''}${it === sel ? ' on' : ''}"><span class="rk">${it.user ? 'YOU' : ''}#${o.rank}</span><span class="nm">${nm(a)}${nm(b)}
-      <span class="tier t${o.tier}" title="${TIERS[o.tier]?.tip || ''}">T${o.tier} ${TIERS[o.tier]?.share || ''}</span>${tm ? `<span class="when${o.overlap_days > 0 ? ' ok' : ''}">${tm}</span>` : ''}</span><span class="km">${fmtKm(o.dist_km)}</span></li>`;
+      <span class="tier t${o.tier}" title="${TIERS[o.tier]?.tip || ''}">T${o.tier} ${TIERS[o.tier]?.share || ''}</span>${tm ? `<span class="when${same(o) ? ' ok' : ''}">${tm}</span>` : ''}</span><span class="km">${fmtKm(o.dist_km)}</span></li>`;
   };
-  const sections = [];
-  if (userOvl.length) sections.push({ k: 'user', t: 'YOUR PROJECTS', d: 'What you added on the map, scored against the other utility\'s plans.', items: userOvl });
-  for (const g of GROUPS) sections.push({ ...g, items: baseOvl.filter(x => groupOf(x.o) === g.k) });
-  let html = '';
-  rowOrder = [];
-  for (const s of sections) {
-    const items = s.items.filter(tierOn).sort(SORTS[sortBy]);
-    if (!items.length) continue;
-    const open = OPEN[s.k] !== false;
-    html += `<li class="grp${open ? ' open' : ''}" data-g="${s.k}" tabindex="0" role="button" aria-expanded="${open}">
-      <span class="gt">${s.t}</span><span class="gn">${items.length}</span><b class="gs">${open ? '–' : '+'}</b><span class="gd">${s.d}</span></li>`;
-    if (!open) continue;
-    html += items.map(row).join('');
-    rowOrder.push(...items);
-  }
-  $('ovl').innerHTML = html || '<li class="empty">No overlaps in the tiers you picked. Click a tier card above to bring it back.</li>';
-  topArcs = new Set(rowOrder.filter(x => !x.user).slice(0, SHOW));
-  const shown = rowOrder.filter(x => !x.user).length;
-  $('count').textContent = `${shown === S.overlaps.length ? '' : `${shown} OF `}${S.overlaps.length} IN LEVEL${userOvl.length ? ` + ${userOvl.length} YOURS` : ''}`;
-  renderTierCards();
-  document.querySelectorAll('#sort-seg button').forEach(b => b.classList.toggle('on', b.dataset.sort === sortBy));
+  const mine = userOvl.filter(x => matches(x.o)).sort(bySpec), base = baseOvl.filter(x => matches(x.o)).sort(bySpec);
+  rowOrder = [...mine, ...base];   // your own first (you just drew them), then the level's in spec order
+  $('ovl').innerHTML = rowOrder.map(row).join('') || '<li class="empty">Nothing in this level matches. Turn a button above back on, or pick another view.</li>';
+  topArcs = new Set(base.slice(0, SHOW));
+  $('count').textContent = `${base.length === baseOvl.length ? '' : `${base.length} OF `}${baseOvl.length} IN LEVEL${userOvl.length ? ` + ${mine.length} YOURS` : ''}`;
+  renderFilter();
   updateArcVisibility();
 }
-function renderTierCards() {
-  const n = t => ovl.filter(x => x.o.tier === t).length;
-  $('tiercards').innerHTML = [1, 2, 3, 4].map(t => {
-    const c = n(t), off = LAY['t' + t] === false;
-    return `<button class="tc t${t}${off ? ' off' : ''}${c ? '' : ' none'}" data-tier="${t}" aria-pressed="${!off}"
-      title="${TIERS[t].tip}. ${c ? (off ? 'Click to show them again.' : 'Click to hide this tier.') : 'None in this level.'}">
-      <span class="h"><b>T${t} ${TIERS[t].d}</b><i>${c}</i></span><span class="s">${TIERS[t].s}</span></button>`;
-  }).join('');
+function setFilter(mode, sub) {
+  if (mode) FILT.mode = mode;
+  if (sub) { const on = FILT[FILT.mode]; on[sub] = on[sub] === false; }
+  store.set('filter', FILT);
+  if (sel && !matches(sel.o)) deselect();   // it just left the world
+  renderList();
 }
-const toggleGroup = g => { OPEN[g] = OPEN[g] === false; store.set('groups', OPEN); renderList(); };
-$('ovl').addEventListener('click', e => {
-  const g = e.target.closest('li.grp');
-  if (g) { toggleGroup(g.dataset.g); return; }
-  const li = e.target.closest('li[data-i]'); if (li) select(ovl[+li.dataset.i], true);
-});
-$('ovl').addEventListener('keydown', e => {   // Enter/Space on a group header folds it (and doesn't also fly the drone up)
-  const g = e.target.closest('li.grp');
-  if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); toggleGroup(g.dataset.g); $('ovl').querySelector(`li.grp[data-g="${g.dataset.g}"]`)?.focus(); }
-});
-$('tiercards').addEventListener('click', e => {
-  const b = e.target.closest('button[data-tier]');
-  if (b) setTier(+b.dataset.tier, LAY['t' + b.dataset.tier] === false);
-});
-$('sort-seg').addEventListener('click', e => {
-  const b = e.target.closest('button[data-sort]');
-  if (b && SORTS[b.dataset.sort]) { sortBy = b.dataset.sort; store.set('sort', sortBy); renderList(); }
-});
+$('fmode').addEventListener('click', e => { const b = e.target.closest('button[data-f]'); if (b) setFilter(b.dataset.f); });
+$('fsub').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b) setFilter(null, b.dataset.s); });
+$('ovl').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) select(ovl[+li.dataset.i], true); });
+
+// the world follows the list: arcs for its top rows, and for the projects in them full-strength lines, light curtains,
+// beams and names. A project in no listed overlap fades (still on screen: the spec wants both utilities' plans shown).
+let litIds = new Set();
+function focus() {
+  const listed = new Set(rowOrder.flatMap(x => [x.o.a, x.o.b]));
+  litIds = new Set(ovl.filter(x => x.group.visible).flatMap(x => [x.o.a, x.o.b]));
+  let changed = false;
+  const stateOf = id => litIds.has(id) ? 'lit' : listed.has(id) ? 'match' : 'dim', rankOf = { lit: 2, match: 1, dim: 0 };
+  const bestOf = ids => ids.map(stateOf).sort((a, b) => rankOf[b] - rankOf[a])[0];
+  for (const q of planned) {
+    const st = bestOf(q.ids);
+    if (st === q.state) continue;
+    q.state = st; changed = true;
+    const u = q.line.userData;
+    styleSolid(q.line, st === 'lit' ? 4 : st === 'match' ? 2.6 : 1.8, q.conf * (st === 'dim' ? 0.32 : 1));
+    if (u.glow) u.glow.opacity = u.glowK * q.conf * (st === 'lit' ? 1.25 : st === 'match' ? 0.8 : 0.3);
+  }
+  for (const g of ghosts) {
+    const st = Math.max(...g.ids.map(id => rankOf[stateOf(id)])), f = st === 0 ? 0.3 : st === 1 ? 0.7 : 1;
+    g.tm.opacity = g.tmBase * f;
+    g.wm.color.copy(g.wCas).lerp(g.wCol, 0.25 + 0.75 * f * g.conf);   // opaque wires, dimmed by color
+  }
+  for (const c of curtains) c.mesh.visible = LAY[SIDE[c.side]] && c.ids.some(id => litIds.has(id));
+  for (const b of beacons) b.visible = LAY[SIDE[b.userData.side]] && [...b.userData.ids].some(id => litIds.has(id));
+  const placed = [];
+  for (const L of endLabels) {   // names only at lit ends, restaggered among themselves so they don't stack
+    L.o.visible = LAY.labels && L.sides.some(s => LAY[SIDE[s]] && [...L.c.bySide[s]].some(id => litIds.has(id)));
+    if (!L.o.visible || PHOTO) continue;
+    let z = L.z;
+    while (placed.some(([x, y, zz]) => Math.hypot(L.c.x - x, L.c.y - y) < 3000 && Math.abs(z - zz) < 400)) z -= 480;
+    placed.push([L.c.x, L.c.y, z]); L.o.position.y = z;
+  }
+  if (changed) drawMiniBase();
+  dcDirty = true;
+}
 
 let sel = null;
 let dcDirty = true, dcTick = 0;   // label declutter: rerun on the next frame (selection changed), frame counter
 function styleArcs() {
   for (const x of ovl) {
     const on = x === sel, t = x.o.tier;
-    x.mat.linewidth = on ? (PHOTO ? 3.5 : 5) : t >= 4 && !x.user ? 1.5 : 2.5;   // Google 3D: close up, a 5 px bloom reads as a tube
+    x.mat.linewidth = on ? (PHOTO ? 3.5 : 5) : t >= 4 && !x.user ? 1.8 : 2.8;   // Google 3D: close up, a 5 px bloom reads as a tube
+    if (x.cas) x.cas.linewidth = 2 * x.mat.linewidth;
     x.mat.color.copy(hot(COL.ice, on ? (PHOTO ? 2.2 : 3) : TIER_K[t] || 1));
-    x.mat.opacity = on || t < 4 || x.user ? 1 : 0.7;
+    x.mat.opacity = 1;   // (opaque over its casing: see-through, the joints showed as dots; T4 is dimmer by color instead)
     x.mat.dashed = on || x.user; x.mat.needsUpdate = true;
     x.chip.classList.toggle('on', on);
   }
   updateArcVisibility();
 }
+// same rule as the map's savings estimate: windows under ~6 months apart can still hand crews over
+const verdictOf = o => o.tier === 1 || same(o) || gapDays(o) < 183 ? ''
+  : o.tier <= 3 ? 'But they\'re built at different times: moving one schedule unlocks it.' : 'But the build windows are far apart, so nothing is shared as planned.';
 function select(it, fly) {
   if (!it) return;
   sel = it;
-  const grp = it.user ? 'user' : groupOf(it.o);   // picked from the world or a deep link while its group is folded: unfold it
-  if (OPEN[grp] === false) { OPEN[grp] = true; store.set('groups', OPEN); renderList(); }
   styleArcs();
   document.querySelectorAll('#ovl li[data-i]').forEach(li => li.classList.toggle('on', ovl[+li.dataset.i] === it));
   document.querySelector('#ovl li.on')?.scrollIntoView({ block: 'nearest' });
   drawRings(it.o);
   setMapLink(it.o);
-  treeAt = null;
+  treeAt = null; walkClear = null;
   if (anchorTiles) anchorTiles(it.mid[0], it.mid[1]);
   const o = it.o, a = projOf(o.a, o.a_name), b = projOf(o.b, o.b_name);
   $('c-kicker').textContent = it.user ? `YOUR PROJECT #${o.rank} OF ${userOvl.length}, TIER ${o.tier}`
-    : `#${o.rank} OF ${S.overlaps.length} IN LEVEL, TIER ${o.tier}${o.check ? ', LOCATION TO VERIFY' : ''}`;
+    : `RANK #${o.rank}, TIER ${o.tier}${o.check ? ', LOCATION TO VERIFY' : ''}`;
   $('c-dist').innerHTML = `${fmtKm(o.dist_km)}<small>CLOSEST POINTS</small>`;
-  const verdict = { shift: 'But they\'re built at different times: moving one schedule unlocks it.',
-                    far: 'But the build windows are far apart, so nothing is shared as planned.' }[groupOf(o)];
+  const verdict = verdictOf(o);
   $('c-share').textContent = [o.tier_label && verdict ? o.tier_label.replace(/\.?$/, '.') : o.tier_label, verdict].filter(Boolean).join(' ');
   const win = w => w ? `${w[0]} → ${w[1]}` : 'window n/a';
   const pj = (p, w, el) => {
@@ -1271,11 +1668,11 @@ function select(it, fly) {
   $('c-reach').textContent = reach(o.dist_km);
   $('why').textContent = o.why || '';
   $('card').classList.add('show');
-  syncWatch(); dcDirty = true;
+  dcDirty = true;
   if (fly) flyTo(viewFor(it));
 }
 function deselect() {
-  sel = null; styleArcs(); drawRings(null); setMapLink(null); syncWatch(); dcDirty = true;
+  sel = null; styleArcs(); drawRings(null); setMapLink(null); dcDirty = true;
   $('card').classList.remove('show');
   document.querySelectorAll('#ovl li.on').forEach(li => li.classList.remove('on'));
 }
@@ -1311,7 +1708,8 @@ function viewFor(it) {
   return orbitView(t, side, Math.min(26000, Math.max(2600, 2000 + 2.2 * it.d)), 24);
 }
 function overview() {
-  const pts = S.projects.filter(p => featured.has(p.id)).flatMap(p => [p.a, p.b].filter(Boolean))
+  const top = new Set(baseOvl.filter(x => matches(x.o)).sort(bySpec).slice(0, 4).flatMap(x => [x.o.a, x.o.b]));   // the list's top 4
+  const pts = S.projects.filter(p => top.has(p.id)).flatMap(p => [p.a, p.b].filter(Boolean))
     .map(e => [Math.max(-W / 2, Math.min(W / 2, e.x)), Math.max(-H / 2, Math.min(H / 2, e.y))]);
   if (!pts.length) pts.push([0, 0]);
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
@@ -1320,10 +1718,24 @@ function overview() {
 }
 function walkGap(it) {  // stand just outside the DESC end, face the GPC end, walking speed
   const [ax, ay] = it.o.pa, [bx, by] = it.o.pb;
-  const len = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / len, uy = (by - ay) / len;
-  const ahead = it.d > 50 ? Math.min(250, len * 0.3) : -350, side = it.d > 50 ? 0 : 160;   // on the cleared gap line; touching: stand back
+  // (2026-09-27: the rebuilt data puts both closest points of a touching pair on the same spot; with no direction the
+  // walker stood inside the touching pillar and saw only white. Touching then stood back 350 m south, 160 m west.)
+  // (2026-09-27 review: that spot was in a forest, trunks and canopy filling the view. Touching now stands on one of the
+  // two projects' own right-of-way, which the trees keep clear of: up to 350 m back along the line, 14 m off its axis
+  // (clear of the preview towers), looking down the row at the shared point. A 40 m band to it stays clear too.)
+  let len = Math.hypot(bx - ax, by - ay), ux = len > 1 ? (bx - ax) / len : 0, uy = len > 1 ? (by - ay) / len : 1;
+  let ahead = Math.min(250, len * 0.3), side = 0;   // on the cleared gap line
+  walkClear = null;
+  if (it.d <= 50) {
+    const line = [it.o.a, it.o.b].map(id => userById[id] || byId[id]).find(p => p?.b);
+    const e = line && [line.a, line.b].sort((p, q) => Math.hypot(q.x - ax, q.y - ay) - Math.hypot(p.x - ax, p.y - ay))[0];
+    len = e ? Math.hypot(e.x - ax, e.y - ay) : 0;
+    if (len > 60) { ux = (e.x - ax) / len; uy = (e.y - ay) / len; ahead = Math.min(350, 0.5 * len); side = 14; }
+    else { ux = 0; uy = -1; ahead = 350; side = 160; }   // two point projects: stand back south
+  }
   const x = ax + ux * ahead - uy * side, y = ay + uy * ahead + ux * side, pos = V(x, y, hAt(x, y) + MODES.WALK.eye);
-  const tgt = it.d > 50 ? V(bx, by, hAt(bx, by) + 150) : V(ax + 500, ay, hAt(ax, ay) + 40);
+  if (it.d <= 50) { walkClear = [x, y, ax, ay]; treeAt = null; }
+  const tgt = it.d > 50 ? V(bx, by, hAt(bx, by) + 150) : V(ax, ay, hAt(ax, ay) + 30);   // touching: face the shared point
   if (tiles) {  // Google's rural mesh is smeared at eye level: hover just over the canopy instead
     pos.y = hAt(x, y) + 60;
     // (2026-09-26 fix: this target went through V(), which wants level coords, so the camera faced back at the DESC
@@ -1356,7 +1768,6 @@ $('b-fly').onclick = () => sel && flyTo(viewFor(sel));
 $('b-walk').onclick = () => sel && flyTo(walkGap(sel));
 
 addEventListener('keydown', e => {
-  if (clipOpen()) { if (e.key === 'Escape') { e.preventDefault(); closeClip(); } return; }   // the video owns the keys while it's up
   if (e.target.closest && e.target.closest('input,textarea,select')) return;
   const k = e.key.toLowerCase();
   if (touring && k !== 't') endTour(false);
@@ -1452,7 +1863,9 @@ async function drawMiniBase() {
   if (GROUND === 'sat') { g.fillStyle = 'rgba(2,4,8,.42)'; g.fillRect(0, 0, MM, MM); }
   for (const p of S.projects) {
     if (!p.b) continue;
-    g.strokeStyle = p.side === 'DESC' ? '#4dd8ff' : '#ffd166'; g.lineWidth = featured.has(p.id) ? 3 : 1.5; g.globalAlpha = p.conf === 'low' ? 0.5 : 1;
+    const st = planned.find(q => q.ids.includes(p.id))?.state;   // same weights as the world: lit, listed, faded
+    g.strokeStyle = p.side === 'DESC' ? '#4dd8ff' : '#ffd166'; g.lineWidth = st === 'lit' ? 3 : st === 'dim' ? 1 : 1.8;
+    g.globalAlpha = (p.conf === 'low' ? 0.5 : 1) * (st === 'dim' ? 0.35 : 1);
     g.beginPath(); g.moveTo(...mpx(p.a.x, p.a.y)); g.lineTo(...mpx(p.b.x, p.b.y)); g.stroke();
   }
   g.setLineDash([6, 4]); g.globalAlpha = 1;
@@ -1465,8 +1878,12 @@ async function drawMiniBase() {
 }
 function drawMini() {
   mmx.drawImage(mmBase, 0, 0);
-  mmx.fillStyle = '#f4f8ff';   // overlap dots: the same ones the world draws arcs for (they follow the list's filters)
-  for (const it of ovl) if (it.group.visible) { const [x, y] = mpx(it.mid[0], it.mid[1]); mmx.beginPath(); mmx.arc(x, y, it === sel ? 6 : 4, 0, 7); mmx.fill(); }
+  mmx.fillStyle = '#f4f8ff';   // overlap dots: every row the filter lists; the ones with an arc in the world bigger
+  for (const it of sel && !rowOrder.includes(sel) ? [...rowOrder, sel] : rowOrder) {
+    const [x, y] = mpx(it.mid[0], it.mid[1]), big = it === sel || it.group.visible;
+    mmx.globalAlpha = big ? 1 : 0.55; mmx.beginPath(); mmx.arc(x, y, it === sel ? 6.5 : big ? 4 : 2.2, 0, 7); mmx.fill();
+  }
+  mmx.globalAlpha = 1;
   const x = (camera.position.x + W / 2) / W * MM, y = (camera.position.z + H / 2) / H * MM;
   mmx.save(); mmx.translate(x, y); mmx.rotate(-yaw);
   mmx.fillStyle = 'rgba(244,248,255,.18)'; mmx.beginPath(); mmx.moveTo(0, 0); mmx.arc(0, 0, 60, -Math.PI / 2 - 0.5, -Math.PI / 2 + 0.5); mmx.fill();
@@ -1499,19 +1916,9 @@ treeIM.count = 0; treeIM.frustumCulled = false; world.add(treeIM);
 let veg = null, treeAt = null;
 async function loadVeg() {
   if (veg || !S.ground.sat?.veg) return;
-  try {
-    const img = await new THREE.ImageLoader().loadAsync(DATA + S.ground.sat.veg + VER);
-    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
-    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
-    const d = g.getImageData(0, 0, c.width, c.height).data, m = new Uint8Array(c.width * c.height);
-    for (let i = 0; i < m.length; i++) m[i] = d[i * 4] > 127 ? 1 : 0;
-    veg = { w: c.width, h: c.height, m };
-  } catch { veg = null; }
+  veg = await loadMask(DATA + S.ground.sat.veg).catch(() => null);
 }
-const vegAt = (x, y) => {
-  const px = Math.floor((x + W / 2) / W * veg.w), py = Math.floor((H / 2 - y) / H * veg.h);
-  return px >= 0 && py >= 0 && px < veg.w && py < veg.h && veg.m[py * veg.w + px] === 1;
-};
+const vegAt = (x, y) => maskAt(veg, x, y);
 const nearWire = (x, y, clear = 32) => {  // inside a cleared right-of-way?
   const list = segIndex.get(`${Math.floor(x / SEG_CELL)},${Math.floor(y / SEG_CELL)}`);
   if (!list) return false;
@@ -1521,13 +1928,11 @@ const nearWire = (x, y, clear = 32) => {  // inside a cleared right-of-way?
   }
   return false;
 };
-const segDist = (x, y, x0, y0, x1, y1) => {
-  const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / l2));
-  return Math.hypot(x - x0 - t * dx, y - y0 - t * dy);
-};
 const plannedSegs = S.projects.filter(p => p.b).map(p => [p.a.x, p.a.y, p.b.x, p.b.y]);
+let walkClear = null;   // walkGap() on a touching pair: the band from where you stand to the shared point
 const inClearing = (x, y) => {  // planned right-of-way (ghost towers stand here) and the selected gap stay open
   for (const g of plannedSegs) if (segDist(x, y, ...g) < 28) return true;
+  if (walkClear && segDist(x, y, ...walkClear) < 40) return true;
   return !!(sel && sel.d > 50 && segDist(x, y, sel.o.pa[0], sel.o.pa[1], sel.o.pb[0], sel.o.pb[1]) < 40);
 };
 const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -1559,23 +1964,14 @@ const LAYER_SPEC = [
   ['user', 'Your projects'], ['labels', 'Labels'],
 ];
 const DEFAULT_LAY = { buildings: true, trees: true, grid: true, structures: true, desc: true, gpc: true, user: true, labels: true,
-                      t1: true, t2: true, t3: true, t4: true, allarcs: false };
+                      allarcs: false };   // (the tier boxes went to the filter on the list, 2026-09-27)
 const LAY = { ...DEFAULT_LAY, ...store.get('layers', {}) };
 $('lay-list').innerHTML = LAYER_SPEC.map(([k, t]) => `<label><input type="checkbox" data-layer="${k}"> ${t}</label>`).join('');
-$('lay-tiers').insertAdjacentHTML('beforeend', ['t1', 't2', 't3', 't4'].map(k => `<label><input type="checkbox" data-layer="${k}"> ${k.toUpperCase()}</label>`).join('')
-  + `<label style="width:100%"><input type="checkbox" data-layer="allarcs"> every overlap, not just the list's top ${SHOW}</label>`);
+$('lay-tiers').insertAdjacentHTML('beforeend', `<label style="width:100%"><input type="checkbox" data-layer="allarcs"> every listed overlap, not just the top ${SHOW}</label>`);
 document.querySelectorAll('#layers input[data-layer]').forEach(inp => {
   inp.checked = !!LAY[inp.dataset.layer];
-  inp.addEventListener('change', () => {
-    LAY[inp.dataset.layer] = inp.checked; applyLayers();
-    if (/^t\d$/.test(inp.dataset.layer)) renderList();   // the tier boxes here and the tier cards on the list are one setting
-  });
+  inp.addEventListener('change', () => { LAY[inp.dataset.layer] = inp.checked; applyLayers(); });
 });
-function setTier(t, on) {
-  LAY['t' + t] = on;
-  const inp = document.querySelector(`#layers input[data-layer="t${t}"]`); if (inp) inp.checked = on;
-  applyLayers(); renderList();
-}
 function toggleKey(open) {
   const on = open ?? !$('key').classList.contains('open');
   $('key').classList.toggle('open', on);
@@ -1586,7 +1982,9 @@ $('key-close').addEventListener('click', () => toggleKey(false));
 // on narrow screens the overlap card rides above the dock; CSS reads its live height from --dock-h
 new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('status').offsetHeight + 'px')).observe($('status'));
 $('b-key').addEventListener('click', () => toggleKey());
-toggleKey(qs.get('key') === '0' ? false : store.get('keyOpen', innerHeight >= 800));   // open on first visit unless the screen is short; ?key=0 for clean recordings
+// 2026-09-27 declutter: closed on a first visit (it covered the middle of the world); the KEY button is right there.
+// ?key=1 opens it, ?key=0 keeps it shut for recordings
+toggleKey(qs.get('key') === '0' ? false : qs.get('key') === '1' ? true : store.get('keyOpen', false));
 const syncLayerSign = () => { $('lay-sign').textContent = $('layers').classList.contains('open') ? '–' : '+'; };
 $('lay-head').addEventListener('click', () => { $('layers').classList.toggle('open'); syncLayerSign(); store.set('layersOpen', $('layers').classList.contains('open')); });
 if (store.get('layersOpen', innerHeight > 900)) $('layers').classList.add('open');
@@ -1595,10 +1993,9 @@ document.querySelectorAll('#ground-seg button').forEach(b => b.addEventListener(
 if (!S.ground.sat) document.querySelector('#ground-seg button[data-ground="sat"]').disabled = true;
 
 function updateArcVisibility() {
-  for (const x of ovl) {
-    const tierOn = LAY['t' + x.o.tier] !== false;
-    x.group.visible = x === sel || (tierOn && (x.user ? LAY.user : (LAY.allarcs || topArcs.has(x))));   // top SHOW rows of the list as shown
-  }
+  const listed = new Set(rowOrder);   // the filter's rows; arcs for the top SHOW of them (or all, with the layer box)
+  for (const x of ovl) x.group.visible = x === sel || (listed.has(x) && (x.user ? LAY.user : (LAY.allarcs || topArcs.has(x))));
+  focus();
 }
 function applyLayers(save = true) {
   structGroup.visible = LAY.structures;
@@ -1606,7 +2003,6 @@ function applyLayers(save = true) {
   for (const side of ['DESC', 'GPC']) projObjs[side].forEach(o => { o.visible = LAY[SIDE[side]]; });
   userGroup.visible = LAY.user;
   placeLabels.forEach(o => { o.visible = LAY.labels; });
-  endLabels.forEach(({ o, sides }) => { o.visible = LAY.labels && sides.some(s => LAY[SIDE[s]]); });
   updateArcVisibility();
   lod(true);
   if (save) store.set('layers', LAY);
@@ -1651,23 +2047,46 @@ async function setGround(g) {
 }
 
 // ================================================================== tour: fly through the top 3 opportunities
-const TOUR = [1, 2, 3];
+// 2026-09-27: the stops are the top 3 of the list as filtered, across both levels, in spec order (they were the old
+// score ranks 1-3). The other level's overlaps come from its scene.json; the stops ride along in the URL on a level hop.
+let TOUR = [], hopStops = qs.get('stops');   // "level:overlap id", comma separated
 let touring = false, tourTimer = null, levelsIndex = null;
 const getLevels = async () => (levelsIndex ||= await fetch(BUILD + 'levels.json', NOCACHE).then(r => r.json()).catch(() => []));
+async function tourStops() {
+  const all = baseOvl.map(x => ({ level: LEVEL.id, o: x.o }));
+  for (const l of await getLevels()) {
+    if (l.level === LEVEL.id) continue;
+    const s = await fetch(BUILD + l.level + '/scene.json', NOCACHE).then(r => r.ok ? r.json() : null).catch(() => null);
+    for (const o of s?.overlaps || []) all.push({ level: l.level, o });
+  }
+  const stops = [], near = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 100;
+  // (every button off: the unfiltered top 3, not an instant "TOUR COMPLETE" that visited nothing)
+  const pool = all.some(x => matches(x.o)) ? all.filter(x => matches(x.o)) : all;
+  for (const x of pool.sort((a, b) => a.o.rank - b.o.rank)) {
+    // same geometry as a stop already taken (the Thurmond pair: one DESC line touching two GPC projects on one route)
+    if (stops.some(s => s.level === x.level && near(s.o.pa, x.o.pa) && near(s.o.pb, x.o.pb))) continue;
+    if (stops.push(x) === 3) break;
+  }
+  return stops.map(x => `${x.level}:${x.o.id}`);
+}
+window.__tourStops = tourStops;   // test hook (read-only)
 async function startTour(step) {
   clearTimeout(tourTimer);
+  if (hopStops) { TOUR = hopStops.split(',').filter(Boolean); hopStops = null; }   // mid-tour, just hopped levels
+  else if (step === 0) TOUR = await tourStops();
   if (step >= TOUR.length) { endTour(true); return; }
-  const rank = TOUR[step];
-  const it = baseOvl.find(x => x.o.rank === rank);
+  const [lvId, id] = TOUR[step].split(/:(.*)/s);
+  const it = lvId === LEVEL.id ? baseOvl.find(x => x.o.id === id) : null;
   if (!it) {  // that opportunity lives in another level: hop there and keep going
-    const lv = (await getLevels()).find(l => (l.ranks || []).includes(rank));
     // (keeps Google 3D on through the hop: a recorded tour shouldn't drop back to the USGS world mid-take)
-    if (lv && lv.level !== LEVEL.id) { location.href = `?level=${lv.level}&tour=${step}${DATA_Q}${qs.get('photoreal') === '1' ? '&photoreal=1' : ''}`; return; }
+    if (lvId !== LEVEL.id && LEVELS.some(l => l.id === lvId)) {
+      location.href = `?level=${lvId}&tour=${step}&stops=${encodeURIComponent(TOUR.join(','))}&filter=${FILT.mode}${DATA_Q}${qs.get('photoreal') === '1' ? '&photoreal=1' : ''}`; return;
+    }
     startTour(step + 1); return;
   }
   touring = true; document.body.classList.add('touring'); $('b-tour').classList.add('on');
   if (measuring) setMeasuring(false);
-  select(it, false);
+  reveal(it); select(it, false);
   const dur = flyTo(viewFor(it)) || 0;
   const o = it.o;
   $('cap-k').textContent = `TOUR ${step + 1} OF ${TOUR.length}: THE #${o.rank} OPPORTUNITY, ${LEVEL.name}`;
@@ -1704,6 +2123,7 @@ function labelRank(el) {  // lower = more important; negative = pinned
   if (k === 'user') return 2.2;
   if (k === 'fac') return 3;
   if (k === 'place') return r === 'city' ? 4 : r === 'town' ? 4.3 : 4.6;
+  if (k === 'facgen') return 4.8;   // an unnamed yard's "SUBSTATION, 115 KV": gives way to every name
   return 5;
 }
 function declutter() {
@@ -1719,7 +2139,8 @@ function declutter() {
   cand.sort((a, b) => a.p - b.p);
   const kept = [];
   // the same name twice (a plant's yard and the project end at it): keep one if they're < 300 px or < 2.5 km apart
-  const twin = (a, b) => a.t === b.t && (Math.hypot(a.cx - b.cx, a.cy - b.cy) < 300 || (a.xy && b.xy && Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) < 2500));
+  // (not for the unnamed yards: two "SUBSTATION, 115 KV" side by side are two yards, each needs its own)
+  const twin = (a, b) => a.t === b.t && a.el._lk !== 'facgen' && (Math.hypot(a.cx - b.cx, a.cy - b.cy) < 300 || (a.xy && b.xy && Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) < 2500));
   for (const c of cand) {
     const r = c.r, pad = c.was ? 10 : 4;   // hysteresis: a hidden label needs a little more room to come back
     const hide = c.p >= 0 && ((c.xy && Math.hypot(c.xy[0] - camX, c.xy[1] - camY) > far)
@@ -1729,45 +2150,19 @@ function declutter() {
   }
 }
 
-// ================================================================== WATCH FLY-IN: pre-rendered clips of the top overlaps
-// Optional: web/public/clips/manifest.json lists {id, rank, level, file, poster, seconds}; file and poster are relative
-// to the clips folder. Missing or broken manifest = no button, silently.
-const CLIPS = new URL('../../clips/', location.href);
-let clipById = {};
-fetch(new URL('manifest.json', CLIPS), NOCACHE).then(r => r.ok ? r.json() : null).then(m => {
-  for (const c of Array.isArray(m?.clips) ? m.clips : []) if (c?.id && c.file) clipById[c.id] = c;
-  syncWatch();
-}).catch(() => {});
-function syncWatch() { $('b-watch').hidden = !(sel && !sel.user && clipById[sel.o.id]); }
-const clipOpen = () => !$('clip').hidden;
-function openClip() {
-  const c = sel && clipById[sel.o.id];
-  if (!c) return;
-  const v = $('clip-v');
-  $('clip-k').textContent = `FLY-IN #${sel.o.rank}, ${fmtKm(sel.o.dist_km).toUpperCase()}, TIER ${sel.o.tier}${c.seconds ? `, ${Math.round(c.seconds)} SEC` : ''}`;
-  v.poster = c.poster ? new URL(c.poster, CLIPS).href : '';
-  v.src = new URL(c.file, CLIPS).href;
-  $('clip').hidden = false;
-  if (touring) endTour(false);
-  keys.clear(); drag = null;
-  v.play().catch(() => {});   // muted autoplay is allowed; if not, the controls are right there
-  $('clip-x').focus({ preventScroll: true });
-}
-function closeClip() {
-  const v = $('clip-v');
-  v.pause(); v.removeAttribute('src'); v.removeAttribute('poster'); v.load();   // stop the download too
-  $('clip').hidden = true;
-}
-$('b-watch').addEventListener('click', openClip);
-$('clip-x').addEventListener('click', closeClip);
-$('clip').addEventListener('click', e => { if (e.target === $('clip')) closeClip(); });   // click the dimmed world to close
-
 // ================================================================== render loop
-const composer = new EffectComposer(renderer);
+// 4x MSAA in the composer's own target (it had none, so everything drawn through the bloom chain was aliased: lines
+// crawled and stair-stepped). Resize goes through composer.setSize, which resizes this target too. (?msaa=2 or 0 to
+// measure the demo laptop)
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(),
+  { type: THREE.HalfFloatType, samples: qs.has('msaa') ? +qs.get('msaa') || 0 : 4 }));
 composer.addPass(new RenderPass(world, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.4, 0.78);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+// (2026-09-27: handed a target already in device pixels, the composer took those as CSS pixels and sized the bloom at
+// pixelRatio squared on HiDPI screens until the first resize. One setSize in CSS pixels puts every pass right.)
+composer.setSize(innerWidth, innerHeight);
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight);
@@ -1775,9 +2170,9 @@ addEventListener('resize', () => {
 });
 
 function updateTowers() {
-  if (tiles || !LAY.grid) { towerIM.count = 0; return; }
   const cx = camera.position.x, cy = -camera.position.z, alt = camera.position.y - hAt(cx, cy);
-  if (alt > 4500) { towerIM.count = 0; return; }
+  gantryGroup.visible = !tiles && LAY.grid && alt < 4500;
+  if (tiles || !LAY.grid || alt > 4500) { towerIM.count = 0; return; }
   const R = Math.min(9000, 2000 + alt * 2.5), near = [];
   for (const t of S.towers) { const d = (t[0] - cx) ** 2 + (t[1] - cy) ** 2; if (d < R * R) near.push([d, t]); }
   if (near.length > MAXT) near.sort((a, b) => a[0] - b[0]);
@@ -1792,11 +2187,23 @@ function updateTowers() {
 function lod(forceTrees = false) {  // level of detail by camera position and layers
   updateTowers();
   const cx = camera.position.x, cy = -camera.position.z, alt = camera.position.y - hAt(cx, cy);
-  gridWires.visible = LAY.grid && !tiles && alt < 2500;
-  gridGlow.visible = LAY.grid && !gridWires.visible;
-  curtains.forEach(({ mesh, side }) => { mesh.visible = LAY[SIDE[side]] && alt > 350; });
-  ghosts.forEach(({ side, objs }) => objs.forEach(o => { o.visible = LAY[SIDE[side]] && alt < 3000; }));
-  for (const f of facLabels) f.o.visible = LAY.labels && LAY.structures && alt < 3500 && Math.hypot(f.x - cx, f.y - cy) < 6000;
+  gridWires.visible = LAY.grid && !tiles; gridGlow.visible = LAY.grid;
+  for (const t of gridTiles) {   // the wire pair near the camera (under 700 m up), the glow line past it
+    const d = Math.hypot(Math.max(t.x0 - cx, 0, cx - t.x0 - GT), Math.max(t.y0 - cy, 0, cy - t.y0 - GT));
+    const near = gridWires.visible && alt < 700 && d < 6000;
+    if (t.wires) t.wires.visible = near;
+    if (t.glow) t.glow.visible = !near || !t.wires;
+  }
+  // (the light curtains used to switch off under 350 m, the other half of "the light disappears when I get close";
+  // focus() owns them now: on for the lit projects at every height)
+  const GR = Math.min(7000, 2500 + 1.5 * alt);   // preview towers: chunks within GR of the camera (and in view: frustum)
+  for (const g of ghosts) {
+    const on = LAY[SIDE[g.side]] && alt < 3000;
+    for (const c of g.chunks) { const v = on && Math.hypot(c.x - cx, c.y - cy) - c.r < GR; for (const o of c.objs) o.visible = v; }
+  }
+  // named yards from 6 km; the unnamed ones ("SUBSTATION, 115 KV") only close by, so the overview stays clean
+  for (const f of facLabels) f.o.visible = LAY.labels && LAY.structures && (f.gen ? alt < 1500 && Math.hypot(f.x - cx, f.y - cy) < 2500
+    : alt < 3500 && Math.hypot(f.x - cx, f.y - cy) < 6000);
   for (const m of bldChunks) m.visible = LAY.buildings && !tiles && alt < 9000 && Math.hypot(m.userData.cx - cx, m.userData.cy - cy) < 12000;
   patchGroup.visible = GROUND === 'sat' && !tiles;
   updateTrees(forceTrees);
@@ -1810,6 +2217,9 @@ if (qs.get('cam')) {  // ?cam=x,y,alt,bearing,pitch  (level meters, alt above gr
   camera.position.copy(V(x, y, hAt(x, y) + alt)); yaw = -b * DEG; pitch = (pt ?? -20) * DEG;
   setMode(alt < 3 ? 'WALK' : 'DRONE');
 }
+window.__cam = (x, y, alt, b, pt = -20) => {   // test hook: the same as ?cam=, without a reload
+  flight = null; camera.position.copy(V(x, y, hAt(x, y) + alt)); yaw = -b * DEG; pitch = pt * DEG; setMode(alt < 3 ? 'WALK' : 'DRONE'); lod(true);
+};
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 const clock = new THREE.Clock();
 let acc = 0, lastSpeed = 0;
@@ -1818,7 +2228,6 @@ function frame() {
   requestAnimationFrame(frame);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!innerWidth || !innerHeight) return;   // hidden pane / minimized tab: nothing to draw into
-  if (clipOpen()) return;                    // a fly-in video is playing over the world: give it the GPU
   prev.copy(camera.position);
   if (flight) {
     flight.t = Math.min(1, flight.t + dt / flight.dur);
@@ -1850,6 +2259,10 @@ function frame() {
     photoFog.near = 1200 + 2.5 * up; photoFog.far = 8000 + 9 * up;
     for (const m of glowMats) { m.uniforms.uFogNear.value = photoFog.near; m.uniforms.uFogFar.value = photoFog.far; }
   }
+  {  // planned lines ease down onto their preview towers as the camera comes below ~600 m (all the way by 200 m)
+    const up = camera.position.y - hAt(camera.position.x, -camera.position.z), k = smooth01((600 - up) / 400);
+    if (Math.abs(k - DROP.value) > 1e-3 || (k !== DROP.value && (k === 0 || k === 1))) setDrop(k);
+  }
   if (sel?.mat.dashed) sel.mat.dashOffset -= dt * (PHOTO ? 160 : 400);
   for (const x of userOvl) if (x !== sel) x.mat.dashOffset -= dt * (PHOTO ? 64 : 160);
   for (const b of beacons) {
@@ -1860,8 +2273,23 @@ function frame() {
     const away = Math.min(1, Math.max(0, (d - 60) / (PHOTO ? 400 : 1400)));   // 0 at the foot, 1 once you're well away
     const slim = PHOTO ? 0.6 : 0.3;
     b.scale.x = b.scale.z = slim + (1 - slim) * away;
-    const k = 0.55 + 0.45 * away;
+    // (inside the slimmed beam you see one wall, not the two you see from outside: full strength there, or walking into
+    // the Okatie beam made it almost vanish)
+    let k = Math.max(0.55 + 0.45 * away, 1 - smooth01((d - BEAM_R * b.scale.x) / 15));
+    // (at a touching point the two utilities' beams stand side by side with the white pillar between them; lined up
+    // from the WALK THE GAP spot, cyan + yellow + the pillar added up to a white-out. There the pillar is the marker up
+    // close and the pair dims with it, to a fifth by the foot)
+    if (b.userData.touch) k *= 0.2 + 0.8 * smooth01((d - 30) / 1500);
     if (b.material.uniforms) b.material.uniforms.uOpacity.value = b.userData.base * k; else b.material.opacity = b.userData.base * k;
+  }
+  for (const p of pillars) {   // the touching pillar: slimmer and dimmer up close (a sixth of its width and an eighth of its
+    // light at its foot, full again from ~1.5 km), and never wrapped around the camera: its HDR glow, two beams beside it
+    // and the bloom filled the screen white from the WALK THE GAP spot 350 m out, and from inside
+    const d = Math.hypot(p.position.x - camera.position.x, p.position.z - camera.position.z), away = smooth01((d - 30) / 1500);
+    // (and never wider than ~4 degrees of the view: over the bright photo sky any additive light near the lens clipped white)
+    const sc = Math.max(0.02, Math.min(0.15 + 0.85 * away, 0.035 * d / p.userData.r)), op = p.userData.base * (0.12 + 0.88 * away);
+    p.scale.x = p.scale.z = sc; p.visible = d > p.userData.r * sc + 8;
+    if (p.material.uniforms) p.material.uniforms.uOpacity.value = op; else p.material.opacity = op;
   }
   acc += dt;
   if (acc > 0.25) {  // HUD + LOD at 4 Hz
@@ -1946,7 +2374,7 @@ if (PHOTO) {
     $('photo-note').classList.add('show');
     setTimeout(() => $('photo-note').classList.remove('show'), 9000);
     addEventListener('keydown', e => {
-      if (!clipOpen() && (e.key === '[' || e.key === ']')) { nudge += e.key === ']' ? 2 : -2; photoRoot.position.y = nudge; $('near').textContent = `ground offset ${nudge} m`; }
+      if (e.key === '[' || e.key === ']') { nudge += e.key === ']' ? 2 : -2; photoRoot.position.y = nudge; $('near').textContent = `ground offset ${nudge} m`; }
     });
   } catch (err) {
     console.error(err);
@@ -1983,7 +2411,13 @@ setTimeout(() => $('boot').remove(), 250);
 frame();
 if (qs.get('select')) {  // deep links: ?select=<overlap id | global rank> (yours too) flies there, &walk=1 drops you on the ground
   const q = qs.get('select'), it = ovl.find(x => x.o.id === q) || ovl.find(x => !x.user && String(x.o.rank) === q);
-  if (it) { select(it, !qs.get('walk')); if (qs.get('walk')) flyTo(walkGap(it)); }
+  // (2026-09-27: a saved filter could hide the linked overlap: card open, no row in the list. It is revealed first.)
+  if (it) { reveal(it); select(it, !qs.get('walk')); if (qs.get('walk')) flyTo(walkGap(it)); }
+  else {  // the other level's overlap (?select=1 is Augusta's #1): hop there, the way the tour does
+    const l = (await getLevels()).find(l => l.level !== LEVEL.id && LEVELS.some(x => x.id === l.level)
+      && ((l.overlap_ids || []).includes(q) || (l.ranks || []).map(String).includes(q)));
+    if (l) { const u = new URLSearchParams(location.search); u.set('level', l.level); location.replace(`?${u}`); }
+  }
 } else if (tiles && !qs.get('cam') && qs.get('tour') == null) {   // Google 3D, no deep link: drop in on the list's top overlap
   const top = rowOrder.find(x => !x.user) || baseOvl[0];
   if (top) flyTo(viewFor(top));
