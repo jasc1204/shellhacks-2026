@@ -1268,7 +1268,7 @@ function renderAbout() {
     </ul>
     <h3>Sources</h3>
     <ul>${meta.sources.map((s) => `<li>${esc(s.label)} <span style="color:#7286a4">(${esc(s.via)})</span></li>`).join('')}
-      <li>Satellite imagery: USGS The National Map (public domain). Elevation: AWS Terrain Tiles. Basemap: OpenFreeMap, OpenMapTiles, © OpenStreetMap contributors.</li></ul>
+      <li>Satellite imagery: USGS The National Map (public domain) up close, and Sentinel-2 cloudless 2024 by EOX IT Services GmbH (CC BY-NC-SA 4.0, contains modified Copernicus Sentinel data) zoomed out. Elevation in the 3D world: AWS Terrain Tiles. Labels: OpenFreeMap, OpenMapTiles, © OpenStreetMap contributors.</li></ul>
     <p style="margin-top:18px">Built at ShellHacks 2026 for Sperry Tech's GridLock challenge.</p>
   </div>`
 }
