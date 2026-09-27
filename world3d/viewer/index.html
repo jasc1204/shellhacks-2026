@@ -642,6 +642,15 @@ async function buildPatches() {  // ~2 m/px USGS imagery draped on the same terr
 
 // ================================================================== lines helpers
 const lineMats = [];
+// 2026-09-27: the additive glow gets butt caps. Round caps overlap at every joint (the planned lines come in 250 m
+// pieces) and, added up, drew a faint bead of light there on dimmed and low-confidence lines.
+const buttCaps = m => {
+  m.onBeforeCompile = sh => {
+    sh.fragmentShader = sh.fragmentShader.replace(/if \( abs\( vUv\.y \) > 1\.0 \) \{\s*float a = vUv\.x;[\s\S]*?if \( len2 > 1\.0 \) discard;\s*\}/, 'if ( abs( vUv.y ) > 1.0 ) discard;');
+  };
+  m.customProgramCacheKey = () => 'butt-caps';
+  return m;
+};
 const lineMat = (color, width, opts = {}) => {   // Google 3D: lines sink into the haze with the land (no bright tangle on the horizon)
   const m = new LineMaterial({ color, linewidth: width, transparent: true, fog: PHOTO, ...opts });
   m.resolution.set(innerWidth, innerHeight);
@@ -680,7 +689,7 @@ function solid(geo, Ctor, { color, core = color, width, glow = 0.3, glowW = widt
   if (fade) geo.setAttribute('instanceFade', new THREE.InstancedBufferAttribute(new Float32Array(fade), 2));
   if (Ctor === Line2) new Line2(geo).computeLineDistances();   // once per geometry (dashes)
   const L = like?.userData;
-  if (glow) add('glow', L?.glow || lineMat(hot(color, 1.3), glowW, { opacity: glow * k, blending: THREE.AdditiveBlending, depthWrite: false }), 1);
+  if (glow) add('glow', L?.glow || buttCaps(lineMat(hot(color, 1.3), glowW, { opacity: glow * k, blending: THREE.AdditiveBlending, depthWrite: false })), 1);
   add('casing', L?.casing || lineMat(casingOf(color), width * 2, { depthWrite: false }), 2);
   add('core', L?.core || lineMat(new THREE.Color(core), width), 3);
   Object.assign(g.userData, { w: width, glowW, glowK: glow, coreCol: new THREE.Color(core), casingCol: casingOf(color) });
@@ -2217,7 +2226,11 @@ function lod(forceTrees = false) {  // level of detail by camera position and la
   const GR = Math.min(7000, 2500 + 1.5 * alt);   // preview towers: chunks within GR of the camera (and in view: frustum)
   for (const g of ghosts) {
     const on = LAY[SIDE[g.side]] && alt < 3000;
-    for (const c of g.chunks) { const v = on && Math.hypot(c.x - cx, c.y - cy) - c.r < GR; for (const o of c.objs) o.visible = v; }
+    for (const c of g.chunks) {   // (2026-09-27: towers near the camera only; their wires 2.5x further, or the line ended in mid-air)
+      const d = Math.hypot(c.x - cx, c.y - cy) - c.r;
+      c.objs[0].visible = on && d < GR;
+      if (c.objs[1]) c.objs[1].visible = on && d < 2.5 * GR;
+    }
   }
   // named yards from 6 km; the unnamed ones ("SUBSTATION, 115 KV") only close by, so the overview stays clean
   for (const f of facLabels) f.o.visible = LAY.labels && LAY.structures && (f.gen ? alt < 1500 && Math.hypot(f.x - cx, f.y - cy) < 2500
