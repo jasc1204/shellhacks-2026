@@ -15,32 +15,32 @@ Numbers are checked against the data (Sep 27): 252 projects (44 DESC, 208 Georgi
 
 **1. The problem** *(2D map, the whole river corridor)*
 
-Right now, Georgia Power and Dominion Energy South Carolina are planning hundreds of new transmission projects, on opposite sides of the same river. And they're planning them without looking at each other's plans.
+Right now, Georgia Power and Dominion Energy South Carolina are planning hundreds of new transmission projects on opposite sides of the same river. And they're planning them without ever looking at each other's plans.
 
 **2. What GridLock does** *(the header numbers and the ranked list)*
 
-What GridLock does is that it reads both utilities' public plans, all two hundred fifty-two projects, puts them on a map, and finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
+That's where GridLock comes in. It reads both utilities' public plans, all two hundred fifty-two projects, and puts every one of them on a map. Then it finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
 
 **3. How it measures** *(GEOGRAPHIC, TIMELINE, BOTH)*
 
-The trick is measuring from the closest points, not the centers. A long line can pass right next to a substation even when their centers are miles apart. Then everything's ranked the way Sperry asked: how close first, then how well the timing lines up.
+Power lines don't stay in one place. A single new line can stretch for miles, passing right beside another company's substation, crossing its corridors, running along the same roads. So GridLock measures from the closest points, not the centers, and catches the pairs a quick glance would miss. Then it ranks every pair the way Sperry asked: how close they are first, then how well their timing lines up.
 
 **4. One opportunity** *(click #3, the card opens)*
 
-Dominion's Jasper to Okatie line and Georgia Power's work at McIntosh are less than a kilometer apart, and they're being built during the same two years. If they coordinate, that's about a million dollars saved. One crew instead of two, and shared land.
+Take this one. Dominion's Jasper to Okatie line and Georgia Power's work at McIntosh are less than a kilometer apart, and both are being built during the same two years. If they coordinate, that's about a million dollars saved: one crew instead of two, and land they can share.
 
 **5. The same spot, in 3D** *(press 3D, the camera takes over and flies in, the card shows the savings)*
 
-And here's that same spot in 3D. That's the real river, real buildings, the grid that's already there, and both new lines. The rings show what they could share, from the land itself out to the crews. And the savings come along with it.
+Here's that same spot in 3D. That's the real river, the real buildings, the grid that's already standing, and both new lines. The rings show what the two could share, from the land itself all the way out to the crews. And the savings come along with it.
 
 **6. The top two** *(pick #1 in the list, the 3D world flies to Thurmond Dam)*
 
-At the top of the list, it gets even closer. At Thurmond Dam, both utilities are rebuilding lines that end at the exact same spot. They'll have to coordinate, but right now their schedules are four years apart. That's a conversation worth starting today.
+At the top of the list, it gets even closer. At Thurmond Dam, both utilities are rebuilding lines that end at the exact same spot. They'll have to coordinate no matter what, but right now their schedules are four years apart. That's a conversation worth starting today.
 
 **7. A planning tool** *(back to 2D, draw a new project, it shows up in the list and in 3D)*
 
-Draw a project of your own, and GridLock checks it against the other utility's plans right away, in 2D and in 3D.
+And it's not just a report. Draw a project of your own, and GridLock checks it against the other utility's plans instantly, in 2D and in 3D.
 
 **8. Close** *(Data Quality tab, then the end card)*
 
-Every number here traces back to a page in the filings, and it reproduces all six of Sperry's sample overlaps. That's GridLock. Find the overlap before the crews do.
+Every number you've seen traces back to a page in the public filings, and GridLock reproduces all six of the overlaps in Sperry's own sample. This is GridLock. Find the overlap before the crews do.
