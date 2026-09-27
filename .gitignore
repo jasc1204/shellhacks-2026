@@ -44,3 +44,6 @@ video/.venv-tts/
 video/voice/
 video/VOICEOVER.md
 video/clone_voice.py
+DEVPOST.md
+DEMO_SCRIPT.md
+GRIDLOCK_SPEC.md

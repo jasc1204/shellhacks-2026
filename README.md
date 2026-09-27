@@ -6,7 +6,7 @@ Neighboring utilities plan their transmission work years in advance, mostly with
 
 **Try it:** [jasc1204.github.io/shellhacks-2026](https://jasc1204.github.io/shellhacks-2026/), the 2D map and the 3D world on one page: the **2D / 3D** switch in the header flips between them at the same spot. The optional GOOGLE 3D mode needs your own token, so it only works when you run the app locally.
 
-The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
+Built for Sperry Tech's GridLock challenge at ShellHacks 2026.
 
 ## Status
 
