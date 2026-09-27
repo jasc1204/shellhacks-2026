@@ -2271,14 +2271,15 @@
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 35,
   "loc_a": {
-   "lat": 33.4333777,
-   "lon": -81.909209,
-   "osm_id": "way/449466234",
-   "osm_name": "Urquhart Station",
-   "osm_operator": "Dominion Energy South Carolina, Inc",
-   "method": "OSM name match (exact)",
+   "lat": 33.43287,
+   "lon": -81.911081,
+   "osm_id": "relation/14317637",
+   "osm_name": "Urquhart Substation",
+   "osm_operator": "",
+   "method": "manual: OSM name match (substation not plant)",
    "confidence": "high",
-   "n_candidates": 2
+   "note": "OSM's named Urquhart Substation (230 kV transmission yard), 183 m from the Urquhart Station plant centroid that the name match picked; the Urquhart - Toolebeck 115 kV OSM line (way/186511170) ends 54 m from it. Urquhart is not in Sperry's sample. (Stevens Creek and Jasper keep the plant points Sperry's sample uses.)",
+   "n_candidates": 0
   },
   "loc_b": {
    "lat": 33.5346321,
@@ -2294,8 +2295,8 @@
    "type": "LineString",
    "coordinates": [
     [
-     -81.909209,
-     33.4333777
+     -81.911081,
+     33.43287
     ],
     [
      -81.6693272,
@@ -2303,10 +2304,10 @@
     ]
    ]
   },
-  "straight_length_km": 24.93,
+  "straight_length_km": 25.11,
   "center": [
-   -81.7892681,
-   33.4840049
+   -81.7902041,
+   33.48375105
   ],
   "location_confidence": "high"
  },
@@ -2832,26 +2833,27 @@
   "source_doc": "DESC Planned Transmission Projects $2M and above (2024-2028)",
   "source_page": 43,
   "loc_a": {
-   "lat": 33.4333777,
-   "lon": -81.909209,
-   "osm_id": "way/449466234",
-   "osm_name": "Urquhart Station",
-   "osm_operator": "Dominion Energy South Carolina, Inc",
-   "method": "OSM name match (exact)",
+   "lat": 33.43287,
+   "lon": -81.911081,
+   "osm_id": "relation/14317637",
+   "osm_name": "Urquhart Substation",
+   "osm_operator": "",
+   "method": "manual: OSM name match (substation not plant)",
    "confidence": "high",
-   "n_candidates": 2
+   "note": "OSM's named Urquhart Substation (230 kV transmission yard), 183 m from the Urquhart Station plant centroid that the name match picked; the Urquhart - Toolebeck 115 kV OSM line (way/186511170) ends 54 m from it. Urquhart is not in Sperry's sample. (Stevens Creek and Jasper keep the plant points Sperry's sample uses.)",
+   "n_candidates": 0
   },
   "loc_b": null,
   "geometry": {
    "type": "Point",
    "coordinates": [
-    -81.909209,
-    33.4333777
+    -81.911081,
+    33.43287
    ]
   },
   "center": [
-   -81.909209,
-   33.4333777
+   -81.911081,
+   33.43287
   ],
   "location_confidence": "medium"
  },
@@ -5010,43 +5012,46 @@
   "source_doc": "Georgia Power 2025 IRP Vol. 3 (public disclosure): 2024 GA ITS Ten-Year Plan (2025-2034)",
   "plan_page": 91,
   "source_page": 261,
+  "point_fix_note": "Filed work: reconductor about 2.72 mi of line from Fenwick St to East Augusta Jct (the junction is not in OSM); drawn to Sand Bar Ferry, the line's named end.",
   "loc_a": {
-   "lat": 33.4781959,
-   "lon": -81.9956777,
-   "osm_id": "way/9451261",
-   "osm_name": "Fenwick Street, Hillside Park, Augusta, Richmond County, Georgia, 30904, United ",
+   "lat": 33.468643,
+   "lon": -81.968117,
+   "osm_id": "way/1007026803",
+   "osm_name": "GPC 115 kV substation on Fenwick Street (unnamed in OSM)",
    "osm_operator": "",
-   "method": "approximate: Nominatim highway/residential (town/street level, not the substation itself)",
-   "confidence": "low",
+   "method": "manual: OSM substation + street match",
+   "confidence": "medium",
+   "note": "No OSM substation is named Fenwick Street. This Georgia Power 115 kV yard is the only substation beside Fenwick Street (61 m from the street, 0.65 km from the nearest Nominatim segment point). Replaces a Nominatim point on the first of three Fenwick Street segments, 2.8 km west.",
    "n_candidates": 0
   },
   "loc_b": {
-   "lat": 33.4485609,
-   "lon": -81.9225725,
-   "osm_id": "way/858401457",
-   "osm_name": "Sand Bar Ferry Road, Marion Homes, Augusta, Richmond County, Georgia, 30901, Uni",
+   "lat": 33.442656,
+   "lon": -81.933134,
+   "osm_id": "way/170166816",
+   "osm_name": "unnamed GPC 115 kV yard (cluster of 3 off Sand Bar Ferry Rd)",
    "osm_operator": "",
-   "method": "approximate: Nominatim highway/primary (town/street level, not the substation itself)",
+   "method": "manual: OSM substation near street",
    "confidence": "low",
+   "note": "No OSM substation is named Sand Bar Ferry. Nearest Georgia Power 115 kV yards to Sand Bar Ferry Road: ways 170166816, 170166800 and 170166793, 1.05-1.3 km from the road. Alternative: the 115 kV switching station way/1007026782 (33.431496,-81.936141). Replaces a Nominatim point on the road median at the river bridge.",
    "n_candidates": 0
   },
   "geometry": {
    "type": "LineString",
    "coordinates": [
     [
-     -81.9956777,
-     33.4781959
+     -81.968117,
+     33.468643
     ],
     [
-     -81.9225725,
-     33.4485609
+     -81.933134,
+     33.442656
     ]
    ]
   },
-  "straight_length_km": 7.54,
+  "straight_length_km": 4.35,
   "center": [
-   -81.9591251,
-   33.463378399999996
+   -81.9506255,
+   33.4556495
   ],
   "location_confidence": "low"
  },

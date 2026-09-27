@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from overlaps import timing_phrase
+from overlaps import TOUCH_KM, timing_phrase
 
 ROOT = Path(__file__).resolve().parent.parent
 PROC = ROOT / "data" / "processed"
@@ -154,7 +154,6 @@ def kml_overlap(o, a, b, n):
             f"<b>Timing:</b> {timing}; in-service dates {o['isd_gap_days']} days apart<br/>"
             f"<b>Rough savings if coordinated:</b> {money(total) if total > 0 else 'depends on the schedule'}"
             f"<ul>{''.join(f'<li>{kml_text(i)}</li>' for i in items)}</ul>"
-            f"<b>Score:</b> {o['score']:.1f} / 100 (65% distance, 35% timing)<br/><br/>"
             f"{side(a, o['a_window'])}<br/><br/>{side(b, o['b_window'])}"
             + ("<br/><br/><i>At least one end is located approximately: check it before relying on this match.</i>"
                if o["needs_location_check"] else ""))
@@ -166,7 +165,7 @@ def kml_overlap(o, a, b, n):
     data = {"rank": o["rank"], "tier": o["tier"], "closest_km": o["closest_km"], "center_mi": o["center_mi"],
             "desc_project": o["a"], "gpc_project": o["b"], "desc_window": " to ".join(o["a_window"]),
             "gpc_window": " to ".join(o["b_window"]), "build_overlap_days": o["overlap_days"],
-            "window_gap_days": o["window_gap_days"], "isd_gap_days": o["isd_gap_days"], "score": o["score"],
+            "window_gap_days": o["window_gap_days"], "isd_gap_days": o["isd_gap_days"],
             "est_savings_usd": round(total), "needs_location_check": o["needs_location_check"]}
     rng = max(1500, o["closest_km"] * 1000 * 2.5)
     return kml_placemark(name, snippet, html, kml_lookat(lon, lat, rng, heading), "top" if o["rank"] <= 10 else "ovl", data, geometry)
@@ -215,9 +214,9 @@ def write_kml(projects, overlaps, count, best, n_total):
     mapped = [p for p in projects if p.get("geometry")]
     tiers = {o["tier"]: o["tier_label"] for o in overlaps}
     about = (f"Where Dominion Energy South Carolina's and Georgia Power's planned transmission projects come close in "
-             f"place and time: {len(overlaps)} overlaps, ranked by the gap between the closest points of the two projects "
-             f"and by how much their build windows overlap. Tiers: "
-             + "; ".join(f"{t} {tiers[t].lower()}" for t in sorted(tiers))
+             f"place and time: {len(overlaps)} overlaps between the closest points of the two projects, ranked by "
+             f"distance tier first, then by build timing, then by the exact distance. Tiers: "
+             + "; ".join(f"{t} {tiers[t].lower()}" + (f" (within {TOUCH_KM} km)" if t == 1 else "") for t in sorted(tiers))
              + f". {len(mapped)} of {n_total} projects are mapped. Double-click an overlap to fly to it.<br/><br/>"
              "Sources: DESC Planned Transmission Projects $2M and above (2024-2028); Georgia Power 2025 IRP Vol. 3, "
              "2024 GA ITS Ten-Year Plan (public disclosure version); substation locations from OpenStreetMap contributors "
@@ -332,7 +331,7 @@ def main():
     # then our additions). distance_mi and time_gap (day) keep Sperry's definitions (center to center, in-service gap).
     by_code = {p["project_id"]: p for p in projects}
     ocols = ["overlap_id", "distance_mi", "time_gap (day)", "utility_a", "project_id_a", "project_name_a", "utility_b",
-             "project_id_b", "project_name_b", "rank", "closest_km", "tier", "tier_label", "can_share",
+             "project_id_b", "project_name_b", "rank", "closest_km", "closest_mi", "tier", "tier_label", "can_share",
              "build_overlap_days", "window_gap_days", "score", "needs_location_check", "source_page_a", "source_page_b"]
     # utf-8-sig: a byte-order mark so Excel reads the en dashes in project names correctly.
     with open(OUT / "overlaps_sperry_format.csv", "w", newline="", encoding="utf-8-sig") as fh:
@@ -344,7 +343,7 @@ def main():
                 "overlap_id": f"OVL_{o['rank']}", "distance_mi": o["center_mi"], "time_gap (day)": o["isd_gap_days"],
                 "utility_a": a["utility"], "project_id_a": o["a"], "project_name_a": o["a_name"],
                 "utility_b": b["utility"], "project_id_b": o["b"], "project_name_b": o["b_name"],
-                "rank": o["rank"], "closest_km": o["closest_km"], "tier": o["tier"], "tier_label": o["tier_label"],
+                "rank": o["rank"], "closest_km": o["closest_km"], "closest_mi": round(o["closest_km"] / 1.609344, 2), "tier": o["tier"], "tier_label": o["tier_label"],
                 "can_share": o["can_share"], "build_overlap_days": o["overlap_days"], "window_gap_days": o["window_gap_days"],
                 "score": o["score"], "needs_location_check": o["needs_location_check"],
                 "source_page_a": a["source_page"], "source_page_b": b["source_page"],

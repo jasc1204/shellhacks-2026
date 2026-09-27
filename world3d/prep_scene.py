@@ -75,7 +75,7 @@ REGIONS = {
 }
 
 TIERS = [  # (tier, max km, what can be shared) from the GridLock spec
-    (1, 0.1, "Touching / crossing: must coordinate outages and crossing structures"),
+    (1, 0.25, "Touching / crossing: must coordinate outages and crossing structures"),  # same tolerance as the pipeline
     (2, 1.6, "Under 1.6 km: share the land itself (right-of-way, access roads, permits)"),
     (3, 8.0, "Under 8 km: share site logistics (laydown yards, deliveries)"),
     (4, 40.0, "Under 40 km: share crews and equipment"),
@@ -444,8 +444,24 @@ def build_grid(loc, z_at, region):
                 h = tower_height(kv)
                 if key not in towers or towers[key][4] < h:
                     towers[key] = [round(x, 1), round(y, 1), round(z_at(x, y), 1), round(heading, 1), h]
-    print(f"  grid: {len(lines)} line runs, {len(towers)} towers")
-    return lines, list(towers.values())
+    kept = dedupe_towers(list(towers.values()))
+    print(f"  grid: {len(lines)} line runs, {len(kept)} towers ({len(towers) - len(kept)} near-duplicates merged)")
+    return lines, kept
+
+
+def dedupe_towers(towers, r=6.0):
+    """Parallel OSM ways often map one physical tower as two nodes a few meters apart: keep the tallest (in the
+    original order, so the file only loses the duplicates)."""
+    cells, keep = {}, set()
+    for i in sorted(range(len(towers)), key=lambda i: -towers[i][4]):
+        x, y = towers[i][0], towers[i][1]
+        cx, cy = int(x // r), int(y // r)
+        if any(math.hypot(x - towers[j][0], y - towers[j][1]) < r
+               for dx in (-1, 0, 1) for dy in (-1, 0, 1) for j in cells.get((cx + dx, cy + dy), ())):
+            continue
+        cells.setdefault((cx, cy), []).append(i)
+        keep.add(i)
+    return [t for i, t in enumerate(towers) if i in keep]
 
 
 def build_substations(loc, z_at):
@@ -582,7 +598,7 @@ def build_overlaps(projects, z_at):
         for b in gpc:
             d, pa, pb = closest_points(a, b)
             km = d / 1000
-            tier = next((t for t in TIERS if km < t[1]), None)
+            tier = next((t for t in TIERS if (km <= t[1] if t[0] == 1 else km < t[1])), None)
             if tier is None:
                 continue
             ca = np.mean([[e["x"], e["y"]] for e in (a["a"], a["b"]) if e], axis=0)

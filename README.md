@@ -2,7 +2,7 @@
 
 Entry for **Sperry Tech's GridLock challenge** at [ShellHacks 2026](https://shellhacks-2026.devpost.com/) (FIU, Miami, Sep 25-27, 2026).
 
-Neighboring utilities plan their transmission work years in advance, mostly without seeing each other's plans. GridLock compares the public construction plans of **Dominion Energy South Carolina (DESC)** and **Georgia Power (GPC)** and flags where planned projects overlap in space (closest points within 40 km, ranked in tiers) and in time (the same build window). Those overlaps are where the two utilities could share crews, equipment and right-of-way.
+Neighboring utilities plan their transmission work years in advance, mostly without seeing each other's plans. GridLock compares the public construction plans of **Dominion Energy South Carolina (DESC)** and **Georgia Power (GPC)** and flags where planned projects overlap in space (closest points within 40 km) and in time (the same build window). It ranks them the way the spec asks: distance tier first, then build timing, then the exact distance. Those overlaps are where the two utilities could share crews, equipment and right-of-way.
 
 The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
 
@@ -11,7 +11,7 @@ The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
 Built during the hackathon:
 - **The data pipeline** below. It extracts 252 planned projects (44 DESC, 208 Georgia Power), locates their named end points, ranks the 78 cross-utility overlaps, and reproduces all 6 overlaps in Sperry's starter sample.
 - **`web/`:** the interactive map (Vite, TypeScript, MapLibre GL), with the ranked list, satellite and 3D terrain, "add your own project", a guided tour, a Google Earth link for every opportunity and a Google Earth file of everything.
-- **`world3d/`:** a walkable 3D world of the two border regions (Savannah River and Augusta/Thurmond), built with Blender and Three.js from the same data, with an optional Google photorealistic 3D mode and Blender fly-in clips of the top 10 overlaps.
+- **`world3d/`:** a walkable 3D world of the two border regions (Savannah River and Augusta/Thurmond), built with Blender and Three.js from the same data, with an optional Google photorealistic 3D mode.
 
 ## Data pipeline
 
@@ -22,7 +22,7 @@ Python 3 with `pip install shapely numpy pillow`. Step 1 also needs `pdftotext` 
 | 1. Extract projects, dates and source pages from the two utility PDFs | `pipeline/extract_projects.py` | `data/processed/desc_projects.json`, `gpc_projects.json`, `projects_extracted.csv` |
 | 2. Download substations and plants (GA + SC) and power lines (Savannah and Augusta border areas) from OpenStreetMap | `pipeline/fetch_osm.py` | `data/osm/*.json` |
 | 3. Match each project's named endpoints to OpenStreetMap substations, with a town-level Nominatim fallback flagged as low confidence | `pipeline/geocode.py` | `data/processed/projects_located.json` |
-| 4. Rank overlaps: closest-point distance tiers (touching, < 1.6 km, < 8 km, < 40 km) plus build-window overlap, with Sperry's center-to-center method for comparison | `pipeline/overlaps.py` | `data/processed/overlaps.json`, `overlap_summary.json` |
+| 4. Find overlaps between the closest points of each pair (projects are straight lines between their named end substations, since the filings name only the ends) and rank them: distance tier first (touching within 0.25 km, under 1.6 km, under 8 km, under 40 km), then build timing (overlapping windows, then the smaller gap), then the exact distance. Sperry's center-to-center method is kept for comparison | `pipeline/overlaps.py` | `data/processed/overlaps.json`, `overlap_summary.json` |
 | 5. Write the compact files the web map loads, the project and overlap tables in the column layout of Sperry's `Projects_Overlaps.xlsx`, and a Google Earth file | `pipeline/export_web.py` | `web/public/data/` (incl. `overlaps_sperry_format.csv`, `gridlock.kml`), `data/processed/projects_located.csv` |
 
 Every step's output is committed, so you can start from any step:
@@ -33,8 +33,7 @@ python pipeline/fetch_osm.py          # uses the cached files; --force re-downlo
 python pipeline/geocode.py
 python pipeline/overlaps.py
 python pipeline/export_web.py
-python world3d/prep_scene.py savannah # 3D scene: terrain, basemap and grid for one border region
-blender -b --factory-startup -P world3d/render_clips.py -- 1   # fly-in clip for overlap #1 into web/public/clips/
+python world3d/prep_scene.py savannah # 3D scene: terrain, basemap and grid for one border region (and augusta)
 ```
 
 ## Web app
@@ -50,7 +49,7 @@ npm run build   # static site in web/dist/
 
 - **Map:** both utilities' planned projects, with the overlaps drawn in gold between their closest points and the selected pair labeled on the map. Toggle **CENTERS** to compare with the center-to-center method from Sperry's starter guide.
 - **Layers:** switch between the night map and **satellite** imagery (USGS, public domain), between **2D** and **3D terrain** (with extruded buildings), and toggle each layer: either utility's projects, your projects, overlaps, the existing grid, line end points, place names.
-- **Opportunities:** the ranked list, filterable by tier and by "same build window". Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate, **View in 3D** / **Walk the gap** links into the 3D world, and **Google Earth**, which opens Google Earth's own 3D view at the gap. The top 10 also have **Watch fly-in**, a 7-second Blender clip of the site.
+- **Opportunities:** the ranked list (distance tier first, then build timing). Three filters narrow it: **GEOGRAPHIC** (by distance tier), **TIMELINE** (by build timing) and **BOTH** (close and timed together); everything else on the map dims. Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate, **View in 3D** / **Walk the gap** links into the 3D world, and **Google Earth**, which opens Google Earth's own 3D view at the gap.
 - **Add your own project:** draw a line or drop a substation, pick the utility and build window, and it's scored in the browser with exactly the same rules as the pipeline (`web/src/geo.ts`, checked against `overlaps.json`: the same 78 overlaps, distances within 1 m). Saved in the browser (`localStorage["gridlock.userProjects.v1"]`) and shown in the 3D world too.
 - **Guided tour** (▶ TOUR): satellite + 3D, then the camera flies to the top opportunities with their numbers on screen. Arrow keys, Space and Esc control it.
 - **Data quality:** downloads of the overlap and project tables in the column layout of Sperry's `Projects_Overlaps.xlsx` and of `gridlock.kml` (every mapped project and the ranked overlaps, with the gap, timing, savings estimate and source pages in each pop-up; opens in Google Earth or any GIS), the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
@@ -62,7 +61,6 @@ npm run build   # static site in web/dist/
 
 - Satellite ground, real building footprints, today's grid with its towers (OpenStreetMap), substations, and both utilities' planned lines shown as see-through towers at real height. Your own projects from the map appear too.
 - **GOOGLE 3D** (`?photoreal=1`) swaps our ground for Google's photorealistic 3D tiles (via `3d-tiles-renderer`). It needs your own free token in `world3d/viewer/tokens.local.json`: `{"cesiumIonToken": "..."}` from cesium.com/ion, or `{"googleMapsKey": "..."}`. The file is git-ignored and only the dev server serves it, so a built site never includes it.
-- **Fly-ins:** `world3d/render_clips.py` renders each clip headless in Blender from our own data only (no Google imagery) and rewrites `web/public/clips/manifest.json`. A clip's WATCH FLY-IN button appears wherever the manifest lists it.
 
 ## Data sources
 
@@ -71,6 +69,6 @@ npm run build   # static site in web/dist/
 - Both PDFs came in **Sperry Tech's GridLock starter package**, which is not redistributed here (`data/sperry/` is git-ignored). Put the package there to re-run step 1.
 - Substations, plants and power lines: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL, via the Overpass and Nominatim APIs.
 - Web basemap: [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org) · © OpenStreetMap contributors. Satellite imagery: [USGS The National Map](https://www.usgs.gov/programs/national-geospatial-program/national-map) (public domain). Web 3D terrain: [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/).
-- Optional GOOGLE 3D mode: Google Photorealistic 3D Tiles, streamed live with your own token. Nothing from Google is saved in this repo, and the fly-in clips don't use it.
+- Optional GOOGLE 3D mode: Google Photorealistic 3D Tiles, streamed live with your own token. Nothing from Google is saved in this repo.
 - 3D scene: elevation from [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Terrarium); basemap © OpenStreetMap contributors © [CARTO](https://carto.com/attributions).
 - Manual location overrides for endpoints that OpenStreetMap does not name, each with a source and confidence level: `data/overrides/locations_manual.csv`.

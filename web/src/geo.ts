@@ -98,8 +98,9 @@ function corridorKm(ga: P[], gb: P[], within = 1.6) {
   return Math.max(along(ga, gb), along(gb, ga))
 }
 
+// Tier 1 includes its tolerance; the others are "under" their limit, as the spec words them.
 export function tierFor(dKm: number) {
-  return TIERS.find((t) => dKm <= t.limit) || null
+  return TIERS.find((t) => (t.tier === 1 ? dKm <= t.limit : dKm < t.limit)) || null
 }
 
 function geoScore(tier: number, d: number) {

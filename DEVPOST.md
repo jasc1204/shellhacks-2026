@@ -15,20 +15,21 @@ Power companies plan their transmission work years ahead, and neighbors mostly p
 GridLock reads both utilities' public construction plans, puts every project on a map, and ranks the places where they overlap.
 
 - **252 planned projects extracted** (44 DESC, 208 Georgia Power); **217 mapped** to real substations and lines, each linked to its source page.
-- **78 cross-utility overlaps**, measured between the **closest points** of the two projects (the spec's rule) and ranked in tiers:
-  - touching / crossing
-  - under 1.6 km (share land)
-  - under 8 km (share logistics)
-  - under 40 km (share crews)
+- **78 cross-utility overlaps**, measured between the **closest points** of the two projects (the spec's rule) and ranked the way the spec asks: **distance tier first, then build timing**, then the exact distance. The tiers:
+  - touching / crossing (within 0.25 km): must coordinate
+  - under 1.6 km: share the land
+  - under 8 km: share site logistics
+  - under 40 km: share crews and equipment
 - **Build windows:** Georgia Power publishes start and need dates. DESC's windows come from its own year-by-year budget. 34 of the 78 pairs are under construction at the same time.
 - **An impact estimate** for every opportunity: one mobilization avoided plus shared right-of-way, with editable assumptions.
-- **The #1 opportunity:** DESC's new $23.8M Jasper–Okatie 230 kV line and Georgia Power's McIntosh–Purrysburg tie-line work are **0.94 km apart** and **both under construction for the same 24 months**, worth roughly $1M if coordinated.
+- **#1, Thurmond Dam:** DESC's Hooks–Thurmond 115 kV tie rebuild and Georgia Power's Evans Primary–Thurmond Dam #5 and #6 115 kV rebuilds end in **the same substation** at the dam on the Savannah River. They touch, so the two utilities must coordinate outages and crossing structures there. As planned, their build windows are 4.4 years apart, so the opportunity is to line up the schedules. Sperry's own sample lists this pair first, about 4 miles apart center to center.
+- **The best pair to share as planned (#3):** DESC's new $23.8M Jasper–Okatie 230 kV line and Georgia Power's McIntosh–Purrysburg 230 kV tie work are **0.94 km apart** and **both under construction for the same 24 months**, worth roughly $1M if coordinated. Georgia Power's equipment work is at McIntosh; its tie lines end in the same Purrysburg Road yard as DESC's existing Jasper lines.
+- **Filters:** GEOGRAPHIC (by tier), TIMELINE (by timing) or BOTH (close and timed together). Everything else dims, so the map stays readable.
 - **Add your own project:** draw a line or drop a substation, and GridLock scores it against the other utility's plans instantly, with the same rules.
 - **See it:**
   - satellite imagery and 3D terrain in the map
   - a guided tour of the top opportunities
   - a walkable 3D world of both border regions, built in Blender and Three.js, with real buildings, substations and satellite ground, plus an optional Google photorealistic 3D mode
-  - a 7-second Blender fly-in of each of the top 10 opportunities
   - one click opens any opportunity in Google Earth's own 3D view
 - **Downloads:** the overlap and project tables in the column layout of Sperry's starter spreadsheet, and a Google Earth file (KML) with every project and overlap. Each pop-up shows the gap, the timing, the savings estimate and the source pages, so a planner can open it in the tools they already use.
 
@@ -39,18 +40,18 @@ GridLock reads both utilities' public construction plans, puts every project on 
   - Georgia Power's ten-year plan is embedded in its 2025 IRP (pages 171–474), with a TEAMS number, need date and start date per project.
 - **Locations:** OpenStreetMap through the Overpass API, following Sperry's "Finding Real Locations" guide.
   - Names are matched to named substations, then checked against state boundaries and the other end of each line.
-  - Where OSM has no name, I **traced the power-line network**. Tracing found DESC's "Hooks" (9.4 miles from Stevens Creek; DESC says 9.5) and Georgia Power's "Purrysburg" tie point, 0.8 km from DESC's Jasper substation.
+  - Where OSM has no name, I **traced the power-line network**. Tracing found DESC's "Hooks" (9.4 miles from Stevens Creek; DESC says 9.5) and Georgia Power's "Purrysburg" tie point, about 1 km from DESC's Jasper plant.
   - Town-level fallbacks (Nominatim) are always labeled low confidence.
-- **Overlap engine:** closest points between point and line geometries (Shapely) in a local projection, the four tiers, build-window overlap, and a score (65% distance, 35% timing).
+- **Overlap engine:** closest points between point and line geometries (Shapely) in a local projection, the four tiers, and build-window overlap. The ranking follows the spec: tier, then timing, then distance. A 0–100 score (65% distance, 35% timing) is shown as a summary but never reorders pairs across tiers.
 - **Validation:** it reproduces **all 6 overlaps in Sperry's sample**, with in-service gaps matching to the day. The browser version of the math matches the Python pipeline exactly: the same 78 overlaps, distances within 1 m.
 - **Web app:** TypeScript + Vite + MapLibre GL, with an OpenFreeMap basemap, USGS satellite imagery and AWS terrain tiles, none of which need API keys.
-- **3D world:** Blender + Three.js, generated from the same data files. The fly-in clips are rendered headless in Blender from our own data only (USGS imagery, OpenStreetMap grid and buildings, AWS terrain). The optional Google 3D mode streams Google's photorealistic tiles through `3d-tiles-renderer`.
+- **3D world:** Blender + Three.js, generated from the same data files. The optional Google 3D mode streams Google's photorealistic tiles through `3d-tiles-renderer`.
 
 ## Challenges I ran into
 
 - **Sperry's own documents disagree on how to measure.** The starter guide measures center to center, while the spec says closest points. Closest points matters: at Thurmond, the center method says 3.9 miles, but the two projects share the same substation. The app shows both methods side by side.
 - **OpenStreetMap doesn't name every substation.** Tracing power lines found two key ones, and every manual location cites its evidence.
-- **Street names are ambiguous.** "First Avenue" exists in every city. A Georgia Power line in Columbus, GA was briefly placed in Savannah, so street matches now need a nearby partner.
+- **Street names are ambiguous.** "First Avenue" exists in every city. A Georgia Power line in Columbus, GA was briefly placed in Savannah, so street matches now need a nearby partner. A final audit also caught two Georgia Power ends named after streets ("Fenwick Street", "Sand Bar Ferry") and moved them off the road to the nearest Georgia Power 115 kV substations (Sand Bar Ferry is still marked approximate).
 - **Three of DESC's budget tables don't add up** in the source PDF. They're flagged in the app instead of silently "fixed".
 
 ## Accomplishments I'm proud of

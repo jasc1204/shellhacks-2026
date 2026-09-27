@@ -10,8 +10,12 @@ Geographic overlap (primary signal, per the GridLock spec):
   We also report Sperry's starter-guide method (center-to-center haversine, 25 mi cutoff) for comparison.
 
 Timeline overlap (strong secondary signal):
-  GPC gives start + need dates. DESC gives only a planned in-service date, so its build window is
-  ISD minus an assumed duration by work type (documented in each record as `window_basis`).
+  GPC gives start + need dates. DESC gives a planned in-service date and a year-by-year budget, so its
+  build window starts in the first budget year with spending ("Previous" = before 2024, taken as Jan 2023).
+  An assumed duration by work type is only a fallback (each record says which in `window_basis`).
+
+Ranking: tier first, then timing (overlapping windows first, then the smaller gap), then the closest
+distance. The 0-100 score (65% distance, 35% timing) is a displayed summary and doesn't set the order.
 
 Outputs: data/processed/overlaps.json, data/processed/overlap_summary.json
 """
@@ -84,8 +88,9 @@ def build_window(p):
 
 
 def tier_for(d_km):
+    # Tier 1 includes its tolerance; the others are "under" their limit, as the spec words them.
     for tier, limit, label, share in TIERS:
-        if d_km <= limit:
+        if (d_km <= limit) if tier == 1 else (d_km < limit):
             return tier, label, share
     return None, None, None
 
@@ -184,7 +189,11 @@ def main():
                 "why": f"{dist_txt}; {when}. {share}.",
             })
 
-    overlaps.sort(key=lambda o: -o["score"])
+    # The spec: "closer overlaps are worth more; rank them by distance", with timing as a strong secondary signal.
+    # So the tier decides first, then the timing (overlapping build windows, then the smaller gap), then the exact
+    # distance. The score is shown next to each pair but never reorders them across tiers.
+    overlaps.sort(key=lambda o: (o["tier"], -o["time_score"], o["window_gap_days"], o["closest_km"],
+                                 o["needs_location_check"], o["id"]))
     for i, o in enumerate(overlaps, 1):
         o["rank"] = i
 
