@@ -4,6 +4,8 @@ Entry for **Sperry Tech's GridLock challenge** at [ShellHacks 2026](https://shel
 
 Neighboring utilities plan their transmission work years in advance, mostly without seeing each other's plans. GridLock compares the public construction plans of **Dominion Energy South Carolina (DESC)** and **Georgia Power (GPC)** and flags where planned projects overlap in space (closest points within 40 km) and in time (the same build window). It ranks them the way the spec asks: distance tier first, then build timing, then the exact distance. Those overlaps are where the two utilities could share crews, equipment and right-of-way.
 
+**Try it:** the map at [jasc1204.github.io/shellhacks-2026](https://jasc1204.github.io/shellhacks-2026/) and the [3D world](https://jasc1204.github.io/shellhacks-2026/world3d/viewer/). The optional GOOGLE 3D mode needs your own token, so it only works when you run the app locally.
+
 The challenge brief is in [GRIDLOCK_SPEC.md](GRIDLOCK_SPEC.md).
 
 ## Status
@@ -46,6 +48,8 @@ npm install
 npm run dev     # http://localhost:5173 (also copies MapLibre's worker into public/maplibre/)
 npm run build   # static site in web/dist/
 ```
+
+The public site is built and deployed by `.github/workflows/pages.yml` (GitHub Pages, `VITE_BASE=/shellhacks-2026/`) on every push to `main`.
 
 - **Map:** both utilities' planned projects, with the overlaps drawn in gold between their closest points and the selected pair labeled on the map. Toggle **CENTERS** to compare with the center-to-center method from Sperry's starter guide.
 - **Layers:** switch between the night map and **satellite** imagery (USGS, public domain), between **2D** and **3D terrain** (with extruded buildings), and toggle each layer: either utility's projects, your projects, overlaps, the existing grid, line end points, place names.

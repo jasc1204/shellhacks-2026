@@ -6,6 +6,8 @@
 
 **Tagline:** Two utilities, one river, 78 places where they could share crews, land and time.
 
+**Try it out links** (Devpost has a field for these): the live site https://jasc1204.github.io/shellhacks-2026/ and the code https://github.com/jasc1204/shellhacks-2026
+
 ## Inspiration
 
 Power companies plan their transmission work years ahead, and neighbors mostly plan alone. In 2024, FERC Order No. 1920 pushed utilities toward coordinated long-term planning, because planning in isolation wastes money and slows down the grid. Sperry Tech's GridLock challenge asked a sharp version of that question: where exactly do Dominion Energy South Carolina's and Georgia Power's planned projects come close enough, in space and in time, that they should be coordinating?
@@ -83,4 +85,4 @@ python · shapely · poppler · openstreetmap · overpass-api · nominatim · ty
 - **MLH GoDaddy Registry:** only if you register a domain with their code and point it at the site.
 - **Don't select** Gemini, ElevenLabs, MongoDB, Snowflake, Solana or Tiger Data. We didn't use them.
 
-Required in the submission: the GitHub repo link, at least one Discord tag, and your full name.
+Required in the submission: the GitHub repo link, at least one Discord tag, and your full name. Add the live site as a "Try it out" link too.
