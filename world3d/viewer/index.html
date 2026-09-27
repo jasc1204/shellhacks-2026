@@ -2462,7 +2462,8 @@ if (EMBED) {
   // GOOGLE 3D, where a token is served (local runs): reloads this level in Google 3D, keeping the pick
   const b = $('b-photo');
   if (PHOTO) { b.hidden = false; b.classList.add('lit'); }
-  else fetch('tokens.local.json', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) b.hidden = false; }).catch(() => {});
+  // (only a local dev server serves the token: on the public site, don't even ask, so its console stays clean)
+  else if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) fetch('tokens.local.json', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) b.hidden = false; }).catch(() => {});
   b.onclick = () => {
     const u = new URLSearchParams(location.search);
     if (PHOTO) u.delete('photoreal'); else u.set('photoreal', '1');
