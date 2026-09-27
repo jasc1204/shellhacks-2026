@@ -314,8 +314,8 @@ function wireMapEvents() {
       if (state.drawing) return
       const p = e.features![0].properties as any
       map.getCanvas().style.cursor = 'pointer'
-      const head = p.user ? `<div class="u" style="color:${ICE}">YOUR PROJECT · ${esc(UTIL_NAME[p.utility as Utility])}</div>`
-        : `<div class="u" style="color:${COLOR[p.utility as Utility]}">${UTIL_NAME[p.utility as Utility]} · ${esc(p.id)}</div>`
+      const head = p.user ? `<div class="u" style="color:${ICE}">YOUR ${esc(UTIL_NAME[p.utility as Utility])} PROJECT</div>`
+        : `<div class="u" style="color:${COLOR[p.utility as Utility]}">${UTIL_NAME[p.utility as Utility]}, ${esc(p.id)}</div>`
       show(`${head}${esc(p.name)}`, e.point.x, e.point.y)
     })
     map.on('mouseleave', layer, hide)
@@ -326,7 +326,7 @@ function wireMapEvents() {
     const o = findOverlap(String((e.features![0].properties as any).id))
     if (!o) return
     map.getCanvas().style.cursor = 'pointer'
-    show(`<div class="u" style="color:${HOT}">${o.user ? 'YOURS ' : ''}${rankLabel(o)} · ${TIER_SHORT[o.tier]}</div>${esc(o.why)}`, e.point.x, e.point.y)
+    show(`<div class="u" style="color:${HOT}">${o.user ? 'YOURS ' : ''}${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>${esc(o.why)}`, e.point.x, e.point.y)
   })
   map.on('mouseleave', 'connectors', hide)
   map.on('click', 'connectors', (e) => { if (!state.drawing) { e.preventDefault(); selectOverlap(String((e.features![0].properties as any).id)) } })
@@ -419,7 +419,7 @@ function renderLegend() {
     <div class="seg"><button data-base="map" class="${state.satellite ? '' : 'on'}">MAP</button><button data-base="sat" class="${state.satellite ? 'on' : ''}" title="USGS aerial imagery">SATELLITE</button></div>
     <div class="seg"><button data-view="2d" class="${state.view3d ? '' : 'on'}">2D</button><button data-view="3d" class="${state.view3d ? 'on' : ''}" title="Terrain (x4 height) and 3D buildings">3D TERRAIN</button></div>
     <div class="head"><span>LAYERS</span><button data-collapse title="Show or hide the layer list">${state.legendCollapsed ? '+' : '–'}</button></div>
-    <div class="body">${rows}<div class="note">Faded = approximate location · overlaps by ${state.method === 'closest' ? 'closest points' : 'centers'}</div></div>`
+    <div class="body">${rows}<div class="note">Faded = approximate location<br>Overlaps by ${state.method === 'closest' ? 'closest points' : 'centers'}</div></div>`
   const L = $('#legend')
   L.querySelectorAll<HTMLButtonElement>('[data-base]').forEach((b) => b.addEventListener('click', () => {
     state.satellite = b.dataset.base === 'sat'
@@ -489,7 +489,7 @@ function openNewProjectForm() {
   const card = $('#detail')
   card.hidden = false
   card.innerHTML = `<button class="close" aria-label="Cancel">ESC ✕</button>
-    <div class="kicker" style="color:${ICE}">NEW PROJECT · HYPOTHETICAL</div>
+    <div class="kicker" style="color:${ICE}">NEW HYPOTHETICAL PROJECT</div>
     <h2>${draft.length > 1 ? 'A new line' : 'A new substation'}: who's building it, and when?</h2>
     <div class="why">GridLock scores it against the other utility's plans with the same rules: closest points, tiers, build windows.</div>
     <form class="newproj" novalidate>
@@ -500,7 +500,7 @@ function openNewProjectForm() {
       </div>
       <label>BUILD STARTS <input type="month" name="start" value="2026-01" required></label>
       <label>IN SERVICE <input type="month" name="end" value="2027-06" required></label>
-      <label>EST. COST ($M) <input type="number" name="cost" min="0" step="0.1" placeholder="optional"></label>
+      <label>COST ($M) <input type="number" name="cost" min="0" step="0.1" placeholder="optional"></label>
       <label>VOLTAGE (kV) <input type="number" name="kv" min="1" step="1" placeholder="optional"></label>
       <div class="wide err" hidden></div>
       <div class="wide buttons"><button type="submit">SCORE IT</button><button type="button" data-act="cancel">CANCEL</button></div>
@@ -541,9 +541,10 @@ function renderUserBox() {
   const box = $('#userbox')
   const items = state.user.map((p) => {
     const f = byId[p.id]?.properties
+    const n = f?.n_overlaps ?? 0
     const best = f?.best_tier ? `T${f.best_tier}` : 'none'
     return `<li data-id="${p.id}"><span class="dot ${p.utility === 'DESC' ? 'desc' : 'gpc'}"></span><span class="n">${esc(p.name)}</span>
-      <span class="m">${f?.n_overlaps ?? 0} OVERLAP${f?.n_overlaps === 1 ? '' : 'S'} · BEST ${best}</span>
+      <span class="m">${n ? `${n} OVERLAP${n === 1 ? '' : 'S'}, BEST ${best}` : 'NO OVERLAPS'}</span>
       <button data-del="${p.id}" title="Delete this project" aria-label="Delete ${esc(p.name)}">✕</button></li>`
   }).join('')
   box.innerHTML = `<div class="headrow"><span class="micro">YOUR PROJECTS</span><button class="chip add" data-add>+ ADD A PROJECT</button></div>
@@ -627,14 +628,14 @@ function renderTourbar() {
   const n = tour.steps.length, o = tour.steps[tour.i]
   let body: string
   if (!o) {
-    body = `<div class="kicker">GUIDED TOUR · 1 / ${n}</div>
+    body = `<div class="kicker">GUIDED TOUR 1 OF ${n}</div>
       <h3>Two utilities, one river, ${meta.desc_projects + meta.gpc_projects} planned projects</h3>
       <div class="who">Dominion Energy South Carolina and Georgia Power plan their transmission work separately. GridLock found
         <b>${overlaps.length}</b> places where they'll build within 40 km of each other, <b>${overlaps.filter((x) => x.overlap_days > 0).length}</b> of them at the same time.</div>`
   } else {
     const a = byId[o.a].properties, b = byId[o.b].properties
     const { total } = costModel(o)
-    body = `<div class="kicker">GUIDED TOUR · ${tour.i + 1} / ${n} · ${o.user ? 'YOUR PROJECT' : 'OPPORTUNITY ' + rankLabel(o)}</div>
+    body = `<div class="kicker">GUIDED TOUR ${tour.i + 1} OF ${n}, ${o.user ? 'YOUR PROJECT' : 'OPPORTUNITY ' + rankLabel(o)}</div>
       <h3>${esc(o.tier_label)}: ${esc(o.can_share.replace(/^Can share /, 'they can share ').replace(/^Must coordinate/, 'they must coordinate'))}</h3>
       <div class="who"><span class="dot ${dotClass(a)}"></span>${esc(a.name)}<b>×</b><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div>
       <div class="big">
@@ -646,7 +647,7 @@ function renderTourbar() {
   bar.innerHTML = `${body}
     <div class="ctrl"><button data-t="prev" aria-label="Previous">◀</button><button data-t="pause">${tour.paused ? '▶ PLAY' : '❚❚ PAUSE'}</button>
       <button data-t="next" aria-label="Next">▶</button>${o ? '<button data-t="details">DETAILS</button>' : ''}<button data-t="exit">✕ EXIT</button>
-      <span class="keys">← → · SPACE · ESC</span></div>
+      <span class="keys"><span>← →</span><span>SPACE</span><span>ESC</span></span></div>
     <div class="progress"><i class="${tour.paused ? '' : 'run'}" style="--dur:${TOUR_MS}ms"></i></div>`
   bar.querySelectorAll<HTMLButtonElement>('[data-t]').forEach((btn) => btn.addEventListener('click', () => tourAction(btn.dataset.t!)))
 }
@@ -679,7 +680,7 @@ function renderStats() {
 function renderFilters() {
   const counts = [1, 2, 3, 4].map((t) => overlaps.filter((o) => o.tier === t && (state.method === 'closest' || o.flagged_by_center_method)).length)
   $('#filters').innerHTML =
-    [1, 2, 3, 4].map((t, i) => `<button class="chip hotchip ${state.tiers.has(t) ? 'on' : ''}" data-tier="${t}">${TIER_SHORT[t]} · ${counts[i]}</button>`).join('') +
+    [1, 2, 3, 4].map((t, i) => `<button class="chip hotchip ${state.tiers.has(t) ? 'on' : ''}" data-tier="${t}">${TIER_SHORT[t]} (${counts[i]})</button>`).join('') +
     `<button class="chip ${state.concurrentOnly ? 'on' : ''}" data-concurrent="1" title="Only pairs whose build windows overlap">SAME WINDOW ONLY</button>`
   $('#filters').querySelectorAll<HTMLButtonElement>('button').forEach((btn) => btn.addEventListener('click', () => {
     if (btn.dataset.tier) {
@@ -705,7 +706,7 @@ function overlapItem(o: Overlap) {
   return `<li tabindex="0" data-id="${o.id}" class="${o.id === state.selected ? 'sel' : ''}">
     <div class="top"><span class="rank">${rankLabel(o)}</span>${o.user ? '<span class="yours">YOURS</span>' : ''}<span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span><span class="score">${o.score.toFixed(0)}</span></div>
     <div class="names"><div><span class="dot ${dotClass(a)}"></span>${esc(a.name)}</div><div><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div></div>
-    <div class="meta">${dist} · ${timingText(o)}${o.needs_location_check ? ' · <span class="warn">verify location</span>' : ''}</div>
+    <div class="meta">${dist}, ${timingText(o)}${o.needs_location_check ? ', <span class="warn">verify location</span>' : ''}</div>
   </li>`
 }
 
@@ -751,17 +752,17 @@ function projectBlock(p: ProjectProps) {
   const window = exactWindow(p) ? `${ym(p.start)} → ${ym(p.isd)}` : `~${ym(p.start)} → ${ym(p.isd)}*`
   if (p.user) {
     return `<div class="proj user">
-      <div class="u" style="color:${ICE}">YOUR PROJECT · ${UTIL_NAME[p.utility]}</div>
+      <div class="u" style="color:${ICE}">YOUR ${UTIL_NAME[p.utility]} PROJECT</div>
       <div class="n">${esc(p.name)}</div>
-      <div class="m">BUILD ${window}${p.cost ? ' · ' + money(p.cost) : ''}${p.kv.length ? ' · ' + p.kv[0] + ' kV' : ''}</div>
+      <div class="m">BUILD ${window}${p.cost ? ', ' + money(p.cost) : ''}${p.kv.length ? ', ' + p.kv[0] + ' kV' : ''}</div>
       <div class="m">Hypothetical, added on this map</div>
     </div>`
   }
   return `<div class="proj ${p.utility === 'DESC' ? 'desc' : 'gpc'}">
-    <div class="u" style="color:${COLOR[p.utility]}">${UTIL_NAME[p.utility]} · ${esc(p.source_id)}</div>
+    <div class="u" style="color:${COLOR[p.utility]}">${UTIL_NAME[p.utility]}, ${esc(p.source_id)}</div>
     <div class="n">${esc(p.name)}</div>
-    <div class="m">BUILD ${window}${p.cost ? ' · ' + money(p.cost) : p.utility === 'GPC' ? ' · cost redacted' : ''}</div>
-    <div class="m">${esc(p.status)} · source p.${p.page}</div>
+    <div class="m">BUILD ${window}${p.cost ? ', ' + money(p.cost) : p.utility === 'GPC' ? ', cost redacted' : ''}</div>
+    <div class="m">${esc(p.status)}, source page ${p.page}</div>
     ${p.budget ? budgetBars(p.budget, p.budget_check) : ''}
     ${locLine(p.loc_a)}${locLine(p.loc_b)}
     ${p.desc ? `<div class="d">${esc(p.desc.length > 230 ? p.desc.slice(0, 227) + '…' : p.desc)}</div>` : ''}
@@ -860,7 +861,7 @@ function renderOverlapDetail(o: Overlap) {
   const card = $('#detail')
   card.hidden = false
   card.innerHTML = `<button class="close" aria-label="Close">ESC ✕</button>
-    <div class="kicker">${o.user ? 'YOUR PROJECT · ' : ''}COORDINATION OPPORTUNITY ${rankLabel(o)} · ${TIER_SHORT[o.tier]}</div>
+    <div class="kicker">${o.user ? 'YOUR ' : ''}COORDINATION OPPORTUNITY ${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>
     <h2>${esc(o.tier_label)}</h2>
     <div class="why">${esc(o.why)}</div>
     ${actions3d(o)}
@@ -905,7 +906,7 @@ function showProject(pid: string) {
   renderRanked()
   const card = $('#detail')
   card.hidden = false
-  const kicker = p.user ? `<div class="kicker" style="color:${ICE}">YOUR PROJECT · HYPOTHETICAL</div>`
+  const kicker = p.user ? `<div class="kicker" style="color:${ICE}">YOUR HYPOTHETICAL PROJECT</div>`
     : `<div class="kicker" style="color:${COLOR[p.utility]}">${UTIL_NAME[p.utility]} PROJECT</div>`
   const other = p.utility === 'DESC' ? 'GEORGIA POWER' : 'DOMINION ENERGY SC'
   card.innerHTML = `<button class="close" aria-label="Close">ESC ✕</button>
@@ -917,7 +918,7 @@ function showProject(pid: string) {
       const q = byId[o.a === pid ? o.b : o.a].properties
       return `<li data-id="${o.id}"><div class="top"><span class="rank">${rankLabel(o)}</span><span class="tier t${o.tier}">${TIER_SHORT[o.tier]}</span><span class="score">${o.score.toFixed(0)}</span></div>
         <div class="names"><div><span class="dot ${dotClass(q)}"></span>${esc(q.name)}</div></div>
-        <div class="meta">${o.tier === 1 ? 'touching' : o.closest_km.toFixed(1) + ' km'} · ${timingText(o)}</div></li>`
+        <div class="meta">${o.tier === 1 ? 'touching' : o.closest_km.toFixed(1) + ' km'}, ${timingText(o)}</div></li>`
     }).join('')}</ol>`
   card.querySelector('.close')!.addEventListener('click', closeDetail)
   card.querySelector<HTMLButtonElement>('[data-del]')?.addEventListener('click', () => deleteUserProject(p.id))
@@ -953,7 +954,7 @@ function renderQuality() {
   }
   const sample = SPERRY_SAMPLE.map((s) => {
     const o = overlaps.find((x) => x.a === s.a && x.b === s.b)
-    return `<tr><td class="mono">${s.id}</td><td>${s.mi.toFixed(2)} mi · ${s.gap} d</td><td>${o ? `${o.center_mi.toFixed(2)} mi · ${o.isd_gap_days} d → <b>${o.tier === 1 ? 'touching' : o.closest_km.toFixed(2) + ' km'}</b> (T${o.tier})` : 'missing'}</td></tr>`
+    return `<tr><td class="mono">${s.id}</td><td>${s.mi.toFixed(2)} mi, ${s.gap} d</td><td>${o ? `${o.center_mi.toFixed(2)} mi, ${o.isd_gap_days} d → <b>${o.tier === 1 ? 'touching' : o.closest_km.toFixed(2) + ' km'}</b> (T${o.tier})` : 'missing'}</td></tr>`
   }).join('')
   const dl = (f: string, label: string) => `<a class="btn3d" href="${import.meta.env.BASE_URL}data/${f}" download>${label} ↓</a>`
   $('#tab-quality').innerHTML = `<div class="prose">
@@ -962,7 +963,7 @@ function renderQuality() {
     <div class="actions3d">${dl('overlaps_sperry_format.csv', 'OVERLAP TABLE (CSV)')}${dl('projects_located.csv', 'PROJECT TABLE (CSV)')}</div>
     <h3>Checked against Sperry's answer key</h3>
     <p>All 6 overlaps in Sperry's starter sample are reproduced. In-service gaps match to the day. Center distances differ slightly because we also located <b>Hooks</b> and <b>Purrysburg</b>, which the sample leaves blank. The closest-point rule shows two of those pairs are much closer than their centers suggest.</p>
-    <table><tr><th>SAMPLE</th><th>THEIRS (CENTER · GAP)</th><th>OURS</th></tr>${sample}</table>
+    <table><tr><th>SAMPLE</th><th>THEIRS (CENTER, GAP)</th><th>OURS</th></tr>${sample}</table>
     <h3>Location confidence</h3>
     <table><tr><th></th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>UNMAPPED</th></tr>
       <tr><td>DESC</td><td>${d.high}</td><td>${d.medium}</td><td>${d.low}</td><td>${meta.desc_projects - meta.desc_mapped}</td></tr>
@@ -984,7 +985,7 @@ function renderAbout() {
     <h3>How overlaps are found</h3>
     <ul>
       <li><b>Distance:</b> between the <b>closest points</b> of the two projects, as the GridLock spec asks. A line can pass right by a substation even when their centers are miles apart. Toggle <span class="mono">CENTERS</span> to compare with the center-to-center method in Sperry's starter guide.</li>
-      <li><b>Tiers:</b> touching (≤ 0.25 km, the footprint of a substation) · under 1.6 km (share land) · under 8 km (share logistics) · under 40 km (share crews). Anything farther is ignored.</li>
+      <li><b>Tiers:</b> touching (≤ 0.25 km, the footprint of a substation), under 1.6 km (share land), under 8 km (share logistics) or under 40 km (share crews). Anything farther is ignored.</li>
       <li><b>Timing:</b> Georgia Power publishes start and need dates. DESC publishes an in-service date plus a 5-year budget, so a DESC window starts in the first year its budget spends money on the project. 41 of 44 budgets add up to their stated totals; the other 3 don't in the source PDF and are flagged. If a project has no budget, the window is assumed: 24 months for new construction, 18 for rebuilds, 12 for other work.</li>
       <li><b>Score:</b> 65% distance, 35% timing, ×0.85 when a location is approximate.</li>
       <li><b>Your projects:</b> anything you add is scored in your browser with exactly the same rules (checked against the pipeline: the same 78 overlaps, distances within 1 m). It's saved only in this browser and shows up in the 3D world too.</li>

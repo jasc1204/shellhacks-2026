@@ -147,7 +147,7 @@ button { font: inherit; color: inherit; }
 .tourbar .ctrl { display: flex; gap: 6px; align-items: center; }
 .tourbar .ctrl button { background: transparent; border: 1px solid var(--line-2); border-radius: 3px; padding: 5px 10px; cursor: pointer;
   font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--ink); }
-.tourbar .ctrl .keys { margin-left: auto; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.1em; }
+.tourbar .ctrl .keys { margin-left: auto; display: flex; gap: 12px; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.1em; }
 .tourbar .progress { height: 2px; margin-top: 10px; background: var(--line); overflow: hidden; }
 .tourbar .progress i { display: block; height: 100%; width: 0; background: var(--hot); box-shadow: 0 0 8px var(--hot); }
 .tourbar .progress i.run { animation: tourfill var(--dur, 11s) linear forwards; }

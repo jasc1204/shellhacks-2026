@@ -491,7 +491,7 @@ def build_overlays(scene, ter, fonts, cols, cam):
             mid = pa.lerp(pb, 0.5)
             top = mid.z + 30 + apex
         tagged.append(text_object(f"dist {o['id']}", fmt_km(o["dist_km"]), 380, m_label, c_ovl, (mid.x, mid.y, top + 330), font_m, spacing=1.05, face=cam))
-        tagged.append(text_object(f"tier {o['id']}", f"#{o['rank']}  TIER {o['tier']}  ·  {timing(o)}", 170, m_muted, c_ovl,
+        tagged.append(text_object(f"tier {o['id']}", f"#{o['rank']}  TIER {o['tier']}  {timing(o)}", 170, m_muted, c_ovl,
                                   (mid.x, mid.y, top + 100), font_m, spacing=1.2, face=cam))
         for ob in tagged:
             ob["rank"] = lr
