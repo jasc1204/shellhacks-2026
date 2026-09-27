@@ -1852,9 +1852,15 @@ function frame() {
   }
   if (sel?.mat.dashed) sel.mat.dashOffset -= dt * (PHOTO ? 160 : 400);
   for (const x of userOvl) if (x !== sel) x.mat.dashOffset -= dt * (PHOTO ? 64 : 160);
-  for (const b of beacons) {   // a beam fades as you reach it (Google 3D's thin pillars only right at the foot)
+  for (const b of beacons) {
+    // 2026-09-26: the beams used to fade to 8% as you walked up to them, and Jose read that as the light disappearing.
+    // Now they keep at least 55% of their glow and slim down instead (to 30% of their width here, 60% in Google 3D),
+    // so up close they read as a pillar of light, not a glowing wall that swallows the view.
     const d = Math.hypot(b.position.x - camera.position.x, b.position.z - camera.position.z);
-    const k = PHOTO ? Math.min(1, Math.max(0.12, (d - 40) / 300)) : Math.min(1, Math.max(0.08, (d - 120) / 900));
+    const away = Math.min(1, Math.max(0, (d - 60) / (PHOTO ? 400 : 1400)));   // 0 at the foot, 1 once you're well away
+    const slim = PHOTO ? 0.6 : 0.3;
+    b.scale.x = b.scale.z = slim + (1 - slim) * away;
+    const k = 0.55 + 0.45 * away;
     if (b.material.uniforms) b.material.uniforms.uOpacity.value = b.userData.base * k; else b.material.opacity = b.userData.base * k;
   }
   acc += dt;
