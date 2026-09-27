@@ -19,7 +19,7 @@ Right now, Georgia Power and Dominion Energy South Carolina are planning hundred
 
 **2. What GridLock does** *(the header numbers and the ranked list)*
 
-So I built GridLock. It reads both utilities' public plans, all two hundred fifty-two projects, puts them on a map, and finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
+It reads both utilities' public plans, all two hundred fifty-two projects, puts them on a map, and finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
 
 **3. How it measures** *(GEOGRAPHIC, TIMELINE, BOTH)*
 
@@ -27,7 +27,7 @@ The trick is measuring from the closest points, not the centers. A long line can
 
 **4. One opportunity** *(click #3, the card opens)*
 
-Here's a good one. Dominion's Jasper to Okatie line and Georgia Power's work at McIntosh are less than a kilometer apart, and they're being built during the same two years. If they coordinate, that's about a million dollars saved. One crew instead of two, and shared land.
+Dominion's Jasper to Okatie line and Georgia Power's work at McIntosh are less than a kilometer apart, and they're being built during the same two years. If they coordinate, that's about a million dollars saved. One crew instead of two, and shared land.
 
 **5. The same spot, in 3D** *(press 3D, the camera takes over and flies in, the card shows the savings)*
 
@@ -39,7 +39,7 @@ At the top of the list, it gets even closer. At Thurmond Dam, both utilities are
 
 **7. A planning tool** *(back to 2D, draw a new project, it shows up in the list and in 3D)*
 
-It's not just a report, either. Draw a project of your own, and GridLock checks it against the other utility's plans right away, in 2D and in 3D.
+Draw a project of your own, and GridLock checks it against the other utility's plans right away, in 2D and in 3D.
 
 **8. Close** *(Data Quality tab, then the end card)*
 
