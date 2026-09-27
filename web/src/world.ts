@@ -41,6 +41,17 @@ const win = (): any => { try { return frame?.contentWindow ?? null } catch { ret
 const api = (): Api3D | null => win()?.gridlock3d ?? null
 const frames = (n: number) => new Promise<void>((res) => { const f = () => (--n <= 0 ? res() : requestAnimationFrame(f)); requestAnimationFrame(f) })
 const wait = (ms: number) => new Promise((res) => setTimeout(res, ms))
+/** n animation frames of the 3D frame itself (its own render loop), or `cap` ms, whichever comes first. */
+const ownFrames = (f: HTMLIFrameElement, n: number, cap: number) => new Promise<void>((res) => {
+  let done = false
+  const end = () => { if (!done) { done = true; res() } }
+  setTimeout(end, cap)
+  try {
+    const w = f.contentWindow!
+    const tick = () => (--n <= 0 ? end() : w.requestAnimationFrame(tick))
+    w.requestAnimationFrame(tick)
+  } catch { end() }
+})
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const bearingTo = (a: LonLat, b: LonLat) => (Math.atan2((b[0] - a[0]) * Math.cos((a[1] * Math.PI) / 180), b[1] - a[1]) * 180) / Math.PI
@@ -83,15 +94,22 @@ function frameLoaded() {
   const f = frame!, n = ++loads
   ready = false
   try { level = new URLSearchParams(f.contentWindow!.location.search).get('level') || level } catch { /* keep */ }
+  // the viewer reloading itself (GOOGLE 3D, a tour hopping levels) while on screen: cover it until it's built
+  try { f.contentWindow!.addEventListener('pagehide', () => { if (view === '3d') veil(true, 'LOADING THE 3D WORLD') }) } catch { /* ignore */ }
   const t0 = performance.now()
   const poll = () => {
     if (f !== frame || n !== loads) return
     let d: Document | null = null
     try { d = f.contentDocument } catch { d = null }
     // the viewer takes its boot screen away once the level is built
-    if (d && d.getElementById('stage') && !d.getElementById('boot')) { adopt(d); ready = true; api()?.setVisible?.(hooks.visibleIds()); return }
+    if (d && d.getElementById('stage') && !d.getElementById('boot')) {
+      adopt(d); ready = true; api()?.setVisible?.(hooks.visibleIds())
+      if (view === '3d' && run === runAtLoad) veil(false)
+      return
+    }
     if (performance.now() - t0 < 120000) setTimeout(poll, 120)
   }
+  const runAtLoad = run
   poll()
 }
 
@@ -139,10 +157,21 @@ function veil(on: boolean, label = 'BUILDING THE 3D WORLD') {
   tick()
 }
 
+/** Where MapLibre's camera is. MapLibre 6 keeps it on an internal transform (map._camera.transform); if that ever
+ *  moves, work it out from the public values: the camera sits cameraToCenterDistance pixels behind the center. */
 function mapCamera(): Cam {
-  const tr = (map as any).transform
-  const ll = tr.getCameraLngLat()
-  return { lon: ll.lng, lat: ll.lat, alt: tr.getCameraAltitude(), bearing: map.getBearing(), pitch: map.getPitch(), fov: map.getVerticalFieldOfView() }
+  const bearing = map.getBearing(), pitch = map.getPitch(), fov = map.getVerticalFieldOfView()
+  const tr = (map as any)._camera?.transform ?? (map as any).transform
+  if (tr?.getCameraLngLat && tr?.getCameraAltitude) {
+    const ll = tr.getCameraLngLat()
+    return { lon: ll.lng, lat: ll.lat, alt: tr.getCameraAltitude(), bearing, pitch, fov }
+  }
+  const c = map.getCenter(), rad = Math.PI / 180, coslat = Math.cos(c.lat * rad)
+  const mpp = (40075016.686 * coslat) / (512 * 2 ** map.getZoom())                       // meters per pixel at the center
+  const d = ((0.5 * map.getCanvas().clientHeight) / Math.tan((fov * rad) / 2)) * mpp    // camera to center, in meters
+  const back = d * Math.sin(pitch * rad)
+  return { lon: c.lng - (back * Math.sin(bearing * rad)) / (111320 * coslat), lat: c.lat - (back * Math.cos(bearing * rad)) / 111320,
+    alt: d * Math.cos(pitch * rad), bearing, pitch, fov }
 }
 
 const easeMap = (o: Record<string, unknown>, ms: number) => new Promise<void>((res) => {
@@ -167,7 +196,8 @@ export async function show3D(t: Target) {
   const bearing = t.id && mid ? bearingTo(mid, t.center) : 0
   const zoom = t.id ? clamp(12.3 - Math.log2(Math.max(1, t.km)), 9.6, 12.3) : 9.3
   map.stop()
-  await easeMap({ center: t.center, zoom, pitch: 58, bearing }, 1150)
+  haze(true)
+  await easeMap({ center: t.center, zoom, pitch: 50, bearing }, 1150)
   if (run !== r) return
   if (!ready) {
     veil(true)
@@ -177,9 +207,13 @@ export async function show3D(t: Target) {
   // 2. The 3D camera takes the map's exact spot, draws a couple of frames, then fades in while it flies on.
   const f = frame!
   f.style.display = 'block'
+  // built while hidden, the viewer's canvas and render targets are 0 x 0 until it hears it has a size
+  try { f.contentWindow?.dispatchEvent(new Event('resize')) } catch { /* ignore */ }
   const a = api()
-  a?.jump(mapCamera())
-  await frames(3)
+  try { a?.jump(mapCamera()) } catch (e) { console.warn('3D handoff: camera not matched', e) }
+  // let the world draw ~20 of its own frames at the new spot before it shows (its first ones after waking up are
+  // a flat blue wash), capped so a slow machine still switches
+  await ownFrames(f, 20, 900)
   if (run !== r) return
   f.classList.add('on')
   if (t.id) a?.select(t.id, { fly: true, walk: !!t.walk })
@@ -218,6 +252,7 @@ export async function show2D(settle?: () => void) {
   stage.classList.remove('v3d-done')
   const f = frame, a = api()
   if (f && a && f.classList.contains('on')) {
+    haze(true)
     try {   // under the fade, the map takes the 3D camera's spot (MapLibre tops out at 75 degrees of tilt)
       const c = a.camera()
       map.jumpTo(map.calculateCameraOptionsFromCameraLngLatAltRotation([c.lon, c.lat], c.alt, c.bearing, Math.min(c.pitch, 75)))
@@ -232,6 +267,18 @@ export async function show2D(settle?: () => void) {
   if (f) f.style.display = 'none'
   if (settle) settle()
   else map.easeTo({ pitch: 0, bearing: 0, duration: 1100, easing: easeInOut })
+  const flat = () => { if (view === '2d') haze(false) }
+  map.once('moveend', flat)
+  setTimeout(flat, 2600)   // (in case the settle didn't move the map at all)
+}
+
+/** While the map leans (both ways), far tiles that haven't loaded yet show the map's background: make that the 3D
+ *  world's horizon haze instead of black, so the crossfade reads as distance, not holes. */
+let bg: unknown = null
+function haze(on: boolean) {
+  if (!map.getLayer('background')) return
+  if (on && bg == null) { bg = map.getPaintProperty('background', 'background-color'); map.setPaintProperty('background', 'background-color', '#a6b7c7') }
+  else if (!on && bg != null) { map.setPaintProperty('background', 'background-color', bg as any); bg = null }
 }
 
 /** Keep the 3D world's arcs in step with the page's filter. */

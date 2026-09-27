@@ -210,6 +210,11 @@ body.touring #key { display: none; }
   #card { left: 16px; right: 16px; width: auto; }
   #b-key { display: none; }
 }
+/* embedded in the GridLock page (?embed=1): its side panel does the list and the filter, its header the 2D / 3D switch,
+   and its own veil the loading (the boot element stays, hidden, for the page to watch) */
+body.embed #leftcol, body.embed #to-map { display: none !important; }
+body.embed #dock { left: 16px; }
+body.embed #boot { visibility: hidden; }
 </style>
 <script type="importmap">
 { "imports": {
@@ -313,7 +318,7 @@ body.touring #key { display: none; }
       <div class="row"><span id="mode">DRONE</span><span id="speed"></span><span id="alt"></span></div>
       <div id="near"></div>
     </div>
-    <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-tour" title="Shortcut: T">TOUR TOP 3</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button></div>
+    <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-tour" title="Shortcut: T">TOUR TOP 3</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button><button class="act" id="b-photo" hidden title="Google's photorealistic 3D tiles, live (needs a token: local runs only)">GOOGLE 3D</button></div>
   </div>
   <!-- 2026-09-27 declutter: one line of keys; M, T and K have buttons, L and G live on the LAYERS panel (all still work) -->
   <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>Tab</b> walk, drive or fly</span>
@@ -345,8 +350,14 @@ const qs = new URLSearchParams(location.search);
 const LEVEL = LEVELS.find(l => l.id === qs.get('level')) || LEVELS[0];
 const BUILD = qs.get('data') || '../build/';
 const DATA = BUILD + LEVEL.id + '/';
-const DATA_Q = qs.get('data') ? '&data=' + encodeURIComponent(qs.get('data')) : '';
+// 2026-09-27: ?embed=1 is the GridLock page showing this world in place of its 2D map (web/src/world.ts). The page owns
+// the list and the filter, so the left column hides, and every level link and hop keeps embed=1.
+const EMBED = qs.get('embed') === '1';
+const DATA_Q = (qs.get('data') ? '&data=' + encodeURIComponent(qs.get('data')) : '') + (EMBED ? '&embed=1' : '');
 const $ = id => document.getElementById(id);
+if (EMBED) document.body.classList.add('embed');
+// tell the page what the world picked (a chip, a number key, the tour), so its list and card follow
+const notify = id => { if (EMBED && parent !== window) parent.postMessage({ source: 'gridlock3d', type: 'select', id }, location.origin); };
 const DEG = Math.PI / 180, R_EARTH = 6371008.8;
 const COL = { desc: 0x4dd8ff, gpc: 0xffd166, ice: 0xf4f8ff, grid: 0x1b5ce8, steel: 0x7aa8ff, haze: 0x0b1a3a, land: 0x060b16 };
 const SIDE = { DESC: 'desc', GPC: 'gpc' };
@@ -528,6 +539,7 @@ world.add(sky);
 // overhead, a luminous haze band whose horizon is exactly the fog color (the far tiles melt into it with no seam),
 // and a soft warm glow toward a late-afternoon sun in the southwest. Below the horizon it's all haze.
 const PHOTO_HAZE = 0xc3d1de;
+const PHOTO_MAX_UP = 9000;   // Google 3D: highest the camera goes above the ground (m)
 // Its haze is linear, not exponential, and scaled by altitude every frame (frame()): at 450 m it starts at 2.3 km (past
 // all a drone sees looking 40 degrees down) and is total by 12 km; from 60 m it starts at 1.4 km. Exponential fog
 // couldn't do both: from low up, the 3-27 km of land at the horizon squeeze into a few pixels and stayed a hard dark line.
@@ -1539,7 +1551,9 @@ function reveal(it) {
   store.set('filter', FILT);
   renderList();
 }
+let OUTSIDE = null;   // embedded: the page's filter, as a set of overlap ids (null: this world's own filter)
 function matches(o) {
+  if (OUTSIDE) return OUTSIDE.has(o.id);
   const m = FMODES[FILT.mode];
   if (!m.base(o)) return false;
   const s = m.subs().find(s => s.test(o));
@@ -1669,12 +1683,14 @@ function select(it, fly) {
   $('why').textContent = o.why || '';
   $('card').classList.add('show');
   dcDirty = true;
+  notify(o.id);
   if (fly) flyTo(viewFor(it));
 }
 function deselect() {
   sel = null; styleArcs(); drawRings(null); setMapLink(null); dcDirty = true;
   $('card').classList.remove('show');
   document.querySelectorAll('#ovl li.on').forEach(li => li.classList.remove('on'));
+  notify(null);
 }
 
 // ================================================================== camera: modes, flights, input
@@ -2255,8 +2271,14 @@ function frame() {
   camera.quaternion.setFromEuler(euler.set(pitch, yaw, 0));
   sky.position.copy(camera.position);
   if (tiles) {  // Google 3D haze: clear around a low camera, pushed out as it climbs (the overview must not drown in it)
-    const up = Math.max(0, camera.position.y - hAt(camera.position.x, -camera.position.z));
+    // 2026-09-27: at most 9 km up, so the view never takes in (and streams) half the continent. And nothing past the
+    // haze can be seen, so nothing past it is loaded: the far plane follows the haze, the sky dome shrinks inside it.
+    const g0 = hAt(camera.position.x, -camera.position.z);
+    if (camera.position.y - g0 > PHOTO_MAX_UP) camera.position.y = g0 + PHOTO_MAX_UP;
+    const up = Math.max(0, camera.position.y - g0);
     photoFog.near = 1200 + 2.5 * up; photoFog.far = 8000 + 9 * up;
+    const far = photoFog.far * 1.15;
+    if (Math.abs(camera.far - far) > 250) { camera.far = far; camera.updateProjectionMatrix(); sky.scale.setScalar(Math.min(1, 0.9 * far / 200000)); }
     for (const m of glowMats) { m.uniforms.uFogNear.value = photoFog.near; m.uniforms.uFogFar.value = photoFog.far; }
   }
   {  // planned lines ease down onto their preview towers as the camera comes below ~600 m (all the way by 200 m)
@@ -2344,7 +2366,7 @@ if (PHOTO) {
     // (applied by the auth plugin once the token resolves) raise it to 20. frame() asks for 12 px while the camera is
     // settled and 20 in flight, so a drone stop sharpens without streaming full detail for every frame of a flight.
     // The cache (default 6000-8000 tiles, 0.3-0.4 GB) gets room for the extra detail:
-    Object.assign(tiles.lruCache, { minSize: 9000, maxSize: 12000, minBytesSize: 0.55 * 2 ** 30, maxBytesSize: 0.8 * 2 ** 30 });
+    Object.assign(tiles.lruCache, { minSize: 7000, maxSize: 9500, minBytesSize: 0.35 * 2 ** 30, maxBytesSize: 0.55 * 2 ** 30 });   // 2026-09-27: less memory, the view ends at the haze now
     window.__diag = { tilesLoaded: 0, errors: 0 };   // read by tests and shown in the status line
     tiles.addEventListener('load-model', () => { window.__diag.tilesLoaded++; });
     tiles.addEventListener('load-error', e => { window.__diag.errors++; console.warn('Google 3D tile error', e?.error?.message || e?.url || ''); });
@@ -2404,6 +2426,49 @@ if (qs.get('layers')) {  // test hook: ?layers=buildings:0,trees:1,...
   for (const kv of qs.get('layers').split(',')) { const [k, v] = kv.split(':'); if (k in LAY) LAY[k] = v === '1'; }
   document.querySelectorAll('#layers input[data-layer]').forEach(inp => { inp.checked = !!LAY[inp.dataset.layer]; });
   applyLayers(false); renderList();
+}
+// ================================================================== embedded: what the GridLock page drives (web/src/world.ts)
+if (EMBED) {
+  window.gridlock3d = {
+    level: LEVEL.id,
+    // fly to an overlap of this level (false if it isn't here); walk: drop onto the ground at one end, facing the other
+    select(id, { fly = true, walk = false } = {}) {
+      const it = ovl.find(x => x.o.id === id);
+      if (!it) return false;
+      if (touring) endTour(false);
+      if (!OUTSIDE) reveal(it);
+      select(it, fly && !walk);
+      if (walk) flyTo(walkGap(it));
+      return true;
+    },
+    // the camera the way the map describes one: position, compass bearing, tilt from straight down, vertical FOV
+    camera() {
+      const p = camera.position;
+      return { lon: S.origin.lon + p.x / KX, lat: S.origin.lat - p.z / KY, alt: p.y,
+        bearing: ((-yaw / DEG) % 360 + 360) % 360, pitch: 90 + pitch / DEG, fov: camera.fov };
+    },
+    // take the map's camera exactly, so the switch from 2D is seamless
+    jump(c) {
+      flight = null;
+      camera.position.set((c.lon - S.origin.lon) * KX, c.alt, -(c.lat - S.origin.lat) * KY);
+      yaw = -c.bearing * DEG; pitch = (c.pitch - 90) * DEG;
+      setMode('DRONE');
+      lod(true);   // towers, labels, buildings and trees for the new spot now, not at the next 4 Hz tick
+    },
+    // the page's filter: only these overlaps (null: back to this world's own filter)
+    setVisible(ids) { OUTSIDE = ids ? new Set(ids) : null; if (sel && !matches(sel.o)) deselect(); renderList(); },
+    tour() { touring ? endTour(false) : startTour(0); },
+  };
+  // GOOGLE 3D, where a token is served (local runs): reloads this level in Google 3D, keeping the pick
+  const b = $('b-photo');
+  if (PHOTO) { b.hidden = false; b.classList.add('lit'); }
+  else fetch('tokens.local.json', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) b.hidden = false; }).catch(() => {});
+  b.onclick = () => {
+    const u = new URLSearchParams(location.search);
+    if (PHOTO) u.delete('photoreal'); else u.set('photoreal', '1');
+    if (sel) u.set('select', sel.o.id); else u.delete('select');
+    location.href = `?${u}`;
+  };
 }
 lod(true);
 progress(1, 'ready');

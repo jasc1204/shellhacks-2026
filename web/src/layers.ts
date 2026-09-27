@@ -32,6 +32,13 @@ export function addSatellite(map: MapLibreMap, firstDataLayer: string) {
   // USGS only from zoom 10.5 (no requests for its smeared overview tiles), fading in over the Sentinel mosaic
   map.addLayer({ id: 'sat', type: 'raster', source: 'sat', minzoom: 10.5,
     paint: { ...look, 'raster-opacity': ['interpolate', ['linear'], ['zoom'], 10.5, 0, 11.5, 1] } }, firstSymbol)
+  // Only seen while the map leans into 3D (2D itself is flat): the 3D world's own satellite-mode sky and haze, so the
+  // crossfade blends instead of flashing a black band above the horizon.
+  const anyMap = map as any
+  if (typeof anyMap.setSky === 'function') {
+    anyMap.setSky({ 'sky-color': '#3d6594', 'horizon-color': '#c6d3df', 'fog-color': '#a6b7c7', 'sky-horizon-blend': 0.5,
+      'horizon-fog-blend': 0.8, 'fog-ground-blend': 0.6, 'atmosphere-blend': 0 })
+  }
   // Keep the Georgia / South Carolina line visible on top of the imagery: every overlap sits on that border.
   if (map.getLayer('boundary_state')) {
     map.moveLayer('boundary_state', firstDataLayer)
