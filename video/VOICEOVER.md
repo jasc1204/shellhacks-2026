@@ -19,7 +19,7 @@ Right now, Georgia Power and Dominion Energy South Carolina are planning hundred
 
 **2. What GridLock does** *(the header numbers and the ranked list)*
 
-It reads both utilities' public plans, all two hundred fifty-two projects, puts them on a map, and finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
+What GridLock does is that it reads both utilities' public plans, all two hundred fifty-two projects, puts them on a map, and finds every spot where the two are going to build within forty kilometers of each other. It found seventy-eight.
 
 **3. How it measures** *(GEOGRAPHIC, TIMELINE, BOTH)*
 
