@@ -9,6 +9,14 @@ Options:
   --still 1,168    look test: render only these frames as PNGs into --tmp, no video
   --manifest       only rewrite web/public/clips/manifest.json from the clips already there
 
+Explore mode (no rendering): the same look for a whole level, saved as a .blend to fly around in:
+  blender -b --factory-startup -P world3d/render_clips.py -- --explore savannah      (or augusta)
+  --top 10         highlight every overlap of this global rank or better inside the level
+  --out PATH       default world3d/explore/<level>.blend (git-ignored; image paths stay relative, nothing packed)
+  a positional id or rank picks the main overlap (default: #1 for savannah, #3 for augusta)
+The main overlap's fly-in is the active camera (Space plays it, Numpad 0 looks through it). The Layout 3D view opens
+in EEVEE Rendered with the bloom compositor, km-scale clipping, at the fly-in's first frame.
+
 Writes web/public/clips/<id>.mp4 (H.264 yuv420p, no audio), <id>.jpg (poster: the final framing) and
 manifest.json (every clip whose files exist and probe as playable). The web page overlays the facts, so the frames
 carry no text. Only our own data: USGS imagery (public domain), OpenStreetMap grid, yards and buildings, AWS terrain.
@@ -32,7 +40,7 @@ from pathlib import Path
 import bmesh
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -59,7 +67,8 @@ COL = {"DESC": "#4dd8ff", "GPC": "#ffd166", "grid": "#3b7dff", "steel": "#7aa8ff
 def args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     o = {"key": None, "seconds": "7", "fps": "24", "res": "1280x720", "samples": "48", "still": None,
-         "tmp": str(Path(tempfile.gettempdir()) / "gridlock_clips"), "keep": False, "manifest": False}
+         "tmp": str(Path(tempfile.gettempdir()) / "gridlock_clips"), "keep": False, "manifest": False,
+         "explore": None, "top": "10", "out": None}
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -732,12 +741,21 @@ def glow_curve(name, polylines, radius, mat, col, res=1):
     return ob
 
 
-def build_world(scene, build, o, plan, looks):
+def build_world(scene, build, o, plan, looks, extra=None):
+    """The clip's world around overlap o. extra (explore mode only): more (overlap, plan) pairs to highlight too,
+    with lighter detail (40 % of the radii) around their ends."""
     w, h = scene["size_m"]
     ter = plan.ter
     s = plan.s
-    T = plan.T
-    near = lambda x, y, r: math.hypot(x - T.x, y - T.y) < r  # noqa: E731
+    focus = [(o, plan)] + list(extra or [])
+    # detail centers: the target at full radius; in explore mode also the two ends of every other overlap, at 40 %
+    centers = [(plan.T, 1.0)]
+    for _, pl in (extra or []):
+        for p in (pl.pa, pl.pb):
+            if all(math.hypot(p.x - c.x, p.y - c.y) > 500 for c, _ in centers):
+                centers.append((p, 0.4))
+    Ts = [c for c, _ in centers]
+    near = lambda x, y, r: any(math.hypot(x - c.x, y - c.y) < r * k for c, k in centers)  # noqa: E731
 
     c_ter, c_grid, c_proj, c_ovl = (bw.collection(n) for n in ("Terrain", "Grid", "Planned", "Overlap"))
     # lattice meshes first: tower_mesh() evaluates the depsgraph, which is cheap while the scene is still empty
@@ -751,7 +769,13 @@ def build_world(scene, build, o, plan, looks):
     if scene["ground"]["sat"].get("far"):
         x0, y0, x1, y1 = scene["ground"]["sat"]["far"]["box"]
         me = bpy.data.meshes.new("far ground")
-        me.from_pydata([(x0, y0, -2.0), (x1, y0, -2.0), (x1, y1, -2.0), (x0, y1, -2.0)], [], [(0, 1, 2, 3)])
+        if extra is None:
+            me.from_pydata([(x0, y0, -2.0), (x1, y0, -2.0), (x1, y1, -2.0), (x0, y1, -2.0)], [], [(0, 1, 2, 3)])
+        else:  # explore: a frame around the level (no plane under the land to flicker through it from afar)
+            ix, iy = w / 2 - 60.0, h / 2 - 60.0
+            me.from_pydata([(x0, y0, -2.0), (x1, y0, -2.0), (x1, y1, -2.0), (x0, y1, -2.0),
+                            (-ix, -iy, -2.0), (ix, -iy, -2.0), (ix, iy, -2.0), (-ix, iy, -2.0)], [],
+                           [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
         far = bpy.data.objects.new("far ground", me)
         me.materials.append(looks.far_ground(build, scene))
         c_ter.objects.link(far)
@@ -817,11 +841,11 @@ def build_world(scene, build, o, plan, looks):
             ribbon(f"fence {own} {i}", top, 7.0, looks.light(color, 2.4, fade="v", power=0.6), c_grid)
         glow_curve(f"rail {own}", rails[own], 0.6 * max(1.0, s * 0.7), looks.glow(color, 4.0), c_grid, 0)
 
-    if s <= 4:
-        build_buildings(scene, build, T, 5000.0, looks, c_ter, ek)
+    if s <= 4:   # explore: every building in the level (under a million triangles in all)
+        build_buildings(scene, build, Ts, 5000.0 if extra is None else math.inf, looks, c_ter, ek)
 
     # planned projects: the pair glows bright with a curtain and see-through towers; the rest of the plan stays dim
-    pair = {o["a"], o["b"]}
+    pair = {pid for ov, _ in focus for pid in (ov["a"], ov["b"])}
     projects = {p["id"]: p for p in scene["projects"]}
     for p in scene["projects"]:
         side = p["side"]
@@ -880,7 +904,7 @@ def build_world(scene, build, o, plan, looks):
 
     # light beams on the pair's end points and yards (both colors side by side where the utilities meet)
     ends = {}
-    for pid in (o["a"], o["b"]):
+    for pid in (pid for ov, _ in focus for pid in (ov["a"], ov["b"])):
         p = projects[pid]
         for e in (p["a"], p["b"]):
             if not e:
@@ -897,31 +921,44 @@ def build_world(scene, build, o, plan, looks):
             glow_curve(f"end ring {side}", [ring_pts(ter, bx, by, 70.0 * s, 6.0, 72)], 1.4 * s, looks.glow(COL[side], 5.0), c_proj)
 
     # the overlap: white arc across the gap (or pillar + ring where the projects touch), end markers, sharing circles
+    # (explore mode draws every highlighted overlap at the main one's width scale, with lower arcs for the wide gaps,
+    # so they read as lines when you fly close instead of white bands across the sky)
     ice = COL["ice"]
-    pa, pb = plan.pa, plan.pb
-    za, zb = ter.at(pa.x, pa.y), ter.at(pb.x, pb.y)
-    if plan.touching:
-        if not any(math.hypot(x - pa.x, y - pa.y) < 150 for x, y in ends):  # the two beams already mark a shared yard
-            cylinder("touch pillar", pa.x, pa.y, za, 7.0 * s, 500.0 * s, looks.light(ice, 2.5, fade="z", power=2.2), c_ovl)
-        ring = ring_pts(ter, pa.x, pa.y, TOUCH_R * s, 8.0, 180)
-        z = np.array([q[2] for q in ring[:-1]])
-        zs = np.convolve(np.concatenate([z[-15:], z, z[:15]]), np.ones(15) / 15, mode="same")[15:-15]
-        z = np.maximum(z, zs)   # bridge over dam faces and banks instead of plunging down them
-        ring = [(x, y, float(zz)) for (x, y, _), zz in zip(ring[:-1], z)]
-        glow_curve("touch ring", [ring + ring[:1]], 1.6 * s, looks.glow(ice, 6.0), c_ovl)
-    else:
-        arc = [(pa.x + (pb.x - pa.x) * f, pa.y + (pb.y - pa.y) * f, za + (zb - za) * f + 25 + 4 * plan.apex * f * (1 - f))
-               for f in (k / 64 for k in range(65))]
-        glow_curve("overlap arc", [arc], 2.6 * s, looks.glow(ice, 9.0), c_ovl, 2)
-        for p, z in ((pa, za), (pb, zb)):
-            glow_curve("gap end", [ring_pts(ter, p.x, p.y, 38.0 * s, 8.0, 48)], 1.5 * s, looks.glow(ice, 7.0), c_ovl)
-            cylinder("gap pin", p.x, p.y, z, 5.0 * s, 25.0 + 30.0 * s, looks.light(ice, 4.0, fade="z", power=1.0), c_ovl)
+    drawn = []
+    for ov, pl in focus:
+        pa, pb = pl.pa, pl.pb
+        if any((pa - a).length < 1 and (pb - b).length < 1 for a, b in drawn):   # a twin: same closest points
+            continue
+        drawn.append((pa, pb))
+        apex = pl.apex if pl is plan else min(pl.apex, 1500.0)
+        tag = "" if extra is None else f" #{ov['rank']}"
+        za, zb = ter.at(pa.x, pa.y), ter.at(pb.x, pb.y)
+        if pl.touching:
+            if not any(math.hypot(x - pa.x, y - pa.y) < 150 for x, y in ends):  # the two beams already mark a shared yard
+                cylinder("touch pillar" + tag, pa.x, pa.y, za, 7.0 * s, 500.0 * s,
+                         looks.light(ice, 2.5, fade="z", power=2.2), c_ovl)
+            ring = ring_pts(ter, pa.x, pa.y, TOUCH_R * s, 8.0, 180)
+            z = np.array([q[2] for q in ring[:-1]])
+            zs = np.convolve(np.concatenate([z[-15:], z, z[:15]]), np.ones(15) / 15, mode="same")[15:-15]
+            z = np.maximum(z, zs)   # bridge over dam faces and banks instead of plunging down them
+            ring = [(x, y, float(zz)) for (x, y, _), zz in zip(ring[:-1], z)]
+            glow_curve("touch ring" + tag, [ring + ring[:1]], 1.6 * s, looks.glow(ice, 6.0), c_ovl)
+        else:
+            arc = [(pa.x + (pb.x - pa.x) * f, pa.y + (pb.y - pa.y) * f, za + (zb - za) * f + 25 + 4 * apex * f * (1 - f))
+                   for f in (k / 64 for k in range(65))]
+            glow_curve("overlap arc" + tag, [arc], 2.6 * s, looks.glow(ice, 9.0), c_ovl, 2)
+            for p, z in ((pa, za), (pb, zb)):
+                glow_curve("gap end" + tag, [ring_pts(ter, p.x, p.y, 38.0 * s, 8.0, 48)], 1.5 * s, looks.glow(ice, 7.0), c_ovl)
+                cylinder("gap pin" + tag, p.x, p.y, z, 5.0 * s, 25.0 + 30.0 * s,
+                         looks.light(ice, 4.0, fade="z", power=1.0), c_ovl)
+    pa = plan.pa
     for r, k, strength in ((1600.0, 2.0, 0.75), (8000.0, 3.0, 0.6), (40000.0, 5.0, 0.45)):
         glow_curve(f"sharing ring {r:.0f}", [ring_pts(ter, pa.x, pa.y, r, 6.0)], k * s, looks.light(ice, strength), c_ovl)
 
 
-def build_buildings(scene, build, T, radius, looks, col, ek):
-    """OSM footprints extruded to their tagged (or estimated) height; roofs colored from the satellite photo."""
+def build_buildings(scene, build, Ts, radius, looks, col, ek):
+    """OSM footprints extruded to their tagged (or estimated) height; roofs colored from the satellite photo.
+    Only those within radius of one of the targets Ts."""
     meta = scene["structures"].get("buildings")
     path = build / "buildings.bin"
     if not meta or not path.exists():
@@ -937,7 +974,7 @@ def build_buildings(scene, build, T, radius, looks, col, ek):
     off = np.concatenate([[0], np.cumsum(cnt)[:-1]])
     cx = np.add.reduceat(xy[:, 0], off) / cnt
     cy = np.add.reduceat(xy[:, 1], off) / cnt
-    sel = np.nonzero(np.hypot(cx - T.x, cy - T.y) < radius)[0]
+    sel = np.nonzero(np.min([np.hypot(cx - t.x, cy - t.y) for t in Ts], axis=0) < radius)[0]
     if not len(sel):
         return
     verts, faces, fcol = [], [], []
@@ -1050,11 +1087,200 @@ def encode(frames, fps, oid):
         f"poster {(OUT / (oid + '.jpg')).stat().st_size / 1e3:.0f} KB")
 
 
+# ---------------------------------------------------------------- camera
+def add_camera(plan, n_frames, name="camera"):
+    """The fly-in as the scene's active camera, keyed on every frame."""
+    cam = bpy.data.objects.new(name, bpy.data.cameras.new(name))
+    cam.data.lens = LENS
+    cam.data.clip_start = 10
+    cam.data.clip_end = 400000
+    bpy.context.scene.collection.objects.link(cam)
+    bpy.context.scene.camera = cam
+    prev = None
+    for f in range(1, n_frames + 1):
+        loc, q = plan.at((f - 1) / (n_frames - 1))
+        cam.location = loc
+        cam.rotation_euler = q.to_euler("XYZ", prev) if prev else q.to_euler("XYZ")
+        prev = cam.rotation_euler.copy()
+        cam.keyframe_insert("location", frame=f)
+        cam.keyframe_insert("rotation_euler", frame=f)
+    return cam
+
+
+# ---------------------------------------------------------------- explore: a whole level saved as a .blend
+EXPLORE_MAIN = {"savannah": "DESC_23__GPC_20277", "augusta": "DESC_31__GPC_20793"}
+VIEW_LENS = 2 * LENS   # the 3D view measures its lens against a 72 mm sensor: 56 mm there = the clips' 28 mm camera
+SESSION_PY = '''"""Settings for one Blender session with a GridLock explore scene (written by world3d/render_clips.py).
+blender --factory-startup world3d/explore/savannah.blend --python world3d/explore/explore_session.py
+Nothing here is saved: preference auto-save is off for this session."""
+import bpy
+from bpy.app.handlers import persistent
+
+p = bpy.context.preferences
+p.use_preferences_save = False
+w = p.inputs.walk_navigation
+w.walk_speed = 80.0            # m/s in walk/fly mode (Shift+`); the mouse wheel changes it while flying
+w.walk_speed_factor = 5.0      # hold Shift for 5x
+p.inputs.use_emulate_numpad = True   # the number row acts as a numpad: 0 looks through the fly-in camera
+p.system.anisotropic_filter = "FILTER_16"
+
+
+@persistent
+def rendered(*_):
+    """Blender opens a saved Rendered view as Solid; switch the Layout 3D view back to EEVEE Rendered."""
+    if "explore" not in bpy.data.filepath.replace("\\\\", "/"):
+        return
+    for scr in bpy.data.screens:
+        if scr.name != "Layout":
+            continue
+        for area in scr.areas:
+            for sp in area.spaces:
+                if sp.type == "VIEW_3D":
+                    sp.shading.type = "RENDERED"
+            area.tag_redraw()
+
+
+rendered()
+bpy.app.handlers.load_post.append(rendered)
+'''
+
+
+def explore_view(plan):
+    """Saved UI: every 3D view gets km-scale clipping; the Layout view opens in EEVEE Rendered with the viewport
+    compositor (so the bloom shows), in free perspective at the fly-in's first frame."""
+    loc, q = plan.at(0.0)
+    aim = plan.T + Vector((0, 0, plan.h0))
+    dist = (aim - loc).length
+    n = 0
+    for scr in bpy.data.screens:
+        for area in scr.areas:
+            for sp in area.spaces:
+                if sp.type != "VIEW_3D":
+                    continue
+                sp.clip_start, sp.clip_end, sp.lens = 1.0, 200000.0, VIEW_LENS
+                if scr.name != "Layout":
+                    continue
+                sp.shading.type = "RENDERED"
+                try:
+                    sp.shading.use_compositor = "ALWAYS"
+                except (AttributeError, TypeError) as err:
+                    log(f"viewport compositor: {err}")
+                ovl = sp.overlay
+                ovl.show_floor = ovl.show_axis_x = ovl.show_axis_y = ovl.show_cursor = False  # z = 0 is sea level
+                r3 = sp.region_3d
+                r3.view_perspective = "PERSP"
+                r3.view_distance = dist   # the view matrix setter keeps this distance to place the orbit point
+                r3.view_matrix = Matrix.LocRotScale(loc, q, None).inverted()
+                log(f"  view {scr.name}: orbit point {tuple(round(v) for v in r3.view_location)} "
+                    f"(aim {tuple(round(v) for v in aim)}), rotation matches the fly-in start: "
+                    f"{r3.view_rotation.rotation_difference(q).angle < 1e-3}")
+                n += 1
+    for win in bpy.context.window_manager.windows:
+        if win.workspace.name != "Layout" and "Layout" in bpy.data.workspaces:
+            win.workspace = bpy.data.workspaces["Layout"]
+    log(f"  3D views set up: {n} in Layout")
+
+
+def scene_stats():
+    """Rough weight of what EEVEE draws: evaluated triangles per group of objects, and the textures."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    groups, per_mesh = {}, {}
+    for ob in bpy.context.scene.objects:
+        if ob.type not in ("MESH", "CURVE"):
+            continue
+        shared = ob.type == "MESH" and not ob.modifiers
+        if shared and ob.data.name in per_mesh:
+            tris = per_mesh[ob.data.name]
+        else:
+            ev = ob.evaluated_get(dg)
+            me = ev.to_mesh()
+            lt = np.zeros(len(me.polygons), np.int64) if me else np.zeros(0, np.int64)
+            if me:
+                me.polygons.foreach_get("loop_total", lt)
+            tris = int((lt - 2).sum())
+            ev.to_mesh_clear()
+            if shared:
+                per_mesh[ob.data.name] = tris
+        key = ob.name.split(" ")[0].split(".")[0]
+        g = groups.setdefault(key, [0, 0])
+        g[0] += 1
+        g[1] += tris
+    total = sum(g[1] for g in groups.values())
+    for k, (n, t) in sorted(groups.items(), key=lambda kv: -kv[1][1])[:14]:
+        log(f"  {k:<22} {n:>6} objects {t / 1e6:8.3f} M tris")
+    log(f"  TOTAL {total / 1e6:.2f} M tris")
+    for img in bpy.data.images:
+        if img.source == "FILE":
+            log(f"  image {img.name} {img.size[0]}x{img.size[1]}")
+
+
+def explore(o):
+    t_start = time.time()
+    level = o["explore"]
+    if level not in level_names():
+        raise SystemExit(f"level {level!r} not in {level_names()}")
+    scene = load_scene(level)
+    build = BUILD / level
+    key = o["key"] or EXPLORE_MAIN.get(level)
+    feats = sorted((x for x in scene["overlaps"] if x["rank"] <= int(o["top"])), key=lambda x: x["rank"])
+    main_ov = next((x for x in scene["overlaps"] if key and (x["id"] == key or (key.isdigit() and x["rank"] == int(key)))),
+                   None) or feats[0]
+    fps = int(o["fps"])
+    n_frames = max(2, round(float(o["seconds"]) * fps))
+    log(f"EXPLORE {level}: main #{main_ov['rank']} {main_ov['id']}, highlighted {[x['rank'] for x in feats]}")
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.preferences.filepaths.save_version = 0   # this background session only: no .blend1 next to the file
+    ter = bw.Terrain(scene, build)
+    w, h = scene["size_m"]
+    gx, gy = np.meshgrid(np.linspace(-w / 2, w / 2, ter.nx), np.linspace(h / 2, -h / 2, ter.ny))
+    ter.z = (ter.z * edge_k(gx, gy, w, h)).astype(np.float32)
+    rw, rh = (int(v) for v in o["res"].split("x"))
+    projects = {p["id"]: p for p in scene["projects"]}
+    plan = Plan(main_ov, scene, ter, projects, rw / rh)
+    extra = [(x, Plan(x, scene, ter, projects, rw / rh)) for x in feats if x["id"] != main_ov["id"]]
+    global FAR
+    FAR = max(FAR, 6.0 * math.hypot(plan.d0, plan.a0))
+    looks = Looks()
+    setup_look(o, looks, n_frames)
+    sc = bpy.context.scene
+    sc.eevee.taa_samples = 16          # viewport samples: stays interactive while moving, cleans up when still
+    sc.eevee.shadow_pool_size = "512"  # half the clips' pool: less GPU memory for a window that stays open
+    sc.render.use_motion_blur = False
+    sc.sync_mode = "FRAME_DROP"        # the fly-in plays in real time even when the viewport can't keep up
+    build_world(scene, build, main_ov, plan, looks, extra=extra)
+    add_camera(plan, n_frames, "fly-in camera")
+    sc.frame_current = 1
+    explore_view(plan)
+    log(f"BUILT in {time.time() - t_start:.1f} s")
+    scene_stats()
+
+    out = Path(o["out"]) if o["out"] else HERE / "explore" / f"{level}.blend"
+    out = out.resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=str(out))
+    try:
+        bpy.ops.file.make_paths_relative()
+    except RuntimeError as err:
+        log(f"make_paths_relative: {err}")
+    for img in bpy.data.images:
+        if img.filepath and not img.filepath.startswith("//"):
+            img.filepath = bpy.path.relpath(img.filepath)
+        log(f"  path {img.filepath}")
+    bpy.ops.wm.save_mainfile()
+    session = out.parent / "explore_session.py"
+    session.write_text(SESSION_PY, encoding="utf-8")
+    log(f"SAVED {out} {out.stat().st_size / 1e6:.1f} MB in {time.time() - t_start:.1f} s")
+    log(f'OPEN IT: "{bpy.app.binary_path}" --factory-startup "{out}" --python "{session}"')
+
+
 # ---------------------------------------------------------------- main
 def main():
     o = args()
     if o["manifest"]:
         write_manifest()
+        return
+    if o["explore"]:
+        explore(o)
         return
     if not o["key"]:
         raise SystemExit("usage: blender -b --factory-startup -P world3d/render_clips.py -- <overlap id or rank>")
@@ -1076,21 +1302,7 @@ def main():
     looks = Looks()
     setup_look(o, looks, n_frames)
     build_world(scene, build, ov, plan, looks)
-
-    cam = bpy.data.objects.new("camera", bpy.data.cameras.new("camera"))
-    cam.data.lens = LENS
-    cam.data.clip_start = 10
-    cam.data.clip_end = 400000
-    bpy.context.scene.collection.objects.link(cam)
-    bpy.context.scene.camera = cam
-    prev = None
-    for f in range(1, n_frames + 1):
-        loc, q = plan.at((f - 1) / (n_frames - 1))
-        cam.location = loc
-        cam.rotation_euler = q.to_euler("XYZ", prev) if prev else q.to_euler("XYZ")
-        prev = cam.rotation_euler.copy()
-        cam.keyframe_insert("location", frame=f)
-        cam.keyframe_insert("rotation_euler", frame=f)
+    add_camera(plan, n_frames)
     log(f"BUILT in {time.time() - t_start:.1f} s")
 
     frames = Path(o["tmp"]) / ov["id"]

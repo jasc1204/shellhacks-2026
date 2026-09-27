@@ -4,6 +4,7 @@ data/sperry/
 
 # Downloaded map tiles (world3d/prep_scene.py re-downloads them); the built scene in world3d/build/ is committed
 world3d/cache/
+world3d/explore/
 
 # Python
 __pycache__/
