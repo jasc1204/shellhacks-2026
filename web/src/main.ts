@@ -1104,6 +1104,7 @@ function selectOverlap(id: string, how: { from3d?: boolean } = {}) {
   if (state.drawing) stopDrawing()
   revealOverlap(o)
   state.selected = id
+  shownProject = null
   writeHash()
   renderRanked()
   $('#ranked').querySelector(`li[data-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })
@@ -1128,11 +1129,15 @@ function worldTarget(o: Overlap | null, walk = false): Target | null {
   return { level: l.level, center: [(l.bbox[1] + l.bbox[3]) / 2, (l.bbox[0] + l.bbox[2]) / 2], id: null, km: 0 }
 }
 
+let shownProject: string | null = null   // the project whose card is open, if any
+
 function setView(v: View, walk = false) {
   if (v === '3d') {
     if (tour) stopTour(false)
     if (state.drawing) stopDrawing()
-    const o = state.selected ? findOverlap(state.selected) ?? null : null
+    // the picked overlap, or with a project's card open (say, one you just drew) that project's top overlap
+    const o = state.selected ? findOverlap(state.selected) ?? null
+      : shownProject ? allOverlaps().filter((x) => x.a === shownProject || x.b === shownProject).sort(specOrder)[0] ?? null : null
     const t = worldTarget(o, walk)
     if (t) show3D(t)
     return
@@ -1168,6 +1173,7 @@ function showProject(pid: string) {
   const p = f.properties
   const mine = allOverlaps().filter((o) => o.a === pid || o.b === pid).sort(specOrder)
   state.selected = null
+  shownProject = pid
   renderRanked()
   const card = $('#detail')
   card.hidden = false
@@ -1194,6 +1200,7 @@ function showProject(pid: string) {
 
 function closeDetail() {
   state.selected = null
+  shownProject = null
   writeHash()
   $('#detail').hidden = true
   highlight([])
