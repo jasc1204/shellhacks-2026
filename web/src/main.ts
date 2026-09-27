@@ -63,6 +63,8 @@ let meta: Meta
 let levels: Level[] = []
 let levelOf: Record<string, { level: string; title: string }> = {}
 const WORLD_VIEWER = `${import.meta.env.BASE_URL}world3d/viewer/`
+type Clip = { id: string; file: string; poster?: string }
+let clips: Record<string, Clip> = {}  // pre-rendered Blender fly-ins by overlap id (public/clips/manifest.json)
 let backdropData: any = null
 let endpointsData: any = null
 let draft: LonLat[] = []
@@ -91,6 +93,11 @@ async function load() {
     levels = await fetch(`${import.meta.env.BASE_URL}world3d/build/levels.json`).then((r) => (r.ok ? r.json() : []))
     for (const l of levels) for (const id of l.overlap_ids) levelOf[id] = { level: l.level, title: l.title }
   } catch { levels = []; levelOf = {} }
+  // So are the Blender fly-ins: no manifest, no WATCH button. (In dev a missing file comes back as HTML, which json() rejects.)
+  try {
+    const cm = await fetch(`${import.meta.env.BASE_URL}clips/manifest.json`).then((r) => (r.ok ? r.json() : { clips: [] }))
+    for (const c of cm.clips ?? []) clips[c.id] = c
+  } catch { clips = {} }
   try { Object.assign(state, pickUi(JSON.parse(localStorage.getItem(UI_KEY) || '{}'))) } catch { /* defaults */ }
   state.user = loadUserProjects()
   recomputeUserOverlaps(false)
@@ -777,9 +784,12 @@ function timelineSVG(o: Overlap) {
   const W = 580, L = 44, R = 10
   const x = (t: number) => L + ((t - y0) / (y1 - y0)) * (W - L - R)
   const years: string[] = []
-  for (let y = new Date(y0).getFullYear(); y <= new Date(y1).getFullYear(); y++) {
+  const yEnd = new Date(y1).getFullYear()
+  for (let y = new Date(y0).getFullYear(); y <= yEnd; y++) {
     const xx = x(new Date(y, 0, 1).getTime())
-    years.push(`<line x1="${xx}" x2="${xx}" y1="6" y2="64" stroke="rgba(70,105,230,.18)"/><text x="${xx + 3}" y="76" fill="#7286a4" font-size="10" font-family="JetBrains Mono">${y}</text>`)
+    // the closing line is the end of the last year, so it gets no label (it was cut off at the edge anyway)
+    years.push(`<line x1="${xx}" x2="${xx}" y1="6" y2="64" stroke="rgba(70,105,230,.18)"/>` +
+      (y < yEnd ? `<text x="${xx + 3}" y="76" fill="#7286a4" font-size="10" font-family="JetBrains Mono">${y}</text>` : ''))
   }
   const bar = (w: [string, string], y: number, color: string, label: string) =>
     `<text x="0" y="${y + 11}" fill="${color}" font-size="10" font-family="JetBrains Mono">${label}</text>` +
@@ -845,15 +855,46 @@ function levelFor(o: Overlap) {
 }
 
 function actions3d(o: Overlap) {
-  if (!levels.length) return ''
-  const lv = levelFor(o)
-  if (!lv) return `<div class="actions3d"><span class="m">NOT IN A 3D LEVEL YET</span></div>`
-  const url = `${WORLD_VIEWER}?level=${encodeURIComponent(lv.level)}&select=${encodeURIComponent(o.id)}`
-  return `<div class="actions3d">
-    <a class="btn3d" href="${url}">VIEW IN 3D ↗</a>
-    <a class="btn3d hotbtn" href="${url}&walk=1" title="Drop onto the ground at one end, facing the other">WALK THE GAP ↗</a>
-    <span class="m">${esc(lv.title.toUpperCase())}</span>
+  const lv = levels.length ? levelFor(o) : null
+  const url = lv ? `${WORLD_VIEWER}?level=${encodeURIComponent(lv.level)}&select=${encodeURIComponent(o.id)}` : ''
+  const world = lv ? `<a class="btn3d" href="${url}" title="Opens the ${esc(lv.title)} level of the 3D world">VIEW IN 3D ↗</a>
+    <a class="btn3d hotbtn" href="${url}&walk=1" title="Drop onto the ground at one end, facing the other">WALK THE GAP ↗</a>`
+    : levels.length ? '<span class="m">NOT IN A 3D LEVEL YET</span>' : ''
+  const clip = clips[o.id] ? '<button class="btn3d" data-watch title="A short fly-in over this gap, rendered in Blender">▶ WATCH FLY-IN</button>' : ''
+  return `<div class="actions3d">${world}${clip}
+    <a class="btn3d" href="${earthUrl(o)}" target="_blank" rel="noopener" title="Google Earth's own 3D view of this spot">GOOGLE EARTH ↗</a>
   </div>`
+}
+
+// Google Earth's photoreal 3D, opened at the gap. Just a link: nothing of Google's is stored or drawn here.
+function earthUrl(o: Overlap) {
+  const [p, q] = o.closest_points
+  const d = Math.round(Math.min(60000, Math.max(1800, o.closest_km * 2600)))  // camera distance that frames both ends
+  return `https://earth.google.com/web/@${((p[1] + q[1]) / 2).toFixed(5)},${((p[0] + q[0]) / 2).toFixed(5)},0a,${d}d,35y,0h,55t,0r`
+}
+
+// A pre-rendered Blender fly-in (our own world: USGS imagery + OpenStreetMap, no Google data), played over the map.
+function openClip(o: Overlap) {
+  const c = clips[o.id]
+  if (!c) return
+  const base = `${import.meta.env.BASE_URL}clips/`
+  const a = byId[o.a].properties, b = byId[o.b].properties
+  const box = document.createElement('div')
+  box.className = 'clipmodal'
+  box.innerHTML = `<div class="clipbox" role="dialog" aria-label="Fly-in video">
+      <button class="close" aria-label="Close">ESC ✕</button>
+      <div class="kicker">COORDINATION OPPORTUNITY ${rankLabel(o)}, ${TIER_SHORT[o.tier]}</div>
+      <video src="${base}${esc(c.file)}"${c.poster ? ` poster="${base}${esc(c.poster)}"` : ''} autoplay muted playsinline controls></video>
+      <div class="cap"><span class="dot ${dotClass(a)}"></span>${esc(a.name)}<b>×</b><span class="dot ${dotClass(b)}"></span>${esc(b.name)}</div>
+      <div class="meta">${o.tier === 1 ? 'Touching' : o.closest_km.toFixed(2) + ' km apart'}, ${timingText(o)}</div>
+      <div class="credit">Rendered in Blender from USGS imagery and OpenStreetMap data (© OpenStreetMap contributors)</div>
+    </div>`
+  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); close() } }
+  const close = () => { box.remove(); removeEventListener('keydown', onKey, true) }
+  box.addEventListener('click', (e) => { if (e.target === box) close() })
+  box.querySelector('.close')!.addEventListener('click', close)
+  addEventListener('keydown', onKey, true)  // capture: Esc closes the video, not the card under it
+  document.body.append(box)
 }
 
 function renderOverlapDetail(o: Overlap) {
@@ -878,6 +919,7 @@ function renderOverlapDetail(o: Overlap) {
     <div class="section-title">IMPACT ESTIMATE</div>
     ${renderCost(o)}`
   card.querySelector('.close')!.addEventListener('click', closeDetail)
+  card.querySelector('[data-watch]')?.addEventListener('click', () => openClip(o))
   card.querySelectorAll<HTMLInputElement>('input[data-cost]').forEach((inp) => inp.addEventListener('change', () => {
     (state.cost as any)[inp.dataset.cost!] = Number(inp.value)
     renderOverlapDetail(o)

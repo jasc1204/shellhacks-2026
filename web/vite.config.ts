@@ -6,7 +6,7 @@ import path from 'node:path'
 // so the map can deep-link into it: in dev via a middleware, in production by copying only the files the
 // viewer needs into dist/world3d/ (no .blend masters, no lossless textures, no renders).
 const WORLD3D = path.resolve(import.meta.dirname, '../world3d')
-const LEVEL_FILES = ['scene.json', 'terrain.bin', 'ground.webp', 'ground_sat.webp', 'models.glb', 'buildings.bin', 'veg.png']
+const LEVEL_FILES = ['scene.json', 'terrain.bin', 'ground.webp', 'ground_sat.webp', 'ground_far.webp', 'models.glb', 'buildings.bin', 'veg.png']
 // Photoreal-mode API token: served by the local dev server only, NEVER copied into dist (it's git-ignored too).
 const DEV_ONLY = ['viewer/tokens.local.json']
 const TYPES: Record<string, string> = {
