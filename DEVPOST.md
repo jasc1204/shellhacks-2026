@@ -27,8 +27,10 @@ GridLock reads both utilities' public construction plans, puts every project on 
 - **See it:**
   - satellite imagery and 3D terrain in the map
   - a guided tour of the top opportunities
-  - a walkable 3D world of both border regions, built in Blender and Three.js, with real buildings, substations and satellite ground
-- **Downloads** of the overlap and project tables in the column layout of Sperry's starter spreadsheet.
+  - a walkable 3D world of both border regions, built in Blender and Three.js, with real buildings, substations and satellite ground, plus an optional Google photorealistic 3D mode
+  - a 7-second Blender fly-in of each of the top 10 opportunities
+  - one click opens any opportunity in Google Earth's own 3D view
+- **Downloads:** the overlap and project tables in the column layout of Sperry's starter spreadsheet, and a Google Earth file (KML) with every project and overlap. Each pop-up shows the gap, the timing, the savings estimate and the source pages, so a planner can open it in the tools they already use.
 
 ## How I built it
 
@@ -42,7 +44,7 @@ GridLock reads both utilities' public construction plans, puts every project on 
 - **Overlap engine:** closest points between point and line geometries (Shapely) in a local projection, the four tiers, build-window overlap, and a score (65% distance, 35% timing).
 - **Validation:** it reproduces **all 6 overlaps in Sperry's sample**, with in-service gaps matching to the day. The browser version of the math matches the Python pipeline exactly: the same 78 overlaps, distances within 1 m.
 - **Web app:** TypeScript + Vite + MapLibre GL, with an OpenFreeMap basemap, USGS satellite imagery and AWS terrain tiles, none of which need API keys.
-- **3D world:** Blender + Three.js, generated from the same data files.
+- **3D world:** Blender + Three.js, generated from the same data files. The fly-in clips are rendered headless in Blender from our own data only (USGS imagery, OpenStreetMap grid and buildings, AWS terrain). The optional Google 3D mode streams Google's photorealistic tiles through `3d-tiles-renderer`.
 
 ## Challenges I ran into
 
@@ -70,7 +72,7 @@ How transmission planning actually works: IRPs, regional forums like SERTP, CEII
 
 ## Built with
 
-python · shapely · poppler · openstreetmap · overpass-api · nominatim · typescript · vite · maplibre-gl · openfreemap · usgs-national-map · aws-terrain-tiles · blender · three.js
+python · shapely · poppler · openstreetmap · overpass-api · nominatim · typescript · vite · maplibre-gl · openfreemap · usgs-national-map · aws-terrain-tiles · blender · three.js · 3d-tiles-renderer · kml
 
 ## Challenges to select on Devpost
 
