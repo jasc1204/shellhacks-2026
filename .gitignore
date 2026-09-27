@@ -42,3 +42,5 @@ video/takes/
 video/out/
 video/.venv-tts/
 video/voice/
+video/VOICEOVER.md
+video/clone_voice.py
