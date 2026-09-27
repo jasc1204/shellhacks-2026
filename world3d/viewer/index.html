@@ -24,6 +24,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
 body.measuring #stage canvas { cursor: crosshair; }
 #labels { pointer-events: none; }
 .kicker { font: 600 10px/1 var(--mono); letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+.kicker .lvl { margin-left: 1.4em; color: var(--ink); }
 
 /* in-world labels */
 .lbl { font: 700 13px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; padding-left: 10px; white-space: nowrap;
@@ -44,7 +45,15 @@ body.measuring #stage canvas { cursor: crosshair; }
 
 /* HUD */
 .panel { position: fixed; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; backdrop-filter: blur(6px); }
-#brand { top: 16px; left: 16px; padding: 14px 16px 12px; width: 330px; }
+/* 2026-09-26: two stacks instead of one crowded left edge. #leftcol = where you are + what to look at (brand, ranked list);
+   #dock = how you move (drone readout, measure, tour, key, controls), bottom center on its own. The wrappers
+   don't catch the mouse, so the empty space between panels still drags the camera. */
+#leftcol, #dock { position: fixed; display: flex; flex-direction: column; pointer-events: none; }
+#leftcol > .panel, #dock > .panel { position: relative; pointer-events: auto; }
+#leftcol { top: 16px; left: 16px; bottom: 16px; width: 330px; gap: 10px; }
+#dock { left: 362px; right: 250px; bottom: 16px; align-items: center; gap: 8px; }
+body:not(.touring):has(#card.show) #dock { right: 412px; }   /* make room for the overlap card */
+#brand { flex: none; padding: 14px 16px 12px; }
 #brand h1 { margin: 8px 0 2px; font: 700 22px/1.1 var(--display); letter-spacing: .02em; }
 #brand .sub { margin: 0; font: 400 11px/1.4 var(--mono); color: var(--muted); }
 .levels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -53,15 +62,41 @@ body.measuring #stage canvas { cursor: crosshair; }
 .levels a.on { color: var(--ice); border-color: var(--line-hi); }
 .levels a.maplink { margin-left: auto; color: var(--ice); border-color: var(--line-hi); }
 .levels a:hover { box-shadow: var(--glow); }
-#list { top: 162px; left: 16px; width: 330px; max-height: calc(100vh - 318px); display: flex; flex-direction: column; }
+#list { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .panel-h { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-#ovl { list-style: none; margin: 0; padding: 4px 0; overflow-y: auto; }
+#ovl { list-style: none; margin: 0; padding: 0 0 4px; overflow-y: auto; min-height: 0; }
+/* tier cards: the legend IS the filter (click one to hide that tier, in the list and in the world) */
+#list-tools { flex: none; display: grid; gap: 8px; padding: 9px 10px 10px; border-bottom: 1px solid var(--line); }
+.tiercards { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.tc { text-align: left; font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 3px;
+      padding: 6px 7px 6px; cursor: pointer; }
+.tc:hover { border-color: var(--line-hi); }
+.tc .h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font: 600 10px/1 var(--mono); letter-spacing: .1em; }
+.tc .h i { font-style: normal; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.tc .s { display: block; margin-top: 5px; font: 400 9.5px/1.3 var(--mono); color: var(--muted); }
+.tc.t1 .h b { color: var(--ice); } .tc.t2 .h b { color: var(--desc); } .tc.t3 .h b { color: var(--steel); } .tc.t4 .h b { color: var(--muted); }
+.tc.t1:not(.off):not(.none) { border-color: rgba(244, 248, 255, .45); }
+.tc.none { opacity: .5; }
+.tc.off { opacity: .38; border-style: dashed; }
+.tc.off .h b { text-decoration: line-through; }
+.sortrow { display: flex; align-items: center; gap: 10px; }
+.sortrow .seg { flex: 1; margin: 0; }
+/* groups: what a utility would do about each overlap */
+#ovl li.grp { display: grid; grid-template-columns: 1fr auto 12px; gap: 0 8px; align-items: baseline; padding: 11px 12px 7px; cursor: pointer;
+              border-left: 0; border-top: 1px solid var(--line); user-select: none; }
+#ovl li.grp:first-child { border-top: 0; }
+#ovl li.grp:hover, #ovl li.grp:focus-visible { background: rgba(59, 125, 255, .06); outline: none; }
+#ovl .gt { font: 600 10px/1 var(--mono); letter-spacing: .2em; color: var(--ink); }
+#ovl li.grp[data-g="must"] .gt { color: var(--ice); }
+#ovl .gn { font: 600 10px/1 var(--mono); color: var(--muted); }
+#ovl .gs { font: 600 12px/1 var(--mono); color: var(--muted); text-align: right; }
+#ovl .gd { grid-column: 1 / -1; margin-top: 5px; font: 400 10px/1.4 var(--mono); color: var(--faint); }
+#ovl li.grp:not(.open) .gt { color: var(--muted); }
+#ovl li.empty { padding: 14px 12px; font: 400 11px/1.45 var(--mono); color: var(--muted); }
 #ovl li { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; align-items: center; padding: 7px 12px; cursor: pointer;
           border-left: 2px solid transparent; }
 #ovl li:hover { background: rgba(59, 125, 255, .08); }
 #ovl li.on { border-left-color: var(--ice); background: rgba(111, 141, 255, .12); }
-#ovl li.sub { display: block; cursor: default; padding: 8px 12px 4px; font: 600 9px/1 var(--mono); letter-spacing: .24em; color: var(--muted); }
-#ovl li.sub:hover { background: none; }
 #ovl li.user .rk { color: var(--ice); }
 #ovl .rk { font: 600 12px/1 var(--mono); color: var(--muted); }
 #ovl .nm { font: 400 11px/1.35 var(--mono); color: var(--ink); overflow: hidden; }
@@ -73,6 +108,8 @@ body.measuring #stage canvas { cursor: crosshair; }
 .tier.t1 { color: var(--bg); background: var(--ice); border-color: var(--ice); box-shadow: var(--glow); }
 .tier.t2 { color: var(--desc); border-color: rgba(77, 216, 255, .5); }
 .tier.t3 { color: var(--steel); border-color: rgba(122, 168, 255, .4); }
+#ovl .nm .when { display: inline-block; margin-left: 8px; font: 600 9px/1 var(--mono); letter-spacing: .12em; color: var(--faint); }
+#ovl .nm .when.ok { color: var(--ice); }
 
 #card { right: 16px; bottom: 16px; width: 380px; padding: 14px 16px; display: none; }
 #card.show { display: block; }
@@ -113,30 +150,43 @@ button.act.on { box-shadow: var(--glow); }
 .tiers { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 0 2px; border-top: 1px solid var(--line); margin-top: 6px; }
 .tiers .kicker { width: 100%; margin-bottom: 2px; }
 
-#status { left: 16px; bottom: 16px; padding: 10px 12px; width: 330px; }
+/* the dock: drone readout + tools + controls, one container of its own */
+#status { width: min(100%, 780px); padding: 10px 12px; }
+.st-main { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.readout { flex: 1 1 240px; min-width: 0; }
 #status .row { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
 #mode { font: 700 13px/1 var(--mono); letter-spacing: .2em; color: var(--ice); }
 #speed, #alt { font: 400 11px/1 var(--mono); color: var(--muted); }
 #near { margin-top: 7px; font: 400 11px/1.4 var(--mono); color: var(--ink); min-height: 15px; }
-.keys { margin-top: 8px; font: 400 10px/1.6 var(--mono); color: var(--faint); }
+#status .btns { flex: none; margin: 0; }
+#status button.act { flex: none; padding: 9px 11px; }
+button.act.lit { border-color: var(--ice); background: rgba(111, 141, 255, .14); }
+.keys { display: flex; flex-wrap: wrap; gap: 3px 16px; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line);
+        font: 400 10px/1.5 var(--mono); color: var(--faint); }   /* spacing, not dot separators (Jose's rule) */
+.keys span { white-space: nowrap; }
 .keys b { color: var(--muted); font-weight: 600; }
+#near .nf { display: inline-block; margin-right: 16px; }
 
-#caption { left: 50%; bottom: 24px; transform: translateX(-50%); width: min(600px, calc(100vw - 740px)); min-width: 320px; padding: 14px 18px;
-           text-align: center; display: none; border-color: var(--line-hi); box-shadow: var(--glow); }
+#caption { width: min(100%, 600px); padding: 14px 18px; text-align: center; display: none; border-color: var(--line-hi); box-shadow: var(--glow); }
 body.touring #caption, #caption.show { display: block; }
-/* on-screen key: what each visual means (for first-time viewers and judges) */
-#key { left: 50%; bottom: 16px; transform: translateX(-50%); width: clamp(420px, calc(100vw - 800px), 660px); }
-#key .panel-h { cursor: pointer; user-select: none; }
-#key .panel-h b { font: 600 12px/1 var(--mono); color: var(--muted); }
-#key-body { display: none; grid-template-columns: 1fr 1fr; gap: 9px 18px; padding: 10px 12px 12px; }
-#key.open #key-body { display: grid; }
+/* on-screen key: what each visual means (for first-time viewers and judges); opens above the dock (K) */
+#key { width: min(100%, 780px); display: none; }
+#key.open { display: block; }
+#key .panel-h button { font: 600 14px/1 var(--mono); color: var(--muted); background: none; border: 0; padding: 0 2px; cursor: pointer; }
+#key .panel-h button:hover { color: var(--ice); }
+#key-body { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 18px; padding: 10px 12px 12px; max-height: 38vh; overflow-y: auto; }
 .k { display: grid; grid-template-columns: 36px 1fr; gap: 9px; align-items: center; font: 400 10.5px/1.4 var(--mono); color: var(--muted); }
 .k b { display: block; color: var(--ink); font-weight: 600; letter-spacing: .04em; }
 .k svg { width: 36px; height: 24px; overflow: visible; }
 .k .tag { font: 600 9.5px/1 var(--mono); color: var(--ice); border: 1px solid var(--line-hi); border-radius: 2px; padding: 1px 4px; white-space: nowrap; }
 body.touring #key { display: none; }
-@media (max-width: 1180px) { #key { top: 16px; bottom: auto; } }
-@media (max-width: 760px) { #key { display: none; } }
+@media (max-width: 1280px) { body:has(#card.show) #key-body { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) {   /* no room beside the card: the dock takes the full width and the card rides above it */
+  #dock, body:not(.touring):has(#card.show) #dock { right: 16px; }
+  #card { bottom: calc(var(--dock-h, 110px) + 26px); }
+  body:not(.touring):has(#card.show) :is(#key, #mini, #layers) { display: none; }   /* the card is the focus */
+  #key-body { grid-template-columns: 1fr; }
+}
 #cap-t { font: 700 30px/1.1 var(--display); margin: 8px 0 6px; }
 #cap-s { font: 400 12px/1.5 var(--mono); color: var(--ink); }
 
@@ -154,12 +204,13 @@ body.touring #key { display: none; }
 #boot .msg { font: 400 11px/1.5 var(--mono); color: var(--muted); max-width: 520px; }
 .hide-hud .panel { display: none !important; }
 @media (max-width: 760px) {
-  #brand, #list, #status { width: calc(100vw - 32px); }
-  #list { top: auto; bottom: 150px; max-height: 30vh; }
-  #mini, #layers { display: none; }
-  #card { left: 16px; right: 16px; width: auto; bottom: 16px; }
-  #caption { width: calc(100vw - 32px); bottom: 120px; }
-  .keys { display: none; }
+  #leftcol { right: 16px; width: auto; bottom: auto; }
+  #list { max-height: 42vh; }
+  .tc .s { display: none; }   /* phones: tier cards shrink to one line; the tooltip still explains them */
+  #dock, body:not(.touring):has(#card.show) #dock { left: 16px; right: 16px; }
+  #mini, #layers, #key, .keys { display: none !important; }
+  #card { left: 16px; right: 16px; width: auto; }
+  #b-key { display: none; }
 }
 </style>
 <script type="importmap">
@@ -177,24 +228,32 @@ body.touring #key { display: none; }
 <div id="labels"></div>
 
 <div id="boot">
-  <div class="kicker">GRIDLOCK // WORLD</div>
+  <div class="kicker">GRIDLOCK // WORLD <span class="lvl" id="boot-lvl"></span></div>
   <div class="t" id="boot-title">LOADING LEVEL</div>
   <div class="bar"><i id="bar"></i></div>
   <div class="msg" id="boot-msg">fetching terrain...</div>
 </div>
 
-<header id="brand" class="panel">
-  <div class="kicker">GRIDLOCK // WORLD <span id="lvl-no"></span></div>
-  <h1 id="title">...</h1>
-  <p class="sub" id="subtitle"></p>
-  <nav class="levels" id="levels"></nav>
-</header>
+<div id="leftcol">
+  <header id="brand" class="panel">
+    <div class="kicker">GRIDLOCK // WORLD <span class="lvl" id="lvl-no"></span></div>
+    <h1 id="title">...</h1>
+    <p class="sub" id="subtitle"></p>
+    <nav class="levels" id="levels"></nav>
+  </header>
+  <section id="list" class="panel">
+    <div class="panel-h"><span class="kicker">RANKED OVERLAPS</span><span class="kicker" id="count"></span></div>
+    <div id="list-tools">
+      <div class="tiercards" id="tiercards"></div>
+      <div class="sortrow"><span class="kicker">SORT</span>
+        <div class="seg" id="sort-seg"><button data-sort="score" title="The pipeline's score: distance first, build timing second">BEST</button><button data-sort="dist" title="Closest points first">CLOSEST</button><button data-sort="time" title="Longest shared build time first, then the smallest gap">TIMING</button></div>
+      </div>
+    </div>
+    <ol id="ovl"></ol>
+  </section>
+</div>
 
 <div id="photo-note" class="panel"></div>
-<section id="list" class="panel">
-  <div class="panel-h"><span class="kicker">RANKED OVERLAPS</span><span class="kicker" id="count"></span></div>
-  <ol id="ovl"></ol>
-</section>
 
 <aside id="mini" class="panel">
   <canvas id="mm" width="400" height="400"></canvas>
@@ -206,7 +265,7 @@ body.touring #key { display: none; }
 </aside>
 
 <section id="layers" class="panel">
-  <div class="panel-h" id="lay-head"><span class="kicker">LAYERS · L</span><b id="lay-sign">+</b></div>
+  <div class="panel-h" id="lay-head"><span class="kicker" title="Shortcut: L">LAYERS</span><b id="lay-sign">+</b></div>
   <div id="lay-body">
     <div class="seg" id="ground-seg"><button data-ground="sat">SATELLITE</button><button data-ground="map">NIGHT MAP</button></div>
     <div id="lay-list"></div>
@@ -228,14 +287,21 @@ body.touring #key { display: none; }
   <div class="btns"><button class="act" id="b-fly">FLY OVER</button><button class="act hot" id="b-walk">WALK THE GAP</button></div>
 </section>
 
+<div id="dock">
+<section id="caption" class="panel">
+  <div class="kicker" id="cap-k"></div>
+  <div id="cap-t"></div>
+  <div id="cap-s"></div>
+</section>
+
 <section id="key" class="panel">
-  <div class="panel-h" id="key-head"><span class="kicker">WHAT YOU'RE SEEING · K</span><b id="key-sign">–</b></div>
+  <div class="panel-h"><span class="kicker">WHAT YOU'RE SEEING</span><button id="key-close" aria-label="Close the key" title="Close (K)">×</button></div>
   <div id="key-body">
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 18 L35 11" stroke="#3b7dff" stroke-width="1.6"/><path d="M9 22 L12 6 L15 22 M7.5 10 L16.5 10 M10 15 L14 15" stroke="#7aa8ff" stroke-width="1.2" fill="none" opacity="1"/></svg><span><b>Today's grid</b>Blue lines, towers and wires: already built (OpenStreetMap).</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 7 L35 7" stroke="#4dd8ff" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #4dd8ff)"/><path d="M1 17 L35 17" stroke="#ffd166" stroke-width="2.6" style="filter:drop-shadow(0 0 2px #ffd166)"/></svg><span><b>Planned projects</b>Glowing overhead lines: sky-blue = Dominion, yellow = Georgia Power. Straight between named end points (real routes aren't public).</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M8 22 L11 6 L14 22 M6.5 10 L15.5 10 M9 15 L13 15" stroke="#4dd8ff" stroke-width="1.2" fill="none" opacity="0.55"/><path d="M22 22 L25 6 L28 22 M20.5 10 L29.5 10 M23 15 L27 15" stroke="#ffd166" stroke-width="1.2" fill="none" opacity="0.55"/></svg><span><b>Preview towers</b>See-through sky-blue or yellow towers: a planned line shown at real height.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M3 22 Q18 -6 33 22" stroke="#f4f8ff" stroke-width="1.8" fill="none" style="filter:drop-shadow(0 0 2px #f4f8ff)"/></svg><span><b>Overlap</b>White arc with a tag like <span class="tag">#1 0.94 km T2</span>: rank, distance between the closest points, tier. Click to select.</span></div>
-    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><g fill="none" stroke="#f4f8ff"><ellipse cx="18" cy="14" rx="5" ry="2.4" opacity=".95"/><ellipse cx="18" cy="14" rx="11" ry="5" opacity=".7"/><ellipse cx="18" cy="14" rx="17" ry="8" opacity=".4"/></g></svg><span><b>Sharing circles</b>Around a selected overlap: 1.6 km share the land · 8 km share laydown yards · 40 km share crews.</span></div>
+    <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><g fill="none" stroke="#f4f8ff"><ellipse cx="18" cy="14" rx="5" ry="2.4" opacity=".95"/><ellipse cx="18" cy="14" rx="11" ry="5" opacity=".7"/><ellipse cx="18" cy="14" rx="17" ry="8" opacity=".4"/></g></svg><span><b>Sharing circles</b>Around a selected overlap: within 1.6 km they share the land, within 8 km laydown yards, within 40 km crews.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><ellipse cx="18" cy="19" rx="11" ry="3.5" stroke="#f4f8ff" stroke-width="1.6" fill="none"/><rect x="16" y="0" width="4" height="19" fill="#f4f8ff" opacity=".85" style="filter:drop-shadow(0 0 2px #f4f8ff)"/></svg><span><b>Touching</b>Ring + pillar: the two projects meet (tier 1). Must coordinate outages and crossings.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><defs><linearGradient id="kb" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#4dd8ff"/><stop offset="1" stop-color="#4dd8ff" stop-opacity="0"/></linearGradient><linearGradient id="kg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ffd166" stop-opacity="0"/></linearGradient></defs><rect x="9" y="0" width="5" height="24" fill="url(#kb)"/><rect x="23" y="0" width="5" height="24" fill="url(#kg)" opacity=".4"/></svg><span><b>Light beams</b>End points and substations of the top overlaps. A dim beam = location less certain.</span></div>
     <div class="k"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 12 L35 12" stroke="#4dd8ff" stroke-width="2.4" stroke-dasharray="5 3.5"/></svg><span><b>Your projects</b>Dashed lines: projects you added yourself on the map.</span></div>
@@ -244,19 +310,18 @@ body.touring #key { display: none; }
   </div>
 </section>
 
-<section id="caption" class="panel">
-  <div class="kicker" id="cap-k"></div>
-  <div id="cap-t"></div>
-  <div id="cap-s"></div>
-</section>
-
 <footer id="status" class="panel">
-  <div class="row"><span id="mode">DRONE</span><span id="speed"></span><span id="alt"></span></div>
-  <div id="near"></div>
-  <div class="btns" style="margin-top:8px"><button class="act" id="b-measure">MEASURE · M</button><button class="act" id="b-tour">TOUR TOP 3 · T</button></div>
-  <div class="keys"><b>WASD</b> move · <b>drag</b> look · <b>Q/E</b> down/up · <b>Shift</b> boost · <b>wheel</b> speed<br>
-    <b>Tab</b> walk/drive/drone · <b>1-9</b> fly to overlap · <b>G</b> satellite/map · <b>L</b> layers · <b>K</b> key · <b>R</b> overview · <b>H</b> hide HUD</div>
+  <div class="st-main">
+    <div class="readout">
+      <div class="row"><span id="mode">DRONE</span><span id="speed"></span><span id="alt"></span></div>
+      <div id="near"></div>
+    </div>
+    <div class="btns"><button class="act" id="b-measure" title="Shortcut: M">MEASURE</button><button class="act" id="b-tour" title="Shortcut: T">TOUR TOP 3</button><button class="act" id="b-key" title="What each color and shape means. Shortcut: K">KEY</button></div>
+  </div>
+  <div class="keys"><span><b>WASD</b> move</span><span><b>drag</b> look</span><span><b>Q</b> down <b>E</b> up</span><span><b>Shift</b> boost</span><span><b>wheel</b> speed</span><span><b>Tab</b> walk, drive or fly</span>
+    <span><b>1-9</b> fly to a row</span><span><b>M</b> measure</span><span><b>T</b> tour</span><span><b>K</b> key</span><span><b>L</b> layers</span><span><b>G</b> satellite or map</span><span><b>R</b> overview</span><span><b>H</b> hide HUD</span></div>
 </footer>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -298,8 +363,9 @@ const store = {  // per-viewer conveniences only; every access can throw (privat
   set(k, v) { try { localStorage.setItem('gridlock3d.' + k, JSON.stringify(v)); } catch { /* ignore */ } },
 };
 
-$('boot-title').textContent = `LEVEL ${LEVELS.indexOf(LEVEL) + 1} · ${LEVEL.name}`;
-$('lvl-no').textContent = `· LEVEL ${LEVELS.indexOf(LEVEL) + 1}`;
+$('boot-title').textContent = LEVEL.name;
+$('boot-lvl').textContent = `LEVEL ${LEVELS.indexOf(LEVEL) + 1}`;
+$('lvl-no').textContent = `LEVEL ${LEVELS.indexOf(LEVEL) + 1}`;
 $('levels').innerHTML = LEVELS.map((l, i) => `<a href="?level=${l.id}${DATA_Q}" class="${l === LEVEL ? 'on' : ''}">L${i + 1} ${l.id.toUpperCase()}</a>`).join('');
 {
   const u = new URLSearchParams(location.search);
@@ -884,7 +950,7 @@ function buildUser(force = false) {
     if (!pts.length || !p.id) continue;
     const end = ([x, y]) => ({ x, y, z: hAt(x, y), name: p.name });
     const rec = { id: p.id, side, name: p.name || p.id, conf: 'user', a: end(pts[0]), b: pts[1] ? end(pts[1]) : null,
-                  utility: `${side === 'GPC' ? 'Georgia Power' : 'Dominion Energy SC'} · your project`, start: p.start, end: p.end };
+                  utility: `${side === 'GPC' ? 'Georgia Power' : 'Dominion Energy SC'}, your project`, start: p.start, end: p.end };
     userById[p.id] = rec;
     if (!pts.some(q => inLevel(q, 3000))) continue;
     userProjCount++;
@@ -900,7 +966,7 @@ function buildUser(force = false) {
       userGroup.add(polyline(ring, pm), polyline([e.x, e.z, -e.y, e.x, e.z + 700, -e.y], pm));
     }
     const el = document.createElement('div');
-    el.className = 'lbl user'; el.textContent = `YOUR PROJECT · ${rec.name}`;
+    el.className = 'lbl user'; el.textContent = `YOUR PROJECT: ${rec.name}`;
     const o = new CSS2DObject(el); o.center.set(0, 0.5); o.position.copy(V(rec.a.x, rec.a.y, rec.a.z + 720)); userGroup.add(o);
   }
   for (const e of data?.overlaps || []) {
@@ -931,7 +997,7 @@ function drawRings(o) {
   dropCSS(ringGroup); ringGroup.clear();
   if (!o) return;
   const [cx, cy] = o.pa;
-  for (const [r, cap, k] of [[1600, '1.6 KM · SHARE THE LAND', 1.3], [8000, '8 KM · SHARE LAYDOWN YARDS', 1.0], [40000, '40 KM · SHARE CREWS', 0.6]]) {
+  for (const [r, cap, k] of [[1600, 'WITHIN 1.6 KM SHARE THE LAND', 1.3], [8000, 'WITHIN 8 KM SHARE LAYDOWN YARDS', 1.0], [40000, 'WITHIN 40 KM SHARE CREWS', 0.6]]) {
     const pts = [];
     for (let i = 0; i <= 180; i++) { const t = i / 180 * 2 * Math.PI, x = cx + r * Math.cos(t), y = cy + r * Math.sin(t); push(pts, x, y, hAt(x, y) + 25); }
     ringGroup.add(polyline(pts, lineMat(hot(COL.ice, k), r > 20000 ? 1 : 1.6, { opacity: r > 20000 ? 0.45 : 0.8 })));
@@ -945,21 +1011,92 @@ $('title').textContent = S.title.toUpperCase();
 $('subtitle').textContent = S.subtitle;
 const short = n => (n || '').replace(/^SAV:\s*/i, '');
 const projOf = (id, fallback) => userById[id] || byId[id] || (fallback ? { name: fallback, side: /^GPC/.test(id) ? 'GPC' : 'DESC', utility: '' } : null);
+// ---- the list, grouped by what a utility would do about each overlap (2026-09-26). Most pairs inside 40 km are
+// built years apart; those only share crews, and crews need the same time, so they drop to a folded group at the end.
+const TIERS = {   // the spec's four tiers (closest points, not centers)
+  1: { d: 'TOUCHING', s: 'must coordinate outages', share: 'TOUCHING', tip: 'Touching or crossing: must coordinate outage timing and crossing structures' },
+  2: { d: '< 1.6 KM', s: 'share land and permits', share: 'LAND', tip: 'Under 1.6 km: can share the land itself (right-of-way, access roads, permits)' },
+  3: { d: '< 8 KM', s: 'share yards and deliveries', share: 'YARDS', tip: 'Under 8 km: can share site logistics (laydown yards, deliveries)' },
+  4: { d: '< 40 KM', s: 'share crews and equipment', share: 'CREWS', tip: 'Under 40 km, a morning\'s drive from one staging yard: can share crews and equipment' },
+};
+const ALIGN_DAYS = 180;   // same rule as the map's savings estimate: windows under ~6 months apart can still hand crews over
+const gapDays = o => o.overlap_days > 0 ? 0 : (o.window_gap_days ?? o.time_gap_days ?? Infinity);
+const aligned = o => gapDays(o) < ALIGN_DAYS;
+const GROUPS = [
+  { k: 'must', t: 'MUST COORDINATE', d: 'They touch or cross. Outages and crossing structures get planned together, whatever the dates.' },
+  { k: 'now', t: 'SHARE AS PLANNED', d: 'Build windows overlap or are under 6 months apart: land, yards or crews can be shared on today\'s schedules.' },
+  { k: 'shift', t: 'SHIFT A SCHEDULE', d: 'Close enough to share land or yards, but built at different times. Moving one schedule unlocks it.' },
+  { k: 'far', t: 'DIFFERENT YEARS', d: 'Only crews could be shared at this distance, and the build windows are far apart: nothing to share as planned.' },
+];
+const groupOf = o => o.tier === 1 ? 'must' : aligned(o) ? 'now' : o.tier <= 3 ? 'shift' : 'far';
+const timeKey = o => o.overlap_days > 0 ? -o.overlap_days : gapDays(o);
+const SORTS = {
+  score: (a, b) => a.o.rank - b.o.rank,
+  dist: (a, b) => a.o.dist_km - b.o.dist_km || a.o.rank - b.o.rank,
+  time: (a, b) => timeKey(a.o) - timeKey(b.o) || a.o.rank - b.o.rank,
+};
+const OPEN = { user: true, must: true, now: true, shift: true, far: false, ...store.get('groups', {}) };
+let sortBy = SORTS[store.get('sort', 'score')] ? store.get('sort', 'score') : 'score';
+let rowOrder = [], topArcs = new Set();   // what the list shows, in order: keys 1-9 and the arcs in the world follow it
+
 function renderList() {
-  const row = (it, i) => {
-    const o = it.o, a = projOf(o.a, o.a_name), b = projOf(o.b, o.b_name);
-    const nm = p => `<span class="${p?.conf === 'user' ? 'u' : p?.side === 'GPC' ? 'g' : 'd'}">${p?.conf === 'user' ? 'YOU · ' : ''}${short(p?.name) || '?'}</span>`;
-    return `<li data-i="${i}" class="${it.user ? 'user' : ''}"><span class="rk">${it.user ? 'YOU' : ''}#${o.rank}</span><span class="nm">${nm(a)}${nm(b)}
-      <span class="tier t${o.tier}">TIER ${o.tier}${timing(o, true) ? ` · ${timing(o, true)}` : ''}</span></span><span class="km">${fmtKm(o.dist_km)}</span></li>`;
+  const tierOn = it => LAY['t' + it.o.tier] !== false;
+  const row = it => {
+    const o = it.o, a = projOf(o.a, o.a_name), b = projOf(o.b, o.b_name), tm = timing(o, true);
+    const nm = p => `<span class="${p?.conf === 'user' ? 'u' : p?.side === 'GPC' ? 'g' : 'd'}">${short(p?.name) || '?'}</span>`;
+    return `<li data-i="${ovl.indexOf(it)}" class="${it.user ? 'user' : ''}${it === sel ? ' on' : ''}"><span class="rk">${it.user ? 'YOU' : ''}#${o.rank}</span><span class="nm">${nm(a)}${nm(b)}
+      <span class="tier t${o.tier}" title="${TIERS[o.tier]?.tip || ''}">T${o.tier} ${TIERS[o.tier]?.share || ''}</span>${tm ? `<span class="when${o.overlap_days > 0 ? ' ok' : ''}">${tm}</span>` : ''}</span><span class="km">${fmtKm(o.dist_km)}</span></li>`;
   };
+  const sections = [];
+  if (userOvl.length) sections.push({ k: 'user', t: 'YOUR PROJECTS', d: 'What you added on the map, scored against the other utility\'s plans.', items: userOvl });
+  for (const g of GROUPS) sections.push({ ...g, items: baseOvl.filter(x => groupOf(x.o) === g.k) });
   let html = '';
-  if (userOvl.length) html += `<li class="sub">YOUR PROJECTS · ${userOvl.length}</li>` + userOvl.map((it, i) => row(it, i)).join('') + `<li class="sub">PIPELINE</li>`;
-  html += baseOvl.map((it, i) => row(it, i + userOvl.length)).join('');
-  $('ovl').innerHTML = html;
-  $('count').textContent = `${S.overlaps.length} IN LEVEL${userOvl.length ? ` + ${userOvl.length} YOURS` : ''}`;
-  document.querySelectorAll('#ovl li[data-i]').forEach(li => li.classList.toggle('on', ovl[+li.dataset.i] === sel));
+  rowOrder = [];
+  for (const s of sections) {
+    const items = s.items.filter(tierOn).sort(SORTS[sortBy]);
+    if (!items.length) continue;
+    const open = OPEN[s.k] !== false;
+    html += `<li class="grp${open ? ' open' : ''}" data-g="${s.k}" tabindex="0" role="button" aria-expanded="${open}">
+      <span class="gt">${s.t}</span><span class="gn">${items.length}</span><b class="gs">${open ? '–' : '+'}</b><span class="gd">${s.d}</span></li>`;
+    if (!open) continue;
+    html += items.map(row).join('');
+    rowOrder.push(...items);
+  }
+  $('ovl').innerHTML = html || '<li class="empty">No overlaps in the tiers you picked. Click a tier card above to bring it back.</li>';
+  topArcs = new Set(rowOrder.filter(x => !x.user).slice(0, SHOW));
+  const shown = rowOrder.filter(x => !x.user).length;
+  $('count').textContent = `${shown === S.overlaps.length ? '' : `${shown} OF `}${S.overlaps.length} IN LEVEL${userOvl.length ? ` + ${userOvl.length} YOURS` : ''}`;
+  renderTierCards();
+  document.querySelectorAll('#sort-seg button').forEach(b => b.classList.toggle('on', b.dataset.sort === sortBy));
+  updateArcVisibility();
 }
-$('ovl').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) select(ovl[+li.dataset.i], true); });
+function renderTierCards() {
+  const n = t => ovl.filter(x => x.o.tier === t).length;
+  $('tiercards').innerHTML = [1, 2, 3, 4].map(t => {
+    const c = n(t), off = LAY['t' + t] === false;
+    return `<button class="tc t${t}${off ? ' off' : ''}${c ? '' : ' none'}" data-tier="${t}" aria-pressed="${!off}"
+      title="${TIERS[t].tip}. ${c ? (off ? 'Click to show them again.' : 'Click to hide this tier.') : 'None in this level.'}">
+      <span class="h"><b>T${t} ${TIERS[t].d}</b><i>${c}</i></span><span class="s">${TIERS[t].s}</span></button>`;
+  }).join('');
+}
+const toggleGroup = g => { OPEN[g] = OPEN[g] === false; store.set('groups', OPEN); renderList(); };
+$('ovl').addEventListener('click', e => {
+  const g = e.target.closest('li.grp');
+  if (g) { toggleGroup(g.dataset.g); return; }
+  const li = e.target.closest('li[data-i]'); if (li) select(ovl[+li.dataset.i], true);
+});
+$('ovl').addEventListener('keydown', e => {   // Enter/Space on a group header folds it (and doesn't also fly the drone up)
+  const g = e.target.closest('li.grp');
+  if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); toggleGroup(g.dataset.g); $('ovl').querySelector(`li.grp[data-g="${g.dataset.g}"]`)?.focus(); }
+});
+$('tiercards').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tier]');
+  if (b) setTier(+b.dataset.tier, LAY['t' + b.dataset.tier] === false);
+});
+$('sort-seg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-sort]');
+  if (b && SORTS[b.dataset.sort]) { sortBy = b.dataset.sort; store.set('sort', sortBy); renderList(); }
+});
 
 let sel = null;
 function styleArcs() {
@@ -976,6 +1113,8 @@ function styleArcs() {
 function select(it, fly) {
   if (!it) return;
   sel = it;
+  const grp = it.user ? 'user' : groupOf(it.o);   // picked from the world or a deep link while its group is folded: unfold it
+  if (OPEN[grp] === false) { OPEN[grp] = true; store.set('groups', OPEN); renderList(); }
   styleArcs();
   document.querySelectorAll('#ovl li[data-i]').forEach(li => li.classList.toggle('on', ovl[+li.dataset.i] === it));
   document.querySelector('#ovl li.on')?.scrollIntoView({ block: 'nearest' });
@@ -984,14 +1123,16 @@ function select(it, fly) {
   treeAt = null;
   if (anchorTiles) anchorTiles(it.mid[0], it.mid[1]);
   const o = it.o, a = projOf(o.a, o.a_name), b = projOf(o.b, o.b_name);
-  $('c-kicker').textContent = it.user ? `YOUR PROJECT · #${o.rank} OF ${userOvl.length} · TIER ${o.tier}`
-    : `#${o.rank} OF ${S.overlaps.length} IN LEVEL · TIER ${o.tier}${o.check ? ' · LOCATION TO VERIFY' : ''}`;
+  $('c-kicker').textContent = it.user ? `YOUR PROJECT #${o.rank} OF ${userOvl.length}, TIER ${o.tier}`
+    : `#${o.rank} OF ${S.overlaps.length} IN LEVEL, TIER ${o.tier}${o.check ? ', LOCATION TO VERIFY' : ''}`;
   $('c-dist').innerHTML = `${fmtKm(o.dist_km)}<small>CLOSEST POINTS</small>`;
-  $('c-share').textContent = o.tier_label || '';
+  const verdict = { shift: 'But they\'re built at different times: moving one schedule unlocks it.',
+                    far: 'But the build windows are far apart, so nothing is shared as planned.' }[groupOf(o)];
+  $('c-share').textContent = [o.tier_label && verdict ? o.tier_label.replace(/\.?$/, '.') : o.tier_label, verdict].filter(Boolean).join(' ');
   const win = w => w ? `${w[0]} → ${w[1]}` : 'window n/a';
   const pj = (p, w, el) => {
     el.className = `proj ${p?.side === 'GPC' ? 'gpc' : 'desc'}${p?.conf === 'user' ? ' user' : ''}`;
-    el.innerHTML = p ? `<b>${p.name}</b>${p.utility || ''} · ${win(w || (p.start && p.end ? [p.start, p.end] : null))}${p.conf === 'low' ? ' · approx. location' : ''}` : '';
+    el.innerHTML = p ? `<b>${p.name}</b>${p.utility ? `${p.utility}<br>` : ''}Builds ${win(w || (p.start && p.end ? [p.start, p.end] : null))}${p.conf === 'low' ? ', approximate location' : ''}` : '';
   };
   pj(a, o.a_window, $('c-a')); pj(b, o.b_window, $('c-b'));
   $('c-time').textContent = timing(o);
@@ -1084,7 +1225,7 @@ addEventListener('keydown', e => {
   if (k === 'l') { $('layers').classList.toggle('open'); syncLayerSign(); return; }
   if (k === 'k' || e.key === '?') { toggleKey(); return; }
   if (k === 'escape') { if (measuring) setMeasuring(false); else deselect(); return; }
-  if (/^[1-9]$/.test(k)) { const it = baseOvl.find(x => x.o.level_rank === +k); if (it) select(it, true); return; }
+  if (/^[1-9]$/.test(k)) { const it = rowOrder[+k - 1]; if (it) select(it, true); return; }   // the list's rows, as shown
   keys.add(k);
 });
 addEventListener('keyup', e => { keys.delete(e.key.toLowerCase()); });
@@ -1146,10 +1287,10 @@ function addMeasurement(a, b) {
   const d = Math.hypot(b.x - a.x, b.z - a.z);   // horizontal, in real meters
   measureGroup.add(markerAt(b), polyline([a.x, a.y + 6, a.z, b.x, b.y + 6, b.z], mMat));
   const fa = facilityAt(a.x, -a.z), fb = facilityAt(b.x, -b.z);
-  const names = fa?.name && fb?.name && fa !== fb ? `${clean(fa.name)} → ${clean(fb.name)} · ` : '';
+  const names = fa?.name && fb?.name && fa !== fb ? `${clean(fa.name)} → ${clean(fb.name)}: ` : '';
   const el = document.createElement('div');
   el.className = 'chip on';
-  el.innerHTML = `${names}${fmtLen(d)}<small>${fmtDur(d / 1000 / 5 * 60)} walk · ${fmtDur(d / 1000 / 60 * 60)} truck</small>`;
+  el.innerHTML = `${names}${fmtLen(d)}<small>${fmtDur(d / 1000 / 5 * 60)} walk, ${fmtDur(d / 1000 / 60 * 60)} truck</small>`;
   const lab = new CSS2DObject(el); lab.position.set((a.x + b.x) / 2, Math.max(a.y, b.y) + 70, (a.z + b.z) / 2); lab.center.set(0.5, 1);
   measureGroup.add(lab);
   $('near').textContent = `MEASURED ${names}${fmtLen(d)}. Click to start another, M or Esc to exit.`;
@@ -1176,11 +1317,12 @@ async function drawMiniBase() {
     if (p.b) { g.beginPath(); g.moveTo(...mpx(p.a.x, p.a.y)); g.lineTo(...mpx(p.b.x, p.b.y)); g.stroke(); }
     g.beginPath(); g.arc(...mpx(p.a.x, p.a.y), 5, 0, 7); g.stroke();
   }
-  g.setLineDash([]); g.fillStyle = '#f4f8ff';
-  for (const it of [...baseOvl.slice(0, SHOW), ...userOvl]) { const [x, y] = mpx(it.mid[0], it.mid[1]); g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); }
+  g.setLineDash([]);
 }
 function drawMini() {
   mmx.drawImage(mmBase, 0, 0);
+  mmx.fillStyle = '#f4f8ff';   // overlap dots: the same ones the world draws arcs for (they follow the list's filters)
+  for (const it of ovl) if (it.group.visible) { const [x, y] = mpx(it.mid[0], it.mid[1]); mmx.beginPath(); mmx.arc(x, y, it === sel ? 6 : 4, 0, 7); mmx.fill(); }
   const x = (camera.position.x + W / 2) / W * MM, y = (camera.position.z + H / 2) / H * MM;
   mmx.save(); mmx.translate(x, y); mmx.rotate(-yaw);
   mmx.fillStyle = 'rgba(244,248,255,.18)'; mmx.beginPath(); mmx.moveTo(0, 0); mmx.arc(0, 0, 60, -Math.PI / 2 - 0.5, -Math.PI / 2 + 0.5); mmx.fill();
@@ -1276,18 +1418,29 @@ const DEFAULT_LAY = { buildings: true, trees: true, grid: true, structures: true
 const LAY = { ...DEFAULT_LAY, ...store.get('layers', {}) };
 $('lay-list').innerHTML = LAYER_SPEC.map(([k, t]) => `<label><input type="checkbox" data-layer="${k}"> ${t}</label>`).join('');
 $('lay-tiers').insertAdjacentHTML('beforeend', ['t1', 't2', 't3', 't4'].map(k => `<label><input type="checkbox" data-layer="${k}"> ${k.toUpperCase()}</label>`).join('')
-  + `<label style="width:100%"><input type="checkbox" data-layer="allarcs"> all overlaps, not just the top ${SHOW}</label>`);
+  + `<label style="width:100%"><input type="checkbox" data-layer="allarcs"> every overlap, not just the list's top ${SHOW}</label>`);
 document.querySelectorAll('#layers input[data-layer]').forEach(inp => {
   inp.checked = !!LAY[inp.dataset.layer];
-  inp.addEventListener('change', () => { LAY[inp.dataset.layer] = inp.checked; applyLayers(); });
+  inp.addEventListener('change', () => {
+    LAY[inp.dataset.layer] = inp.checked; applyLayers();
+    if (/^t\d$/.test(inp.dataset.layer)) renderList();   // the tier boxes here and the tier cards on the list are one setting
+  });
 });
+function setTier(t, on) {
+  LAY['t' + t] = on;
+  const inp = document.querySelector(`#layers input[data-layer="t${t}"]`); if (inp) inp.checked = on;
+  applyLayers(); renderList();
+}
 function toggleKey(open) {
   const on = open ?? !$('key').classList.contains('open');
   $('key').classList.toggle('open', on);
-  $('key-sign').textContent = on ? '–' : '+';
+  $('b-key').classList.toggle('lit', on);
   store.set('keyOpen', on);
 }
-$('key-head').addEventListener('click', () => toggleKey());
+$('key-close').addEventListener('click', () => toggleKey(false));
+// on narrow screens the overlap card rides above the dock; CSS reads its live height from --dock-h
+new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('status').offsetHeight + 'px')).observe($('status'));
+$('b-key').addEventListener('click', () => toggleKey());
 toggleKey(qs.get('key') === '0' ? false : store.get('keyOpen', innerHeight >= 800));   // open on first visit unless the screen is short; ?key=0 for clean recordings
 const syncLayerSign = () => { $('lay-sign').textContent = $('layers').classList.contains('open') ? '–' : '+'; };
 $('lay-head').addEventListener('click', () => { $('layers').classList.toggle('open'); syncLayerSign(); store.set('layersOpen', $('layers').classList.contains('open')); });
@@ -1299,7 +1452,7 @@ if (!S.ground.sat) document.querySelector('#ground-seg button[data-ground="sat"]
 function updateArcVisibility() {
   for (const x of ovl) {
     const tierOn = LAY['t' + x.o.tier] !== false;
-    x.group.visible = x === sel || (tierOn && (x.user ? LAY.user : (LAY.allarcs || x.o.level_rank <= SHOW)));
+    x.group.visible = x === sel || (tierOn && (x.user ? LAY.user : (LAY.allarcs || topArcs.has(x))));   // top SHOW rows of the list as shown
   }
 }
 function applyLayers(save = true) {
@@ -1342,7 +1495,7 @@ async function setGround(g) {
     bldChunks.forEach(m => { m.material = bMats[g]; });
     document.querySelectorAll('#ground-seg button').forEach(b => b.classList.toggle('on', b.dataset.ground === g));
     $('attrib').textContent = [g === 'sat' ? 'Imagery: USGS The National Map' : null, tiles ? 'Imagery © Google' : null,
-      'Map + grid © OpenStreetMap contributors', 'terrain: AWS Terrain Tiles', 'models: Blender'].filter(Boolean).join(' · ');
+      'Map + grid © OpenStreetMap contributors', 'Terrain: AWS Terrain Tiles', 'Models: Blender'].filter(Boolean).join('. ') + '.';
     if (g === 'sat') { buildPatches().then(() => lod(true)); loadVeg().then(() => updateTrees(true)); }
     applyLayers(false);
     drawMiniBase();
@@ -1368,8 +1521,8 @@ async function startTour(step) {
   select(it, false);
   const dur = flyTo(viewFor(it)) || 0;
   const o = it.o;
-  $('cap-k').textContent = `TOUR · ${step + 1} OF ${TOUR.length} · #${o.rank} OPPORTUNITY · ${LEVEL.name}`;
-  $('cap-t').textContent = `${fmtKm(o.dist_km)} apart · Tier ${o.tier}`;
+  $('cap-k').textContent = `TOUR ${step + 1} OF ${TOUR.length}: THE #${o.rank} OPPORTUNITY, ${LEVEL.name}`;
+  $('cap-t').textContent = o.dist_km < 0.05 ? `Touching, tier ${o.tier}` : `${fmtKm(o.dist_km)} apart, tier ${o.tier}`;
   $('cap-s').innerHTML = `${o.tier_label || ''}<br>Build windows: ${timing(o)}.
     ${o.dist_km >= 0.05 ? `On foot: ${fmtDur(o.dist_km / 5 * 60)}. By truck: ${fmtDur(o.dist_km)}.` : 'Both utilities end on the same structure.'}`;
   tourTimer = setTimeout(() => { if (touring) startTour(step + 1); }, dur * 1000 + 6500);
@@ -1484,12 +1637,12 @@ function frame() {
     acc = 0;
     const [cx, cy, alt] = lod();
     if (anchorTiles && !flight && tileAnchor) { const f = focusPoint(); if (Math.hypot(f[0] - tileAnchor[0], f[1] - tileAnchor[1]) > 2500) anchorTiles(...f); }
-    $('speed').textContent = `${Math.round(lastSpeed * 3.6)} km/h${mult !== 1 ? ` · x${mult.toFixed(2)}` : ''}`;
+    $('speed').textContent = `${Math.round(lastSpeed * 3.6)} km/h${mult !== 1 ? ` (x${mult.toFixed(2)})` : ''}`;
     $('alt').textContent = alt > 1000 ? `${(alt / 1000).toFixed(1)} km up` : `${Math.round(alt)} m up`;
     if (measuring) { /* keep the measure prompt */ }
     else if (sel) {
       const da = Math.hypot(cx - sel.o.pa[0], cy - sel.o.pa[1]) / 1000, db = Math.hypot(cx - sel.o.pb[0], cy - sel.o.pb[1]) / 1000;
-      $('near').innerHTML = `<span style="color:var(--desc)">DESC point ${fmtKm(da)}</span> · <span style="color:var(--gpc)">GPC point ${fmtKm(db)}</span> · walk ${fmtDur(Math.min(da, db) / 5 * 60)}`;
+      $('near').innerHTML = `<span class="nf" style="color:var(--desc)">DESC point ${fmtKm(da)}</span><span class="nf" style="color:var(--gpc)">GPC point ${fmtKm(db)}</span><span class="nf">${fmtDur(Math.min(da, db) / 5 * 60)} walk</span>`;
     } else $('near').textContent = 'Pick an overlap: list, chips, or keys 1-9. T for the tour.';
   }
   drawMini();
@@ -1549,7 +1702,7 @@ if (PHOTO) {
     anchorTiles(...focusPoint());
     // the photo mesh replaces our terrain, buildings, yards, towers and trees; keep lines, beacons, arcs, rings, labels
     [terrain, apron, farGround, towerIM, gridWires, treeIM].forEach(o => { o.visible = false; });
-    $('photo-note').innerHTML = `<b>GOOGLE 3D</b> · Google Photorealistic 3D Tiles${TOKENS.cesiumIonToken ? ' via Cesium ion' : ''}. Imagery © Google. Keys [ and ] nudge the ground height if lines float or sink.`;
+    $('photo-note').innerHTML = `<b>GOOGLE 3D</b> shows Google Photorealistic 3D Tiles${TOKENS.cesiumIonToken ? ' via Cesium ion' : ''}. Imagery © Google. Keys [ and ] nudge the ground height if lines float or sink.`;
     $('photo-note').classList.add('show');
     setTimeout(() => $('photo-note').classList.remove('show'), 9000);
     addEventListener('keydown', e => {
@@ -1582,7 +1735,7 @@ if (qs.get('measure')) {  // test hook: ?measure=x1,y1,x2,y2 (level meters)
 if (qs.get('layers')) {  // test hook: ?layers=buildings:0,trees:1,...
   for (const kv of qs.get('layers').split(',')) { const [k, v] = kv.split(':'); if (k in LAY) LAY[k] = v === '1'; }
   document.querySelectorAll('#layers input[data-layer]').forEach(inp => { inp.checked = !!LAY[inp.dataset.layer]; });
-  applyLayers(false);
+  applyLayers(false); renderList();
 }
 lod(true);
 progress(1, 'ready');
