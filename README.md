@@ -23,7 +23,7 @@ Python 3 with `pip install shapely numpy pillow`. Step 1 also needs `pdftotext` 
 | 2. Download substations and plants (GA + SC) and power lines (Savannah and Augusta border areas) from OpenStreetMap | `pipeline/fetch_osm.py` | `data/osm/*.json` |
 | 3. Match each project's named endpoints to OpenStreetMap substations, with a town-level Nominatim fallback flagged as low confidence | `pipeline/geocode.py` | `data/processed/projects_located.json` |
 | 4. Rank overlaps: closest-point distance tiers (touching, < 1.6 km, < 8 km, < 40 km) plus build-window overlap, with Sperry's center-to-center method for comparison | `pipeline/overlaps.py` | `data/processed/overlaps.json`, `overlap_summary.json` |
-| 5. Write the compact files the web map loads, plus the project and overlap tables in the column layout of Sperry's `Projects_Overlaps.xlsx` | `pipeline/export_web.py` | `web/public/data/` (incl. `overlaps_sperry_format.csv`), `data/processed/projects_located.csv` |
+| 5. Write the compact files the web map loads, the project and overlap tables in the column layout of Sperry's `Projects_Overlaps.xlsx`, and a Google Earth file | `pipeline/export_web.py` | `web/public/data/` (incl. `overlaps_sperry_format.csv`, `gridlock.kml`), `data/processed/projects_located.csv` |
 
 Every step's output is committed, so you can start from any step:
 
@@ -52,7 +52,7 @@ npm run build   # static site in web/dist/
 - **Opportunities:** the ranked list, filterable by tier and by "same build window". Each opportunity opens a card with both projects, their source pages, how confident each location is, a build-window timeline, a rough, editable savings estimate, and **View in 3D** / **Walk the gap** links into the 3D world.
 - **Add your own project:** draw a line or drop a substation, pick the utility and build window, and it's scored in the browser with exactly the same rules as the pipeline (`web/src/geo.ts`, checked against `overlaps.json`: the same 78 overlaps, distances within 1 m). Saved in the browser (`localStorage["gridlock.userProjects.v1"]`) and shown in the 3D world too.
 - **Guided tour** (▶ TOUR): satellite + 3D, then the camera flies to the top opportunities with their numbers on screen. Arrow keys, Space and Esc control it.
-- **Data quality:** downloads of the overlap and project tables in the column layout of Sperry's `Projects_Overlaps.xlsx`, the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
+- **Data quality:** downloads of the overlap and project tables in the column layout of Sperry's `Projects_Overlaps.xlsx` and of `gridlock.kml` (every mapped project and the ranked overlaps, with the gap, timing, savings estimate and source pages in each pop-up; opens in Google Earth or any GIS), the check against Sperry's sample, location confidence, manual locations with their evidence, and the projects that couldn't be mapped.
 - **Links:** `#o=<overlap id>` opens an opportunity, e.g. `#o=DESC_23__GPC_20277`. The 3D world is served from the same site under `/world3d/viewer/` (the dev server serves `../world3d`; `npm run build` copies the files the viewer needs into `dist/world3d/`).
 
 ## Data sources

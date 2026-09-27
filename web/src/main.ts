@@ -213,6 +213,10 @@ function initMap(style: any) {
     style,
     bounds: [[-82.6, 31.9], [-80.6, 33.9]],
     fitBoundsOptions: { padding: 40 },
+    // The challenge is Georgia + South Carolina: keep the camera there (every project is inside, with room for the
+    // side panel and tilted 3D views) so a demo can't wander off to the rest of the world.
+    maxBounds: [[-88, 29], [-76.5, 36.8]],
+    renderWorldCopies: false,
     attributionControl: { compact: true },
     maxPitch: 75,
   })
