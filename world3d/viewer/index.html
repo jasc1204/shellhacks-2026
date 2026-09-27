@@ -19,6 +19,9 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: var(--display); overflow: hidden; }
 #stage, #labels { position: fixed; inset: 0; }
+/* dragging the view across a panel selected its text (grey blocks in Jose's screenshot): this is an app, not a page */
+body { -webkit-user-select: none; user-select: none; }
+input, textarea, select { -webkit-user-select: text; user-select: text; }
 #stage canvas { display: block; cursor: grab; touch-action: none; }
 #stage canvas:active { cursor: grabbing; }
 body.measuring #stage canvas { cursor: crosshair; }
@@ -108,7 +111,13 @@ body:not(.touring):has(#card.show) #dock { right: 412px; }   /* make room for th
 #ovl .nm .when { display: inline-block; margin-left: 8px; font: 600 9px/1 var(--mono); letter-spacing: .12em; color: var(--faint); }
 #ovl .nm .when.ok { color: var(--ice); }
 
-#card { right: 16px; bottom: 16px; width: 380px; padding: 14px 16px; display: none; }
+/* 2026-09-27: the minimap, LAYERS and the overlap card share one right-hand column, so they can never overlap (Jose saw
+   the card cover LAYERS in a short frame): the minimap keeps its size, LAYERS gives up height first and scrolls, the
+   card sits at the bottom and scrolls only if even that isn't enough. The wrapper doesn't catch the mouse. */
+#rightcol { position: fixed; top: 16px; right: 16px; bottom: 16px; display: flex; flex-direction: column; align-items: flex-end;
+            gap: 10px; pointer-events: none; }
+#rightcol > .panel { position: relative; pointer-events: auto; }
+#card { width: 380px; padding: 14px 16px; display: none; flex: 0 1 auto; min-height: 0; margin-top: auto; overflow-y: auto; }
 #card.show { display: block; }
 body.touring #card { display: none; }
 #card h2 { margin: 6px 0 4px; font: 700 28px/1 var(--display); }
@@ -129,13 +138,13 @@ button.act.on { box-shadow: var(--glow); }
 #card .btns button.act { white-space: nowrap; }
 #why { font: 400 11px/1.45 var(--mono); color: var(--faint); margin: 8px 0 0; }
 
-#mini { top: 16px; right: 16px; padding: 8px; width: 218px; }
+#mini { padding: 8px; width: 218px; flex: none; }
 #mini canvas { display: block; width: 200px; height: 200px; cursor: crosshair; border-radius: 2px; }
 .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin-top: 8px; font: 500 9px/1.2 var(--mono); letter-spacing: .12em; color: var(--muted); }
 .legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; }
 .attrib { margin-top: 8px; font: 400 8px/1.4 var(--mono); color: var(--faint); letter-spacing: .04em; }
 
-#layers { top: 330px; right: 16px; width: 218px; max-height: calc(100vh - 346px); overflow-y: auto; }
+#layers { width: 218px; flex: 0 1000 auto; min-height: 38px; overflow-y: auto; }   /* shrinks long before the card does */
 #layers .panel-h { cursor: pointer; user-select: none; }
 #layers .panel-h b { font: 600 12px/1 var(--mono); color: var(--muted); }
 #lay-body { padding: 8px 10px 10px; display: none; }
@@ -181,7 +190,7 @@ body.touring #key { display: none; }
 @media (max-width: 1280px) { body:has(#card.show) #key-body { grid-template-columns: 1fr; } }
 @media (max-width: 1100px) {   /* no room beside the card: the dock takes the full width and the card rides above it */
   #dock, body:not(.touring):has(#card.show) #dock { right: 16px; }
-  #card { bottom: calc(var(--dock-h, 110px) + 26px); }
+  #rightcol { bottom: calc(var(--dock-h, 110px) + 26px); }
   body:not(.touring):has(#card.show) :is(#key, #mini, #layers) { display: none; }   /* the card is the focus */
   #key-body { grid-template-columns: 1fr; }
 }
@@ -207,7 +216,8 @@ body.touring #key { display: none; }
   .fhint { display: none; }   /* phones: the tooltips still explain the filter */
   #dock, body:not(.touring):has(#card.show) #dock { left: 16px; right: 16px; }
   #mini, #layers, #key, .keys { display: none !important; }
-  #card { left: 16px; right: 16px; width: auto; }
+  #rightcol { left: 16px; top: auto; }
+  #card { width: auto; align-self: stretch; max-height: 50vh; }
   #b-key { display: none; }
 }
 /* embedded in the GridLock page (?embed=1): its side panel does the list and the filter, its header the 2D / 3D switch,
@@ -257,6 +267,7 @@ body.embed #boot { visibility: hidden; }
 
 <div id="photo-note" class="panel"></div>
 
+<div id="rightcol">
 <aside id="mini" class="panel">
   <canvas id="mm" width="400" height="400"></canvas>
   <div class="legend">
@@ -288,6 +299,7 @@ body.embed #boot { visibility: hidden; }
   <p id="why"></p>
   <div class="btns"><button class="act" id="b-fly">FLY OVER</button></div>
 </section>
+</div>
 
 <div id="dock">
 <section id="caption" class="panel">
